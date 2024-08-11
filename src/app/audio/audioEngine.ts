@@ -66,44 +66,36 @@ function deleteNode(node: Node) {
   nodeStore.delete(node.id);
 }
 
-function buildAudioGraph(
-  newRoot: Node,
-  currentRoot: Node | null
-): AudioNode | null {
-  let shouldReplaceNode = !currentRoot || newRoot.id != currentRoot.id;
+function replaceNodeIfChanged(newNode: Node, currentNode: Node | null) {
+  let shouldReplaceNode = !currentNode || newNode.id != currentNode.id;
   if (shouldReplaceNode) {
-    if (currentRoot) {
+    if (currentNode) {
       // Remove existing node
-      deleteNode(currentRoot);
+      deleteNode(currentNode);
       // Update the ref to point to the new node
-      currentRoot.id = newRoot.id;
-      currentRoot.children = structuredClone(newRoot.children);
-      currentRoot.nodeType = newRoot.nodeType;
-      currentRoot.props = structuredClone(newRoot.props);
+      currentNode.id = newNode.id;
+      currentNode.children = structuredClone(newNode.children);
+      currentNode.nodeType = newNode.nodeType;
+      currentNode.props = structuredClone(newNode.props);
     }
 
     // Build the new audio node
-    const audioNode = buildAudioNode(newRoot);
+    const audioNode = buildAudioNode(newNode);
     if (audioNode) {
-      nodeStore.set(newRoot.id, audioNode);
+      nodeStore.set(newNode.id, audioNode);
     }
-    // Rebuild all of the children
-    if (newRoot.children) {
-      for (const child of newRoot.children) {
-        const newChild = buildAudioGraph(child, null);
-        if (newChild && audioNode) {
-          newChild.connect(audioNode);
-        }
-      }
-    }
-    return audioNode;
   }
-  // Add newly added children
-  if (newRoot.children) {
-    const parentAudioNode = nodeStore.get(newRoot.id)!;
-    for (const newChild of newRoot.children) {
+}
+
+/// Recursively iterates over the children of newNode and currentNode and adds or
+/// removes AudioNodes from the tree to satisfy the requested state.
+function compareAndUpdateChildren(newNode: Node, currentNode: Node | null) {
+  // Find and add new children
+  if (newNode.children) {
+    const parentAudioNode = nodeStore.get(newNode.id);
+    for (const newChild of newNode.children) {
       // Look for a match of the child's id in the current child array
-      const currentChild = currentRoot?.children?.find(
+      const currentChild = currentNode?.children?.find(
         (n) => n.id === newChild.id
       );
       const childAudioNode = (() => {
@@ -119,23 +111,38 @@ function buildAudioGraph(
     }
   }
   // Delete removed children
-  if (currentRoot && currentRoot.children) {
-    for (const childNode of currentRoot.children) {
+  if (currentNode && currentNode.children) {
+    for (const childNode of currentNode.children) {
       // Is this node missing from the new node's child array?
       if (
-        !newRoot.children ||
-        (newRoot.children &&
-          !newRoot.children.find((n) => n.id === childNode.id))
+        !newNode.children ||
+        (newNode.children &&
+          !newNode.children.find((n) => n.id === childNode.id))
       ) {
         deleteNode(childNode);
       }
     }
   }
-  const node = nodeStore.get(newRoot.id) ?? null;
+}
+
+/// Recursively builds a WebAudio graph by diffing the new tree (rooted at newNode) with
+/// the current tree, then adding and/or removing AudioNodes and updating their connections
+/// to fulfill the requested state.
+function buildAudioGraph(
+  newNode: Node,
+  currentNode: Node | null
+): AudioNode | null {
+  replaceNodeIfChanged(newNode, currentNode);
+  // Note: compareAndUpdateChildren() will recursively call buildAudioGraph() for child nodes
+  // to build out the entire tree.
+  compareAndUpdateChildren(newNode, currentNode);
+  const node = nodeStore.get(newNode.id) ?? null;
   return node;
 }
 
 let started = false;
+/// Renders the tree rooted in `newRoot` by comparing it to the current tree and applying
+/// the minimum number of WebAudio node operations to fulfill the requested state.
 export function renderAudioGraph(newRoot: Node) {
   buildAudioGraph(newRoot, currentRoot);
   currentRoot = structuredClone(newRoot);
@@ -150,6 +157,8 @@ function instantiateGenerators(root: Node, time: number) {
     return;
   }
   for (const child of root.children) {
+    // TODO: this randomized sequence logic is here for testing. Triggers should
+    // be driven by some sort of sequencer node.
     if (child.nodeType === "osc" && Math.random() > 0.2) {
       const oscNode = new OscillatorNode(context);
       const node = child as OscNode;
