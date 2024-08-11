@@ -1,4 +1,5 @@
 import * as Tone from "tone";
+import { produce } from "immer";
 
 const context = new AudioContext();
 
@@ -38,13 +39,6 @@ export interface AudioState {
 let currentRoot: Node | null = null;
 let nodeStore = new Map<number, AudioNode>();
 
-// export function updateState(root: Node) {
-//   if (oldRoot === undefined) {
-//     oldRoot = root;
-//     return;
-//   }
-// }
-
 function buildAudioNode(node: Node): AudioNode | null {
   switch (node.nodeType) {
     case "osc":
@@ -72,13 +66,7 @@ function replaceNodeIfChanged(newNode: Node, currentNode: Node | null) {
     if (currentNode) {
       // Remove existing node
       deleteNode(currentNode);
-      // Update the ref to point to the new node
-      currentNode.id = newNode.id;
-      currentNode.children = structuredClone(newNode.children);
-      currentNode.nodeType = newNode.nodeType;
-      currentNode.props = structuredClone(newNode.props);
     }
-
     // Build the new audio node
     const audioNode = buildAudioNode(newNode);
     if (audioNode) {
@@ -145,7 +133,7 @@ let started = false;
 /// the minimum number of WebAudio node operations to fulfill the requested state.
 export function renderAudioGraph(newRoot: Node) {
   buildAudioGraph(newRoot, currentRoot);
-  currentRoot = structuredClone(newRoot);
+  currentRoot = produce(currentRoot, () => newRoot);
   if (!started) {
     start();
     started = true;
