@@ -10,21 +10,23 @@ export interface Node {
   props?: any;
 }
 
+export interface OscProps {
+  type: OscillatorType;
+  frequency: number;
+}
 export interface OscNode extends Node {
   nodeType: "osc";
-  props: {
-    type: OscillatorType;
-    frequency: number;
-  };
+  props: OscProps;
 }
 
+export interface FilterProps {
+  type: "lowpass" | "highpass";
+  frequency: number;
+  q: number;
+}
 export interface FilterNode extends Node {
   nodeType: "filter";
-  props: {
-    type: "lowpass" | "highpass";
-    frequency: number;
-    q: number;
-  };
+  props: FilterProps;
 }
 
 export type DestinationNode = 0;
@@ -60,9 +62,28 @@ function deleteNode(node: Node) {
   nodeStore.delete(node.id);
 }
 
-function replaceNodeIfChanged(newNode: Node, currentNode: Node | null) {
-  let shouldReplaceNode = !currentNode || newNode.id != currentNode.id;
-  if (shouldReplaceNode) {
+function applyPropUpdates(newNode: Node, currentNode: Node | null) {
+  if (!newNode.props) {
+    return;
+  }
+  if (typeof newNode.props !== "object") {
+    throw new Error("Node.props must be an object");
+  }
+  for (const prop of Object.keys(newNode.props)) {
+    if (
+      !currentNode?.props ||
+      currentNode?.props[prop] !== newNode.props[prop]
+    ) {
+      console.log(`${newNode.id}: Update ${prop} to ${newNode.props[prop]}`);
+    } else {
+      console.log(`${newNode.id}: Not updating ${prop}`);
+    }
+  }
+}
+
+function updateOrReplaceNodeIfChanged(newNode: Node, currentNode: Node | null) {
+  const addNode = !currentNode || newNode.nodeType !== currentNode.nodeType;
+  if (addNode) {
     if (currentNode) {
       // Remove existing node
       deleteNode(currentNode);
@@ -73,6 +94,7 @@ function replaceNodeIfChanged(newNode: Node, currentNode: Node | null) {
       nodeStore.set(newNode.id, audioNode);
     }
   }
+  applyPropUpdates(newNode, currentNode);
 }
 
 /// Recursively iterates over the children of newNode and currentNode and adds or
@@ -125,7 +147,7 @@ function buildAudioGraph(
   newNode: Node,
   currentNode: Node | null
 ): AudioNode | null {
-  replaceNodeIfChanged(newNode, currentNode);
+  updateOrReplaceNodeIfChanged(newNode, currentNode);
   // Note: compareAndUpdateChildren() will recursively call buildAudioGraph() for child nodes
   // to build out the entire tree.
   compareAndUpdateChildren(newNode, currentNode);
@@ -133,15 +155,13 @@ function buildAudioGraph(
   return node;
 }
 
-let started = false;
 /// Renders the tree rooted in `newRoot` by comparing it to the current tree and applying
 /// the minimum number of WebAudio node operations to fulfill the requested state.
 export function render(newRoot: Node) {
   buildAudioGraph(newRoot, currentRoot);
   currentRoot = produce(currentRoot, () => newRoot);
-  if (!started) {
+  if (context.state !== "running") {
     start();
-    started = true;
   }
 }
 

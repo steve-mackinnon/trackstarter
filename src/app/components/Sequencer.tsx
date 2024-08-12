@@ -1,81 +1,21 @@
 "use client";
 
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { render as renderAudioGraph, Node } from "../audio/audioGraph";
+import { filter, osc, output } from "../audio/nodes";
 
-const root: Node = {
-  id: 0,
-  nodeType: "destination",
-  children: [
-    {
-      id: 3,
-      nodeType: "filter",
-      props: {
-        frequency: 1000,
-        type: "lowpass",
-        q: 1.2,
-      },
-      children: [
-        {
-          id: 1,
-          nodeType: "osc",
-          props: {
-            frequency: 200,
-            type: "sine",
-          },
-          children: [],
-        },
-        {
-          id: 2,
-          nodeType: "osc",
-          props: {
-            frequency: 420,
-            type: "sawtooth",
-          },
-          children: [],
-        },
-      ],
-    },
-  ],
-};
-const root2: Node = {
-  id: 0,
-  nodeType: "destination",
-  children: [
-    {
-      id: 4,
-      nodeType: "filter",
-      props: {
-        frequency: 1000,
-        type: "highpass",
-        q: 1.2,
-      },
-      children: [
-        {
-          id: 5,
-          nodeType: "osc",
-          props: {
-            frequency: 100,
-            type: "sine",
-          },
-          children: [],
-        },
-        {
-          id: 6,
-          nodeType: "osc",
-          props: {
-            frequency: 520,
-            type: "sawtooth",
-          },
-          children: [],
-        },
-      ],
-    },
-  ],
-};
+const audioGraph = (frequency: number, type: "lowpass" | "highpass") =>
+  output(0, undefined, [
+    filter(1, { type, frequency, q: 1.7 }, [
+      osc(2, { type: "sine", frequency: 100 }, []),
+      osc(3, { type: "triangle", frequency: 300 }, []),
+    ]),
+  ]);
 
 export function Sequencer() {
-  const [lowpassFreq, setLowpassFreq] = useState(1000);
+  const [filterFreq, setFilterFreq] = useState(1000);
+  const [filter, setFilter] = useState<"lowpass" | "highpass">("lowpass");
+
   return (
     <>
       <input
@@ -84,13 +24,27 @@ export function Sequencer() {
         max={20000}
         onChange={(e: ChangeEvent<HTMLInputElement>) => {
           const freq = Number.parseFloat(e.target.value);
-          root.children![0].props!.frequency = freq;
-          renderAudioGraph(root);
+          setFilterFreq(freq);
+          renderAudioGraph(audioGraph(freq, filter));
         }}
         width={300}
       />
-      <button onClick={() => renderAudioGraph(root)}>Start</button>{" "}
-      <button onClick={() => renderAudioGraph(root2)}>Start 2</button>{" "}
+      <button
+        onClick={() => {
+          setFilter("lowpass");
+          renderAudioGraph(audioGraph(filterFreq, "lowpass"));
+        }}
+      >
+        Lowpass
+      </button>
+      <button
+        onClick={() => {
+          setFilter("highpass");
+          renderAudioGraph(audioGraph(filterFreq, "highpass"));
+        }}
+      >
+        Highpass
+      </button>
     </>
   );
 }
