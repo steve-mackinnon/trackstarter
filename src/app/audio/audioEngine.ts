@@ -81,40 +81,33 @@ function compareAndUpdateChildren(newNode: Node, currentNode: Node | null) {
   // Find and add new children
   if (newNode.children) {
     const parentAudioNode = nodeStore.get(newNode.id);
+    // Create a hash map for constant time lookup using the node id during the
+    // for loop over children.
+    const currentChildren = new Map<number, Node>(
+      currentNode?.children?.map((n) => [n.id, n])
+    );
     for (const newChild of newNode.children) {
       // Look for a match of the child's id in the current child array
-      // TODO: this makes the render algo O(n^2). For O(n), we could instead
-      // require the order of children in the child array to be preserved between
-      // renders and drop the .find() call.
-      const currentChild = currentNode?.children?.find(
-        (n) => n.id === newChild.id
-      );
-      const childAudioNode = (() => {
-        if (!currentChild) {
-          return buildAudioGraph(newChild, null);
+      const currentChild = currentChildren.get(newChild.id);
+      const childAudioNode = buildAudioGraph(newChild, currentChild ?? null);
+      if (childAudioNode) {
+        if (parentAudioNode) {
+          childAudioNode.connect(parentAudioNode);
         } else {
-          return buildAudioGraph(newChild, currentChild);
+          console.warn(
+            `Parent node was unexpectedly missing. Unable to connect ${newChild.nodeType} node with ID ${newChild.id} to graph`
+          );
         }
-      })();
-      if (childAudioNode && !parentAudioNode) {
-        console.warn(
-          `Parent node was unexpectedly missing. Unable to connect ${newChild.nodeType} node with ID ${newChild.id} to graph`
-        );
-      }
-      if (childAudioNode && parentAudioNode) {
-        childAudioNode.connect(parentAudioNode);
       }
     }
   }
   // Delete removed children
   if (currentNode && currentNode.children) {
+    const newChildren = new Map<number, Node>(
+      newNode.children?.map((n) => [n.id, n])
+    );
     for (const childNode of currentNode.children) {
-      // Is this node missing from the new node's child array?
-      if (
-        !newNode.children ||
-        (newNode.children &&
-          !newNode.children.find((n) => n.id === childNode.id))
-      ) {
+      if (!newChildren.has(childNode.id)) {
         deleteNode(childNode);
       }
     }
@@ -124,6 +117,10 @@ function compareAndUpdateChildren(newNode: Node, currentNode: Node | null) {
 /// Recursively builds a WebAudio graph by diffing the new tree (rooted at newNode) with
 /// the current tree, then adding and/or removing AudioNodes and updating their connections
 /// to fulfill the requested state.
+///
+/// Returns the AudioNode created for `newNode`, or null if no AudioNode was created. Generator
+/// nodes get created on the fly when they are needed, so they are not created while building
+/// the graph.
 function buildAudioGraph(
   newNode: Node,
   currentNode: Node | null
