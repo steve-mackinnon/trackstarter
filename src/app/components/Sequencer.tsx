@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useState } from "react";
 import { render as renderAudioGraph, Node } from "../audio/audioGraph";
 import { filter, osc, output } from "../audio/nodes";
 
