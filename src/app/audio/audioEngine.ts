@@ -83,6 +83,9 @@ function compareAndUpdateChildren(newNode: Node, currentNode: Node | null) {
     const parentAudioNode = nodeStore.get(newNode.id);
     for (const newChild of newNode.children) {
       // Look for a match of the child's id in the current child array
+      // TODO: this makes the render algo O(n^2). For O(n), we could instead
+      // require the order of children in the child array to be preserved between
+      // renders and drop the .find() call.
       const currentChild = currentNode?.children?.find(
         (n) => n.id === newChild.id
       );
@@ -93,6 +96,11 @@ function compareAndUpdateChildren(newNode: Node, currentNode: Node | null) {
           return buildAudioGraph(newChild, currentChild);
         }
       })();
+      if (childAudioNode && !parentAudioNode) {
+        console.warn(
+          `Parent node was unexpectedly missing. Unable to connect ${newChild.nodeType} node with ID ${newChild.id} to graph`
+        );
+      }
       if (childAudioNode && parentAudioNode) {
         childAudioNode.connect(parentAudioNode);
       }
