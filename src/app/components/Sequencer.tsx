@@ -1,10 +1,7 @@
 "use client";
 
 import { ChangeEvent, useState } from "react";
-import {
-  renderAudioGraph as renderAudioGraph,
-  Node,
-} from "../audio/audioEngine";
+import { render as renderAudioGraph, Node } from "../audio/audioGraph";
 
 const root: Node = {
   id: 0,

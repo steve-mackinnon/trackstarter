@@ -136,7 +136,7 @@ function buildAudioGraph(
 let started = false;
 /// Renders the tree rooted in `newRoot` by comparing it to the current tree and applying
 /// the minimum number of WebAudio node operations to fulfill the requested state.
-export function renderAudioGraph(newRoot: Node) {
+export function render(newRoot: Node) {
   buildAudioGraph(newRoot, currentRoot);
   currentRoot = produce(currentRoot, () => newRoot);
   if (!started) {
