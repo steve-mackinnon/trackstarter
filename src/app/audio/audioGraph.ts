@@ -75,11 +75,15 @@ function applyPropUpdates(newNode: Node, currentNode: Node | null) {
   }
 }
 
-function updateOrReplaceNodeIfChanged(
-  newNode: NodeWithRef,
-  currentNode: NodeWithRef | null,
-  parentNode: AudioNode | null
-) {
+function compareNodesAndUpdateGraph({
+  newNode,
+  currentNode,
+  parentNode,
+}: {
+  newNode: NodeWithRef;
+  currentNode: NodeWithRef | null;
+  parentNode: AudioNode | null;
+}) {
   const addNode = !currentNode || newNode.nodeType !== currentNode.nodeType;
   if (addNode) {
     if (currentNode) {
@@ -99,7 +103,7 @@ function updateOrReplaceNodeIfChanged(
 
 /// Recursively iterates over the children of newNode and currentNode and adds or
 /// removes AudioNodes from the tree to satisfy the requested state.
-function compareAndUpdateChildren(
+function compareChildNodesAndUpdateGraph(
   newParent: NodeWithRef,
   currentParent: NodeWithRef | null
 ) {
@@ -149,10 +153,10 @@ function buildAudioGraph({
   currentNode: NodeWithRef | null;
   parentNode: AudioNode | null;
 }): AudioNode | null {
-  updateOrReplaceNodeIfChanged(newNode, currentNode, parentNode);
+  compareNodesAndUpdateGraph({ newNode, currentNode, parentNode });
   // Note: compareAndUpdateChildren() will recursively call buildAudioGraph() for child nodes
   // to build out the entire tree.
-  compareAndUpdateChildren(newNode, currentNode);
+  compareChildNodesAndUpdateGraph(newNode, currentNode);
   return newNode.audioNode;
 }
 
