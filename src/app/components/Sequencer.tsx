@@ -1,7 +1,7 @@
 "use client";
 
 import { ChangeEvent, useState } from "react";
-import { render as renderAudioGraph, Node } from "../audio/audioGraph";
+import { render as renderAudioGraph } from "../audio/audioGraph";
 import { filter, osc, output } from "../audio/nodes";
 
 const audioGraph = (frequency: number, type: "lowpass" | "highpass") =>
