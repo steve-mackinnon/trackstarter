@@ -77,7 +77,8 @@ function applyPropUpdates(newNode: Node, currentNode: Node | null) {
 
 function updateOrReplaceNodeIfChanged(
   newNode: NodeWithRef,
-  currentNode: NodeWithRef | null
+  currentNode: NodeWithRef | null,
+  parentNode: AudioNode | null
 ) {
   const addNode = !currentNode || newNode.nodeType !== currentNode.nodeType;
   if (addNode) {
@@ -87,6 +88,9 @@ function updateOrReplaceNodeIfChanged(
     }
     // Build the new audio node
     newNode.audioNode = buildAudioNode(newNode);
+    if (parentNode) {
+      newNode.audioNode?.connect(parentNode);
+    }
   } else {
     newNode.audioNode = currentNode.audioNode;
   }
@@ -96,55 +100,35 @@ function updateOrReplaceNodeIfChanged(
 /// Recursively iterates over the children of newNode and currentNode and adds or
 /// removes AudioNodes from the tree to satisfy the requested state.
 function compareAndUpdateChildren(
-  newNode: NodeWithRef,
-  currentNode: NodeWithRef | null
+  newParent: NodeWithRef,
+  currentParent: NodeWithRef | null
 ) {
-  // Find and add new children
-  if (newNode.children) {
-    const parentAudioNode = newNode.audioNode;
-    newNode.children.forEach((newChild: Node, index: number) => {
-      const currentNodeExistsAtIndex =
-        currentNode?.children && index < currentNode.children.length;
-      const typesAreEqual =
-        currentNodeExistsAtIndex &&
-        newChild.nodeType === currentNode!.children![index].nodeType;
-      if (typesAreEqual) {
-        // buildAudioGraph() will update any props that may have changed
-        buildAudioGraph(
-          newChild as NodeWithRef,
-          currentNode.children![index] as NodeWithRef
-        );
-      } else {
-        if (currentNodeExistsAtIndex) {
-          // Delete the existing node
-          deleteNode(currentNode.children![index] as NodeWithRef);
-        }
-        // Pass null for the current node to force buildAudioGraph() to build
-        // a new subtree and AudioNode starting at newChild
-        const audioNode = buildAudioGraph(newChild as NodeWithRef, null);
-        if (audioNode) {
-          if (parentAudioNode) {
-            audioNode.connect(parentAudioNode);
-          }
-        } else {
-          console.warn(
-            `Parent node was unexpectedly missing. Unable to connect ${newChild.nodeType} node to graph`
-          );
-        }
-      }
+  if (newParent.children) {
+    newParent.children.forEach((newChild: Node, index: number) => {
+      const currentChild =
+        currentParent &&
+        currentParent.children &&
+        currentParent.children.length < index
+          ? currentParent.children[index]
+          : null;
+      buildAudioGraph({
+        newNode: newChild as NodeWithRef,
+        currentNode: currentChild as NodeWithRef | null,
+        parentNode: newParent.audioNode,
+      });
     });
   }
 
   // Delete removed children
-  const numNewChildren = newNode.children ? newNode.children.length : 0;
+  const numNewChildren = newParent.children ? newParent.children.length : 0;
   if (
-    currentNode &&
-    currentNode.children &&
-    currentNode.children.length > numNewChildren
+    currentParent &&
+    currentParent.children &&
+    currentParent.children.length > numNewChildren
   ) {
     // Delete any children that are no longer in the child array
-    for (let i = numNewChildren; i < currentNode.children!.length; ++i) {
-      deleteNode(currentNode.children![i] as NodeWithRef);
+    for (let i = numNewChildren; i < currentParent.children!.length; ++i) {
+      deleteNode(currentParent.children![i] as NodeWithRef);
     }
   }
 }
@@ -156,11 +140,16 @@ function compareAndUpdateChildren(
 /// Returns the AudioNode created for `newNode`, or null if no AudioNode was created. Generator
 /// nodes get created on the fly when they are needed, so they are not created while building
 /// the graph.
-function buildAudioGraph(
-  newNode: NodeWithRef,
-  currentNode: NodeWithRef | null
-): AudioNode | null {
-  updateOrReplaceNodeIfChanged(newNode, currentNode);
+function buildAudioGraph({
+  newNode,
+  currentNode,
+  parentNode,
+}: {
+  newNode: NodeWithRef;
+  currentNode: NodeWithRef | null;
+  parentNode: AudioNode | null;
+}): AudioNode | null {
+  updateOrReplaceNodeIfChanged(newNode, currentNode, parentNode);
   // Note: compareAndUpdateChildren() will recursively call buildAudioGraph() for child nodes
   // to build out the entire tree.
   compareAndUpdateChildren(newNode, currentNode);
@@ -170,7 +159,11 @@ function buildAudioGraph(
 /// Renders the tree rooted in `newRoot` by comparing it to the current tree and applying
 /// the minimum number of WebAudio node operations to fulfill the requested state.
 export function render(newRoot: Node) {
-  buildAudioGraph(newRoot as NodeWithRef, currentRoot);
+  buildAudioGraph({
+    newNode: newRoot as NodeWithRef,
+    currentNode: currentRoot,
+    parentNode: null,
+  });
   currentRoot = produce(currentRoot, () => newRoot);
   if (context.state !== "running") {
     start();
