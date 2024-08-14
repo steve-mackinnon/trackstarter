@@ -5,7 +5,7 @@ const context = new AudioContext();
 
 export interface Node {
   children?: Node[];
-  nodeType: "osc" | "filter" | "destination";
+  type: "osc" | "filter" | "destination";
   props?: any;
 }
 
@@ -18,7 +18,7 @@ export interface OscProps {
   frequency: number;
 }
 export interface OscNode extends Node {
-  nodeType: "osc";
+  type: "osc";
   props: OscProps;
 }
 
@@ -28,14 +28,14 @@ export interface FilterProps {
   q: number;
 }
 export interface FilterNode extends Node {
-  nodeType: "filter";
+  type: "filter";
   props: FilterProps;
 }
 
 let currentRoot: NodeWithRef | null = null;
 
 function buildAudioNode(node: Node): AudioNode | null {
-  switch (node.nodeType) {
+  switch (node.type) {
     case "osc":
       // Osc nodes are created dynamically when they are triggered by a sequence
       return null;
@@ -66,11 +66,9 @@ function applyPropUpdates(newNode: Node, currentNode: Node | null) {
       !currentNode?.props ||
       currentNode?.props[prop] !== newNode.props[prop]
     ) {
-      console.log(
-        `${newNode.nodeType}: Update ${prop} to ${newNode.props[prop]}`
-      );
+      console.log(`${newNode.type}: Update ${prop} to ${newNode.props[prop]}`);
     } else {
-      console.log(`${newNode.nodeType}: Not updating ${prop}`);
+      console.log(`${newNode.type}: Not updating ${prop}`);
     }
   }
 }
@@ -84,7 +82,7 @@ function compareNodesAndUpdateGraph({
   currentNode: NodeWithRef | null;
   parentNode: AudioNode | null;
 }) {
-  const addNode = !currentNode || newNode.nodeType !== currentNode.nodeType;
+  const addNode = !currentNode || newNode.type !== currentNode.type;
   if (addNode) {
     if (currentNode) {
       // Remove existing node
@@ -181,7 +179,7 @@ function instantiateGenerators(root: NodeWithRef, time: number) {
   for (const child of root.children) {
     // TODO: this randomized sequence logic is here for testing. Triggers should
     // be driven by some sort of sequencer node.
-    if (child.nodeType === "osc" && Math.random() > 0.2) {
+    if (child.type === "osc" && Math.random() > 0.2) {
       const oscNode = new OscillatorNode(context);
       const node = child as OscNode;
       const oscType = node.props.type;

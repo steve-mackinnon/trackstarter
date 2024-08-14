@@ -2,7 +2,7 @@ import { FilterNode, FilterProps, Node, OscNode, OscProps } from "./audioGraph";
 
 export function output(props: any, children?: Node[]): Node {
   return {
-    nodeType: "destination",
+    type: "destination",
     props,
     children,
   };
@@ -10,7 +10,7 @@ export function output(props: any, children?: Node[]): Node {
 
 export function osc(props: OscProps, children?: Node[]): OscNode {
   return {
-    nodeType: "osc",
+    type: "osc",
     props,
     children,
   };
@@ -18,7 +18,7 @@ export function osc(props: OscProps, children?: Node[]): OscNode {
 
 export function filter(props: FilterProps, children?: Node[]): FilterNode {
   return {
-    nodeType: "filter",
+    type: "filter",
     props,
     children,
   };
