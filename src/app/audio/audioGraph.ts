@@ -12,7 +12,7 @@ export interface Node {
 }
 
 type SequencerCallbackId = number;
-interface NodeWithRef extends Node {
+interface InternalNode extends Node {
   audioNode: AudioNode | null;
   sequencerCallbackId: SequencerCallbackId | null;
   parent: AudioNode | null;
@@ -51,11 +51,11 @@ export interface SequencerNode extends Node {
   props: SequencerProps;
 }
 
-let currentRoot: NodeWithRef | null = null;
+let currentRoot: InternalNode | null = null;
 
-let keyedNodes = new Map<string, NodeWithRef>();
+let keyedNodes = new Map<string, InternalNode>();
 
-function buildOscNode(node: NodeWithRef & OscNode): OscillatorNode {
+function buildOscNode(node: InternalNode & OscNode): OscillatorNode {
   const oscNode = new OscillatorNode(context);
   const oscType = node.props.type;
   oscNode.type = oscType;
@@ -72,7 +72,7 @@ function buildOscNode(node: NodeWithRef & OscNode): OscillatorNode {
 }
 
 function buildAudioNode(
-  node: NodeWithRef
+  node: InternalNode
 ): AudioNode | SequencerCallbackId | null {
   switch (node.type) {
     case "osc": {
@@ -93,7 +93,7 @@ function buildAudioNode(
               `Unable to connect sequencer to node with key: ${nodeKey}`
             );
           }
-          const osc = buildOscNode(destNode as OscNode & NodeWithRef);
+          const osc = buildOscNode(destNode as OscNode & InternalNode);
           osc.frequency.value = semitonesToHz(
             seqNode.props.transposition,
             (destNode as OscNode).props.frequency
@@ -106,14 +106,14 @@ function buildAudioNode(
   }
 }
 
-function deleteNode(node: NodeWithRef) {
+function deleteNode(node: InternalNode) {
   if (node.key) {
     keyedNodes.delete(node.key);
   }
 
   // Remove existing node
   if (node.children) {
-    node.children.forEach((n) => deleteNode(n as NodeWithRef));
+    node.children.forEach((n) => deleteNode(n as InternalNode));
   }
   node.audioNode?.disconnect();
   if (node.sequencerCallbackId) {
@@ -145,8 +145,8 @@ function compareNodesAndUpdateGraph({
   currentNode,
   parentNode,
 }: {
-  newNode: NodeWithRef;
-  currentNode: NodeWithRef | null;
+  newNode: InternalNode;
+  currentNode: InternalNode | null;
   parentNode: AudioNode | null;
 }) {
   const keyMatch = newNode.key && newNode.key === currentNode?.key;
@@ -180,8 +180,8 @@ function compareNodesAndUpdateGraph({
 /// Recursively iterates over the children of newNode and currentNode and adds or
 /// removes AudioNodes from the tree to satisfy the requested state.
 function compareChildNodesAndUpdateGraph(
-  newParent: NodeWithRef,
-  currentParent: NodeWithRef | null
+  newParent: InternalNode,
+  currentParent: InternalNode | null
 ) {
   if (newParent.children) {
     newParent.children.forEach((newChild: Node, index: number) => {
@@ -192,8 +192,8 @@ function compareChildNodesAndUpdateGraph(
           ? currentParent.children[index]
           : null;
       buildAudioGraph({
-        newNode: newChild as NodeWithRef,
-        currentNode: currentChild as NodeWithRef | null,
+        newNode: newChild as InternalNode,
+        currentNode: currentChild as InternalNode | null,
         parentNode: newParent.audioNode,
       });
     });
@@ -208,7 +208,7 @@ function compareChildNodesAndUpdateGraph(
   ) {
     // Delete any children that are no longer in the child array
     for (let i = numNewChildren; i < currentParent.children!.length; ++i) {
-      deleteNode(currentParent.children![i] as NodeWithRef);
+      deleteNode(currentParent.children![i] as InternalNode);
     }
   }
 }
@@ -225,8 +225,8 @@ function buildAudioGraph({
   currentNode,
   parentNode,
 }: {
-  newNode: NodeWithRef;
-  currentNode: NodeWithRef | null;
+  newNode: InternalNode;
+  currentNode: InternalNode | null;
   parentNode: AudioNode | null;
 }): AudioNode | null {
   compareNodesAndUpdateGraph({ newNode, currentNode, parentNode });
@@ -240,7 +240,7 @@ function buildAudioGraph({
 /// the minimum number of WebAudio node operations to fulfill the requested state.
 export function render(newRoot: Node) {
   buildAudioGraph({
-    newNode: newRoot as NodeWithRef,
+    newNode: newRoot as InternalNode,
     currentNode: currentRoot,
     parentNode: null,
   });
