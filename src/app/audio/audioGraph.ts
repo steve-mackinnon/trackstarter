@@ -1,16 +1,21 @@
 import * as Tone from "tone";
 import { produce } from "immer";
+import { semitonesToHz } from "./utils";
 
 const context = new AudioContext();
 
 export interface Node {
   children?: Node[];
-  type: "osc" | "filter" | "destination";
+  type: "osc" | "filter" | "sequencer" | "destination";
   props?: any;
+  key?: string;
 }
 
+type SequencerCallbackId = number;
 interface NodeWithRef extends Node {
   audioNode: AudioNode | null;
+  sequencerCallbackId: SequencerCallbackId | null;
+  parent: AudioNode | null;
 }
 
 export interface OscProps {
@@ -32,26 +37,88 @@ export interface FilterNode extends Node {
   props: FilterProps;
 }
 
+export interface SequencerProps {
+  // Uses Tone's time notation described here:
+  // https://github.com/Tonejs/Tone.js/wiki/Time
+  rate: string;
+  // numSteps: number;
+  transposition: number;
+  destinationNodes: string[];
+}
+
+export interface SequencerNode extends Node {
+  type: "sequencer";
+  props: SequencerProps;
+}
+
 let currentRoot: NodeWithRef | null = null;
 
-function buildAudioNode(node: Node): AudioNode | null {
+let keyedNodes = new Map<string, NodeWithRef>();
+
+function buildOscNode(node: NodeWithRef & OscNode): OscillatorNode {
+  const oscNode = new OscillatorNode(context);
+  const oscType = node.props.type;
+  oscNode.type = oscType;
+  oscNode.frequency.value = node.props.frequency;
+  const dest = node.parent;
+  if (!dest) {
+    throw new Error(
+      "Missing parent node to connect to. Some audio will not be generated"
+    );
+  } else {
+    oscNode.connect(dest);
+  }
+  return oscNode;
+}
+
+function buildAudioNode(
+  node: NodeWithRef
+): AudioNode | SequencerCallbackId | null {
   switch (node.type) {
-    case "osc":
+    case "osc": {
       // Osc nodes are created dynamically when they are triggered by a sequence
       return null;
+    }
     case "filter":
       return new BiquadFilterNode(context);
     case "destination":
       return context.destination;
+    case "sequencer": {
+      return Tone.getTransport().scheduleRepeat((time) => {
+        const seqNode = node as SequencerNode;
+        for (const nodeKey of seqNode.props.destinationNodes) {
+          const destNode = keyedNodes.get(nodeKey);
+          if (!destNode) {
+            throw new Error(
+              `Unable to connect sequencer to node with key: ${nodeKey}`
+            );
+          }
+          const osc = buildOscNode(destNode as OscNode & NodeWithRef);
+          osc.frequency.value = semitonesToHz(
+            seqNode.props.transposition,
+            (destNode as OscNode).props.frequency
+          );
+          osc.start(time);
+          osc.stop(time + 0.1);
+        }
+      }, (node as SequencerNode).props.rate);
+    }
   }
 }
 
 function deleteNode(node: NodeWithRef) {
+  if (node.key) {
+    keyedNodes.delete(node.key);
+  }
+
   // Remove existing node
   if (node.children) {
     node.children.forEach((n) => deleteNode(n as NodeWithRef));
   }
   node.audioNode?.disconnect();
+  if (node.sequencerCallbackId) {
+    Tone.getTransport().clear(node.sequencerCallbackId);
+  }
 }
 
 function applyPropUpdates(newNode: Node, currentNode: Node | null) {
@@ -82,16 +149,27 @@ function compareNodesAndUpdateGraph({
   currentNode: NodeWithRef | null;
   parentNode: AudioNode | null;
 }) {
-  const addNode = !currentNode || newNode.type !== currentNode.type;
+  const keyMatch = newNode.key && newNode.key === currentNode?.key;
+  const addNode =
+    !keyMatch && (!currentNode || newNode.type !== currentNode.type);
   if (addNode) {
     if (currentNode) {
       // Remove existing node
       deleteNode(currentNode);
     }
+    if (newNode.key) {
+      keyedNodes.set(newNode.key, newNode);
+    }
+    newNode.parent = parentNode;
     // Build the new audio node
-    newNode.audioNode = buildAudioNode(newNode);
-    if (parentNode) {
-      newNode.audioNode?.connect(parentNode);
+    const nodeOrSequencerId = buildAudioNode(newNode);
+    if (nodeOrSequencerId instanceof AudioNode) {
+      newNode.audioNode = nodeOrSequencerId;
+      if (parentNode) {
+        newNode.audioNode?.connect(parentNode);
+      }
+    } else if (typeof nodeOrSequencerId === "number") {
+      newNode.sequencerCallbackId = nodeOrSequencerId;
     }
   } else {
     newNode.audioNode = currentNode.audioNode;
@@ -172,43 +250,9 @@ export function render(newRoot: Node) {
   }
 }
 
-function instantiateGenerators(root: NodeWithRef, time: number) {
-  if (!root.children) {
-    return;
-  }
-  for (const child of root.children) {
-    // TODO: this randomized sequence logic is here for testing. Triggers should
-    // be driven by some sort of sequencer node.
-    if (child.type === "osc" && Math.random() > 0.2) {
-      const oscNode = new OscillatorNode(context);
-      const node = child as OscNode;
-      const oscType = node.props.type;
-      oscNode.type = oscType;
-      oscNode.frequency.value = node.props.frequency;
-      oscNode.start(time);
-      oscNode.stop(time + 0.1);
-      const dest = root.audioNode;
-      if (!dest) {
-        console.error(
-          "Missing parent node to connect to. Some audio will not be generated"
-        );
-      } else {
-        oscNode.connect(dest);
-      }
-    }
-    instantiateGenerators(child as NodeWithRef, time);
-  }
-}
-
 export function start() {
   Tone.getTransport().bpm.value = 128;
   Tone.getTransport().loop = true;
   Tone.getTransport().setLoopPoints("1:1:1", "17:1:1");
-  Tone.getTransport().scheduleRepeat((time) => {
-    if (!currentRoot) {
-      return;
-    }
-    instantiateGenerators(currentRoot, time);
-  }, "16n");
   Tone.getTransport().start();
 }

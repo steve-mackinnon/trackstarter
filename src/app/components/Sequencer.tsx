@@ -2,13 +2,14 @@
 
 import { ChangeEvent, useState } from "react";
 import { render as renderAudioGraph } from "../audio/audioGraph";
-import { filter, osc, output } from "../audio/nodes";
+import { filter, osc, output, sequencer } from "../audio/nodes";
 
 const audioGraph = (frequency: number, type: "lowpass" | "highpass") =>
   output({}, [
+    sequencer({ rate: "8n", transposition: 0, destinationNodes: ["sineosc"] }),
     filter({ type, frequency, q: 1.7 }, [
-      osc({ type: "sine", frequency: 100 }),
-      osc({ type: "triangle", frequency: 300 }),
+      osc({ type: "sine", frequency: 100 }, [], "sineosc"),
+      osc({ type: "square", frequency: 300 }),
     ]),
   ]);
 
