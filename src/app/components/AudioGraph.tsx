@@ -5,6 +5,8 @@ import { render as renderAudioGraph } from "../audio/audioGraph";
 import { filter, osc, output, sequencer } from "../audio/nodes";
 import { Oscillator } from "./Oscillator";
 import { uniqueId } from "../utils";
+import { useAtom } from "jotai";
+import { nodesAtom } from "../state";
 
 const audioGraph = (frequency: number, type: "lowpass" | "highpass") =>
   output({}, [
@@ -15,14 +17,8 @@ const audioGraph = (frequency: number, type: "lowpass" | "highpass") =>
     ]),
   ]);
 
-interface NodeState {
-  xCenter: number;
-  yCenter: number;
-  key: string;
-  type: string;
-}
 export function AudioGraph() {
-  const [nodes, setNodes] = useState<NodeState[]>([]);
+  const [nodes, setNodes] = useAtom(nodesAtom);
 
   return (
     <div
@@ -31,17 +27,17 @@ export function AudioGraph() {
         setNodes((nodes) => [
           ...nodes,
           {
-            xCenter: e.pageX,
-            yCenter: e.pageY,
+            x: e.pageX,
+            y: e.pageY,
             type: "osc",
-            key: uniqueId(),
+            id: uniqueId(),
           },
         ]);
       }}
     >
       <ul>
         {nodes.map((nodeState) => (
-          <Oscillator {...nodeState} />
+          <Oscillator {...nodeState} key={nodeState.id} />
         ))}
       </ul>
     </div>

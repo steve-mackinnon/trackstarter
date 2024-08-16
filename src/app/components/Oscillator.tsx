@@ -1,32 +1,32 @@
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { MouseEventHandler, useEffect, useState } from "react";
+import { activeDragAtom, atomForNode, nodesAtom } from "../state";
 
-export function Oscillator(props: { xCenter: number; yCenter: number }) {
+export function Oscillator(props: { x: number; y: number; id: string }) {
   const [frequency, setFrequency] = useState(200);
   const [type, setType] = useState<OscillatorType>("sine");
-  const [centerPos, setCenterPos] = useState({
-    x: props.xCenter,
-    y: props.yCenter,
-  });
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
+  const nodeState = useAtomValue(atomForNode(props.id));
+  const setNodes = useSetAtom(nodesAtom);
+  const [activeDrag, setActiveDrag] = useAtom(activeDragAtom);
   const [isMouseOver, setIsMouseOver] = useState(false);
 
   const handleMouseUp: MouseEventHandler = (e: any) => {
     e.stopPropagation();
-    setIsDragging(false);
+    setActiveDrag(null);
   };
   useEffect(() => {
     const mouseUp = (e: any) => {
-      handleMouseUp(e);
+      e.stopPropagation();
+      setActiveDrag(null);
     };
     window.addEventListener("mouseup", mouseUp);
     return () => {
       window.removeEventListener("mouseup", mouseUp);
     };
-  }, []);
+  }, [setActiveDrag]);
 
   const getBorderColor = () => {
-    if (isDragging) {
+    if (activeDrag?.id === props.id) {
       return "white";
     } else if (isMouseOver) {
       return "blue";
@@ -36,8 +36,8 @@ export function Oscillator(props: { xCenter: number; yCenter: number }) {
   return (
     <div
       style={{
-        top: `${centerPos.y}px`,
-        left: `${centerPos.x}px`,
+        top: `${nodeState.y}px`,
+        left: `${nodeState.x}px`,
         width: "200px",
         height: "160px",
         border: `2px solid ${getBorderColor()}`,
@@ -48,18 +48,26 @@ export function Oscillator(props: { xCenter: number; yCenter: number }) {
       onClick={(e) => e.stopPropagation()}
       onMouseDown={(e) => {
         e.stopPropagation();
-        setIsDragging(true);
-        setDragOffset({
-          x: e.clientX - centerPos.x,
-          y: e.clientY - centerPos.y,
+
+        setActiveDrag({
+          id: props.id,
+          xOffset: e.clientX - nodeState.x,
+          yOffset: e.clientY - nodeState.y,
         });
       }}
       onMouseMove={(e) => {
-        if (isDragging) {
-          setCenterPos({
-            x: e.clientX - dragOffset.x,
-            y: e.clientY - dragOffset.y,
-          });
+        if (activeDrag?.id === props.id) {
+          setNodes((prevNodes) =>
+            prevNodes.map((node) =>
+              node.id === props.id
+                ? {
+                    ...node,
+                    x: e.clientX - activeDrag.xOffset,
+                    y: e.clientY - activeDrag.yOffset,
+                  }
+                : node
+            )
+          );
         }
       }}
       onMouseUp={handleMouseUp}
