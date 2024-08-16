@@ -1,4 +1,4 @@
-import { MouseEventHandler, useState } from "react";
+import { MouseEventHandler, useEffect, useState } from "react";
 
 export function Oscillator(props: { xCenter: number; yCenter: number }) {
   const [frequency, setFrequency] = useState(200);
@@ -11,10 +11,19 @@ export function Oscillator(props: { xCenter: number; yCenter: number }) {
   const [isDragging, setIsDragging] = useState(false);
   const [isMouseOver, setIsMouseOver] = useState(false);
 
-  const handleMouseUp: MouseEventHandler = (e) => {
+  const handleMouseUp: MouseEventHandler = (e: any) => {
     e.stopPropagation();
     setIsDragging(false);
   };
+  useEffect(() => {
+    const mouseUp = (e: any) => {
+      handleMouseUp(e);
+    };
+    window.addEventListener("mouseup", mouseUp);
+    return () => {
+      window.removeEventListener("mouseup", mouseUp);
+    };
+  }, []);
 
   const getBorderColor = () => {
     if (isDragging) {
@@ -57,15 +66,19 @@ export function Oscillator(props: { xCenter: number; yCenter: number }) {
       onMouseEnter={() => setIsMouseOver(true)}
       onMouseLeave={() => setIsMouseOver(false)}
     >
-      <label className="pb-3">Oscillator</label>
-      <label htmlFor="frequencySlider">Frequency</label>
+      <label className="pb-3 select-none">Oscillator</label>
+      <label htmlFor="frequencySlider" className="select-none">
+        Frequency
+      </label>
       <input
         id="frequencySlider"
         type="range"
         value={frequency}
         onChange={(e) => setFrequency(Number.parseFloat(e.target.value))}
       />
-      <label htmlFor="shape">Shape</label>
+      <label htmlFor="shape" className="select-none">
+        Shape
+      </label>
       <select
         className="text-black"
         name="shape"
