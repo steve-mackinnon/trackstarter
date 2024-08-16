@@ -5,8 +5,7 @@ import { activeDragAtom, atomForNode, nodesAtom } from "../state";
 export function Oscillator(props: { x: number; y: number; id: string }) {
   const [frequency, setFrequency] = useState(200);
   const [type, setType] = useState<OscillatorType>("sine");
-  const nodeState = useAtomValue(atomForNode(props.id));
-  const setNodes = useSetAtom(nodesAtom);
+  const [pos, setPos] = useState({ x: props.x, y: props.y });
   const [activeDrag, setActiveDrag] = useAtom(activeDragAtom);
   const [isMouseOver, setIsMouseOver] = useState(false);
 
@@ -36,8 +35,7 @@ export function Oscillator(props: { x: number; y: number; id: string }) {
   return (
     <div
       style={{
-        top: `${nodeState.y}px`,
-        left: `${nodeState.x}px`,
+        transform: `translate(${pos.x}px, ${pos.y}px)`,
         width: "200px",
         height: "160px",
         border: `2px solid ${getBorderColor()}`,
@@ -51,23 +49,16 @@ export function Oscillator(props: { x: number; y: number; id: string }) {
 
         setActiveDrag({
           id: props.id,
-          xOffset: e.clientX - nodeState.x,
-          yOffset: e.clientY - nodeState.y,
+          xOffset: e.clientX - pos.x,
+          yOffset: e.clientY - pos.y,
         });
       }}
       onMouseMove={(e) => {
         if (activeDrag?.id === props.id) {
-          setNodes((prevNodes) =>
-            prevNodes.map((node) =>
-              node.id === props.id
-                ? {
-                    ...node,
-                    x: e.clientX - activeDrag.xOffset,
-                    y: e.clientY - activeDrag.yOffset,
-                  }
-                : node
-            )
-          );
+          setPos({
+            x: e.clientX - activeDrag.xOffset,
+            y: e.clientY - activeDrag.yOffset,
+          });
         }
       }}
       onMouseUp={handleMouseUp}
