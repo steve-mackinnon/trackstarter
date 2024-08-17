@@ -1,7 +1,7 @@
 import { DraggableContainer } from "common/components/DraggableContainer";
 import { useState } from "react";
 
-export function Oscillator(props: { x: number; y: number; id: string }) {
+export function Oscillator(props: { x: number; y: number }) {
   const [frequency, setFrequency] = useState(200);
   const [type, setType] = useState<OscillatorType>("sine");
 
