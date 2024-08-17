@@ -73,6 +73,10 @@ export function Oscillator(props: { x: number; y: number; id: string }) {
         type="range"
         value={frequency}
         onChange={(e) => setFrequency(Number.parseFloat(e.target.value))}
+        onMouseDown={(e) => {
+          // Prevents drag from starting
+          e.stopPropagation();
+        }}
       />
       <label htmlFor="shape" className="select-none">
         Shape
