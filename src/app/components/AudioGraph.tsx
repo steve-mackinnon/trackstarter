@@ -1,9 +1,9 @@
 "use client";
 
-import { Oscillator } from "./Oscillator";
-import { uniqueId } from "../utils";
+import { Oscillator } from "components/Oscillator";
 import { useAtom } from "jotai";
-import { nodesAtom } from "../state";
+import { nodesAtom } from "state";
+import { uniqueId } from "utils";
 
 export function AudioGraph() {
   const [nodes, setNodes] = useAtom(nodesAtom);
