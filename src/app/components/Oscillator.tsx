@@ -1,31 +1,41 @@
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { MouseEventHandler, useEffect, useState } from "react";
-import { activeDragAtom, atomForNode, nodesAtom } from "../state";
+import { useEffect, useState } from "react";
+
+interface DragState {
+  xOffset: number;
+  yOffset: number;
+}
 
 export function Oscillator(props: { x: number; y: number; id: string }) {
   const [frequency, setFrequency] = useState(200);
   const [type, setType] = useState<OscillatorType>("sine");
   const [pos, setPos] = useState({ x: props.x, y: props.y });
-  const [activeDrag, setActiveDrag] = useAtom(activeDragAtom);
+  const [dragState, setDragState] = useState<DragState | null>(null);
   const [isMouseOver, setIsMouseOver] = useState(false);
 
-  const handleMouseUp: MouseEventHandler = (e: any) => {
-    e.stopPropagation();
-    setActiveDrag(null);
-  };
   useEffect(() => {
     const mouseUp = (e: any) => {
       e.stopPropagation();
-      setActiveDrag(null);
+      setDragState(null);
     };
     window.addEventListener("mouseup", mouseUp);
+
+    const mouseMove = (e: MouseEvent) => {
+      if (dragState) {
+        setPos({
+          x: e.clientX - dragState.xOffset,
+          y: e.clientY - dragState.yOffset,
+        });
+      }
+    };
+    window.addEventListener("mousemove", mouseMove);
     return () => {
       window.removeEventListener("mouseup", mouseUp);
+      window.removeEventListener("mousemove", mouseMove);
     };
-  }, [setActiveDrag]);
+  }, [dragState, setDragState, setPos]);
 
   const getBorderColor = () => {
-    if (activeDrag?.id === props.id) {
+    if (dragState) {
       return "white";
     } else if (isMouseOver) {
       return "blue";
@@ -43,25 +53,14 @@ export function Oscillator(props: { x: number; y: number; id: string }) {
         background: isMouseOver ? "silver" : "gray",
       }}
       className={`absolute flex flex-col bg-gray-500 p-4 items-center rounded-2xl`}
-      onClick={(e) => e.stopPropagation()}
       onMouseDown={(e) => {
         e.stopPropagation();
-
-        setActiveDrag({
-          id: props.id,
+        setDragState({
           xOffset: e.clientX - pos.x,
           yOffset: e.clientY - pos.y,
         });
       }}
-      onMouseMove={(e) => {
-        if (activeDrag?.id === props.id) {
-          setPos({
-            x: e.clientX - activeDrag.xOffset,
-            y: e.clientY - activeDrag.yOffset,
-          });
-        }
-      }}
-      onMouseUp={handleMouseUp}
+      onMouseUp={() => setDragState(null)}
       onMouseEnter={() => setIsMouseOver(true)}
       onMouseLeave={() => setIsMouseOver(false)}
     >
