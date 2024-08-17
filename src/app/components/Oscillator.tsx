@@ -38,7 +38,7 @@ export function Oscillator(props: { x: number; y: number; id: string }) {
     if (dragState) {
       return "white";
     } else if (isMouseOver) {
-      return "blue";
+      return "yellow";
     }
     return "transparent";
   };
@@ -50,7 +50,7 @@ export function Oscillator(props: { x: number; y: number; id: string }) {
         height: "160px",
         border: `2px solid ${getBorderColor()}`,
         boxSizing: "border-box",
-        background: isMouseOver ? "silver" : "gray",
+        background: isMouseOver ? "darkturquoise" : "slategray",
       }}
       className={`absolute flex flex-col bg-gray-500 p-4 items-center rounded-2xl`}
       onMouseDown={(e) => {
@@ -64,7 +64,7 @@ export function Oscillator(props: { x: number; y: number; id: string }) {
       onMouseEnter={() => setIsMouseOver(true)}
       onMouseLeave={() => setIsMouseOver(false)}
     >
-      <label className="pb-3 select-none">Oscillator</label>
+      <label className="pb-3 select-none font-bold">Oscillator</label>
       <label htmlFor="frequencySlider" className="select-none">
         Frequency
       </label>

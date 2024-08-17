@@ -22,7 +22,7 @@ export function AudioGraph() {
 
   return (
     <div
-      className="absolute top-0 bottom-0 left-0 right-0 bg-red-300"
+      className="absolute top-0 bottom-0 left-0 right-0 bg-indigo-950"
       onMouseDown={(e) => addNode({ x: e.pageX, y: e.pageY })}
     >
       <ul>
