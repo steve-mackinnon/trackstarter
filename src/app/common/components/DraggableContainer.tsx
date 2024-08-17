@@ -54,7 +54,6 @@ export function DraggableContainer({
       style={{
         transform: `translate(${pos.x}px, ${pos.y}px)`,
         width: "200px",
-        height: "160px",
         border: `2px solid ${getBorderColor()}`,
         boxSizing: "border-box",
         background: isMouseOver ? "darkturquoise" : "slategray",

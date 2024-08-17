@@ -35,7 +35,7 @@ export function Filter(props: { x: number; y: number }) {
         }}
       />
       <label htmlFor="q-slider" className="select-none">
-        Frequency
+        Q
       </label>
       <input
         id="q-slider"
