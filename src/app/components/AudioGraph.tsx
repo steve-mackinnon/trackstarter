@@ -1,5 +1,6 @@
 "use client";
 
+import { Connection } from "common/components/Connection";
 import { useSetupHotkeys } from "common/hooks/useSetupHotkeys";
 import { Oscillator } from "components/Oscillator";
 import { useAtom, useAtomValue } from "jotai";
@@ -96,9 +97,7 @@ export function AudioGraph() {
       <ul>
         {Object.keys(connections).map((nodeId: string) =>
           connections[nodeId].map((destNodeId) => (
-            <div>
-              {nodeId} - {destNodeId}
-            </div>
+            <Connection source={nodeId} dest={destNodeId} />
           ))
         )}
       </ul>

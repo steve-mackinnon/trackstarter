@@ -1,9 +1,8 @@
 import { useSetAtom } from "jotai";
 import { useEffect } from "react";
-import { connectionSourceNodeAtom, cursorModeAtom } from "state";
+import { cursorModeAtom } from "state";
 
 export function useSetupHotkeys() {
-  const setConnectionSourceNode = useSetAtom(connectionSourceNodeAtom);
   const setCursorMode = useSetAtom(cursorModeAtom);
 
   useEffect(() => {
