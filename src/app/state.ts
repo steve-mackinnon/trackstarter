@@ -10,11 +10,20 @@ export interface NodeState {
 export const nodesAtom = atom<NodeState[]>([]);
 
 export type CursorMode = "selection" | "osc" | "filter" | "add-connection";
-export const cursorModeAtom = atom<CursorMode>("selection");
+const cursorModeStorageAtom = atom<CursorMode>("selection");
+export const cursorModeAtom = atom(
+  (get) => get(cursorModeStorageAtom),
+  (_, set, value: CursorMode) => {
+    if (value !== "add-connection") {
+      set(connectionSourceNodeAtom, null);
+    }
+    set(cursorModeStorageAtom, value);
+  }
+);
 
 export const connectionSourceNodeAtom = atom<string | null>(null);
 
-const connectionsAtom = atom<{ [key: string]: string[] }>({});
+export const connectionsAtom = atom<{ [key: string]: string[] }>({});
 export const addConnectionAtom = atom(
   (get) => get(connectionsAtom),
   (

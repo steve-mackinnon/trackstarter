@@ -24,7 +24,7 @@ export function useCreateNodeConnection() {
     return node.type as NodeType;
   };
   return (destNode: string) => {
-    if (!connectionSource) {
+    if (!connectionSource || connectionSource === destNode) {
       return false;
     }
     if (nodeAcceptsConnections(getNodeType(destNode))) {
