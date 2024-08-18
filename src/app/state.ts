@@ -5,23 +5,24 @@ import { uniqueId } from "utils";
 export interface NodeState {
   x: number;
   y: number;
-  id: string;
+  key: string;
   type: NodeType;
+  props?: any;
 }
 
 export const nodesAtom = atom<NodeState[]>([
-  { x: 100, y: 0, id: uniqueId(), type: "destination" },
+  { x: 100, y: 0, key: uniqueId(), type: "destination" },
 ]);
 
 export const updateNodePositionAtom = atom(
   (get) => null,
   (get, set, { id, x, y }: { id: string; x: number; y: number }) => {
     const nodes = get(nodesAtom);
-    const index = nodes.findIndex((n) => n.id === id);
+    const index = nodes.findIndex((n) => n.key === id);
     if (index === -1) {
       throw new Error(`Failed to find node with id: ${id}`);
     }
-    nodes[index] = { ...nodes[index], x, y, id };
+    nodes[index] = { ...nodes[index], x, y, key: id };
     set(nodesAtom, [...nodes]);
   }
 );

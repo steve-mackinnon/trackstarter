@@ -31,7 +31,7 @@ export function AudioGraph() {
         x,
         y,
         type,
-        id: uniqueId(),
+        key: uniqueId(),
       },
     ]);
   };
@@ -80,24 +80,24 @@ export function AudioGraph() {
               return (
                 <Oscillator
                   {...nodeState}
-                  key={nodeState.id}
-                  nodeId={nodeState.id}
+                  key={nodeState.key}
+                  nodeId={nodeState.key}
                 />
               );
             case "filter":
               return (
                 <Filter
                   {...nodeState}
-                  key={nodeState.id}
-                  nodeId={nodeState.id}
+                  key={nodeState.key}
+                  nodeId={nodeState.key}
                 />
               );
             case "destination":
               return (
                 <DestinationNode
                   {...nodeState}
-                  key={nodeState.id}
-                  nodeId={nodeState.id}
+                  key={nodeState.key}
+                  nodeId={nodeState.key}
                 />
               );
           }

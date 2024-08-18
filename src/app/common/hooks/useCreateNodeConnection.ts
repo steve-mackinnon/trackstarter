@@ -17,7 +17,7 @@ export function useCreateNodeConnection() {
 
   const nodes = useAtomValue(nodesAtom);
   const getNodeType = (id: string): NodeType => {
-    const node = nodes.find((n) => n.id === id);
+    const node = nodes.find((n) => n.key === id);
     if (!node) {
       throw new Error(`Failed to find node with id: ${id}`);
     }
@@ -28,7 +28,7 @@ export function useCreateNodeConnection() {
       return false;
     }
     if (nodeAcceptsConnections(getNodeType(destNode))) {
-      addConnection({ nodeId: connectionSource, connectionNodeId: destNode });
+      addConnection({ sourceId: connectionSource, destId: destNode });
       setConnectionSource(null);
       setCursorMode("selection");
       return true;

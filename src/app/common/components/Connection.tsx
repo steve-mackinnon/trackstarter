@@ -4,8 +4,8 @@ import { nodesAtom } from "state";
 export function Connection({ source, dest }: { source: string; dest: string }) {
   const nodes = useAtomValue(nodesAtom);
 
-  const sourceNode = nodes.find((n) => n.id === source);
-  const destNode = nodes.find((n) => n.id === dest);
+  const sourceNode = nodes.find((n) => n.key === source);
+  const destNode = nodes.find((n) => n.key === dest);
 
   if (!sourceNode || !destNode) {
     return null;
