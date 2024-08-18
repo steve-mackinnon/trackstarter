@@ -10,15 +10,19 @@ export function Connection({ source, dest }: { source: string; dest: string }) {
   if (!sourceNode || !destNode) {
     return null;
   }
+
+  const curveXOffset = destNode.x - sourceNode.x;
   return (
     <svg className="absolute w-full h-full pointer-events-none">
-      <line
-        x1={sourceNode.x}
-        y1={sourceNode.y}
-        x2={destNode.x}
-        y2={destNode.y}
+      <path
+        d={`M ${sourceNode.x} ${sourceNode.y} C ${
+          sourceNode.x + curveXOffset
+        } ${sourceNode.y}, ${destNode.x - curveXOffset} ${destNode.y}, ${
+          destNode.x
+        } ${destNode.y}`}
         stroke="white"
-        strokeWidth="2"
+        strokeWidth="2px"
+        fill="transparent"
       />
     </svg>
   );
