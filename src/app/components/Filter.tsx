@@ -1,13 +1,13 @@
 import { DraggableContainer } from "common/components/DraggableContainer";
 import { useState } from "react";
 
-export function Filter(props: { x: number; y: number }) {
+export function Filter(props: { x: number; y: number; nodeId: string }) {
   const [frequency, setFrequency] = useState(1000);
   const [type, setType] = useState<BiquadFilterType>("lowpass");
   const [q, setQ] = useState(0.707);
 
   return (
-    <DraggableContainer {...props} label="Filter">
+    <DraggableContainer {...props} label="Filter" hasConnectionPort={true}>
       <label htmlFor="type" className="select-none">
         Type
       </label>

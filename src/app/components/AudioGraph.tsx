@@ -31,11 +31,26 @@ export function AudioGraph() {
     ]);
   };
 
+  const cursor = (() => {
+    switch (cursorMode) {
+      case "add-connection":
+      case "osc":
+      case "filter":
+        return "copy";
+      case "selection":
+        return "default";
+    }
+  })();
   return (
     <div
       className="absolute top-0 bottom-0 left-0 right-0 bg-indigo-950"
+      style={{ cursor }}
       onMouseDown={(e) => {
-        if (e.target !== e.currentTarget || cursorMode === "selection") {
+        if (
+          e.target !== e.currentTarget ||
+          cursorMode === "selection" ||
+          cursorMode === "add-connection"
+        ) {
           // Ignore mouse clicks that originated from children
           return;
         }
@@ -55,9 +70,21 @@ export function AudioGraph() {
         {nodes.map((nodeState) => {
           switch (nodeState.type) {
             case "osc":
-              return <Oscillator {...nodeState} key={nodeState.id} />;
+              return (
+                <Oscillator
+                  {...nodeState}
+                  key={nodeState.id}
+                  nodeId={nodeState.id}
+                />
+              );
             case "filter":
-              return <Filter {...nodeState} key={nodeState.id} />;
+              return (
+                <Filter
+                  {...nodeState}
+                  key={nodeState.id}
+                  nodeId={nodeState.id}
+                />
+              );
           }
         })}
       </ul>

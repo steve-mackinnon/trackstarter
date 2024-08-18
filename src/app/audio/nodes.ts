@@ -2,6 +2,7 @@ import {
   FilterNode,
   FilterProps,
   Node,
+  NodeType,
   OscNode,
   OscProps,
   SequencerNode,
@@ -38,4 +39,15 @@ export function sequencer(props: SequencerProps): SequencerNode {
     type: "sequencer",
     props,
   };
+}
+
+export function nodeAcceptsConnections(type: NodeType) {
+  switch (type) {
+    case "destination":
+    case "filter":
+      return true;
+    case "osc":
+    case "sequencer":
+      return false;
+  }
 }

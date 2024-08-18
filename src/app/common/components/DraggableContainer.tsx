@@ -1,20 +1,26 @@
 import { PropsWithChildren, useEffect, useState } from "react";
-
+import { NodeConnectionPort } from "./NodeConnectionPort";
 interface DragState {
   xOffset: number;
   yOffset: number;
+}
+
+export interface DraggableContainerProps {
+  x: number;
+  y: number;
+  label: string;
+  hasConnectionPort: boolean;
+  nodeId: string;
 }
 
 export function DraggableContainer({
   x,
   y,
   label,
+  hasConnectionPort,
   children,
-}: PropsWithChildren<{
-  x: number;
-  y: number;
-  label: string;
-}>) {
+  nodeId,
+}: PropsWithChildren<DraggableContainerProps>) {
   const [pos, setPos] = useState({ x, y });
   const [dragState, setDragState] = useState<DragState | null>(null);
   const [isMouseOver, setIsMouseOver] = useState(false);
@@ -58,7 +64,7 @@ export function DraggableContainer({
         boxSizing: "border-box",
         background: isMouseOver ? "darkturquoise" : "slategray",
       }}
-      className={`absolute flex flex-col bg-gray-500 p-4 items-center rounded-2xl`}
+      className={`absolute flex flex-col bg-gray-500 pb-2 items-center rounded-2xl`}
       onMouseDown={(e) => {
         e.stopPropagation();
         setDragState({
@@ -70,8 +76,9 @@ export function DraggableContainer({
       onMouseEnter={() => setIsMouseOver(true)}
       onMouseLeave={() => setIsMouseOver(false)}
     >
-      <label className="pb-3 select-none font-bold">{label}</label>
+      <label className="pb-1 select-none font-bold">{label}</label>
       {children}
+      {hasConnectionPort && <NodeConnectionPort nodeId={nodeId} />}
     </div>
   );
 }

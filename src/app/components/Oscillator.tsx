@@ -1,12 +1,12 @@
 import { DraggableContainer } from "common/components/DraggableContainer";
 import { useState } from "react";
 
-export function Oscillator(props: { x: number; y: number }) {
+export function Oscillator(props: { x: number; y: number; nodeId: string }) {
   const [frequency, setFrequency] = useState(200);
   const [type, setType] = useState<OscillatorType>("sine");
 
   return (
-    <DraggableContainer {...props} label="Oscillator">
+    <DraggableContainer {...props} label="Oscillator" hasConnectionPort={true}>
       <label htmlFor="frequencySlider" className="select-none">
         Frequency
       </label>

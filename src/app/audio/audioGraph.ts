@@ -1,12 +1,13 @@
-import * as Tone from "tone";
 import { produce } from "immer";
+import * as Tone from "tone";
 import { semitonesToHz } from "./utils";
 
 const context = new AudioContext();
 
+export type NodeType = "osc" | "filter" | "sequencer" | "destination";
 export interface Node {
   children?: Node[];
-  type: "osc" | "filter" | "sequencer" | "destination";
+  type: NodeType;
   props?: any;
   key?: string;
 }
