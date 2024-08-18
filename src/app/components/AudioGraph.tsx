@@ -7,6 +7,7 @@ import { useAtom, useAtomValue } from "jotai";
 import { connectionsAtom, cursorModeAtom, nodesAtom } from "state";
 import { uniqueId } from "utils";
 import { CursorModeSelector } from "./CursorModeSelector";
+import { DestinationNode } from "./DestinationNode";
 import { Filter } from "./Filter";
 
 export function AudioGraph() {
@@ -91,13 +92,25 @@ export function AudioGraph() {
                   nodeId={nodeState.id}
                 />
               );
+            case "destination":
+              return (
+                <DestinationNode
+                  {...nodeState}
+                  key={nodeState.id}
+                  nodeId={nodeState.id}
+                />
+              );
           }
         })}
       </ul>
       <ul>
         {Object.keys(connections).map((nodeId: string) =>
           connections[nodeId].map((destNodeId) => (
-            <Connection source={nodeId} dest={destNodeId} />
+            <Connection
+              source={nodeId}
+              dest={destNodeId}
+              key={`${nodeId}-${destNodeId}`}
+            />
           ))
         )}
       </ul>

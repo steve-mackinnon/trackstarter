@@ -1,13 +1,18 @@
+import { NodeType } from "audio/audioGraph";
 import { atom } from "jotai";
+import { uniqueId } from "utils";
 
 export interface NodeState {
   x: number;
   y: number;
   id: string;
-  type: string;
+  type: NodeType;
 }
 
-export const nodesAtom = atom<NodeState[]>([]);
+export const nodesAtom = atom<NodeState[]>([
+  { x: 100, y: 0, id: uniqueId(), type: "destination" },
+]);
+
 export const updateNodePositionAtom = atom(
   (get) => null,
   (get, set, { id, x, y }: { id: string; x: number; y: number }) => {
