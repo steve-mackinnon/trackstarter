@@ -1,5 +1,10 @@
 import { useAtom } from "jotai";
-import { AudioWaveform, Filter, MousePointer2 } from "lucide-react";
+import {
+  AudioWaveform,
+  Filter,
+  KeyboardMusic,
+  MousePointer2,
+} from "lucide-react";
 import { PropsWithChildren } from "react";
 import { CursorMode, cursorModeAtom } from "state";
 
@@ -56,6 +61,13 @@ export function CursorModeSelector({ className }: { className: string }) {
         handleClick={(value) => setCursorMode(value as CursorMode)}
       >
         <Filter />
+      </RadioButton>
+      <RadioButton
+        value="sequencer"
+        currentValue={cursorMode}
+        handleClick={(value) => setCursorMode(value as CursorMode)}
+      >
+        <KeyboardMusic />
       </RadioButton>
     </div>
   );

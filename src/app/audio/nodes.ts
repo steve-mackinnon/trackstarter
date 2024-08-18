@@ -41,12 +41,14 @@ export function sequencer(props: SequencerProps): SequencerNode {
   };
 }
 
-export function nodeAcceptsConnections(type: NodeType) {
-  switch (type) {
+export function canNodesConnect(sourceType: NodeType, destType: NodeType) {
+  switch (destType) {
     case "destination":
     case "filter":
       return true;
-    case "osc":
+    case "osc": {
+      return sourceType === "sequencer";
+    }
     case "sequencer":
       return false;
   }

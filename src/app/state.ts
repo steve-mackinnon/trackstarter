@@ -27,7 +27,12 @@ export const updateNodePositionAtom = atom(
   }
 );
 
-export type CursorMode = "selection" | "osc" | "filter" | "add-connection";
+export type CursorMode =
+  | "selection"
+  | "osc"
+  | "filter"
+  | "sequencer"
+  | "add-connection";
 const cursorModeStorageAtom = atom<CursorMode>("selection");
 export const cursorModeAtom = atom(
   (get) => get(cursorModeStorageAtom),
@@ -44,21 +49,14 @@ export const connectionSourceNodeAtom = atom<string | null>(null);
 export const connectionsAtom = atom<{ [key: string]: string[] }>({});
 export const addConnectionAtom = atom(
   (get) => get(connectionsAtom),
-  (
-    get,
-    set,
-    { nodeId, connectionNodeId }: { nodeId: string; connectionNodeId: string }
-  ) => {
+  (get, set, { sourceId, destId }: { sourceId: string; destId: string }) => {
     const current = get(connectionsAtom);
     const updated = { ...current };
     // Don't add a duplicate connection
-    if (
-      updated[nodeId] &&
-      updated[nodeId].find((n) => n === connectionNodeId)
-    ) {
+    if (updated[destId] && updated[destId].find((n) => n === sourceId)) {
       return;
     }
-    updated[nodeId] = [...(updated[nodeId] || []), connectionNodeId];
+    updated[destId] = [...(updated[destId] || []), sourceId];
     set(connectionsAtom, updated);
   }
 );

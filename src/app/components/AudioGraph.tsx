@@ -1,7 +1,9 @@
 "use client";
 
+import { NodeType } from "audio/audioGraph";
 import { Connection } from "common/components/Connection";
 import { useSetupHotkeys } from "common/hooks/useSetupHotkeys";
+import { useUpdateAudioGraphOnStateChange } from "common/hooks/useUpdateAudioGraphOnStateChange";
 import { Oscillator } from "components/Oscillator";
 import { useAtom, useAtomValue } from "jotai";
 import { connectionsAtom, cursorModeAtom, nodesAtom } from "state";
@@ -9,12 +11,14 @@ import { uniqueId } from "utils";
 import { CursorModeSelector } from "./CursorModeSelector";
 import { DestinationNode } from "./DestinationNode";
 import { Filter } from "./Filter";
+import { SequencerNode } from "./SequencerNode";
 
 export function AudioGraph() {
   const [nodes, setNodes] = useAtom(nodesAtom);
   const [cursorMode, setCursorMode] = useAtom(cursorModeAtom);
   const connections = useAtomValue(connectionsAtom);
   useSetupHotkeys();
+  useUpdateAudioGraphOnStateChange();
 
   const addNode = ({
     x,
@@ -23,7 +27,7 @@ export function AudioGraph() {
   }: {
     x: number;
     y: number;
-    type: "osc" | "filter";
+    type: NodeType;
   }) => {
     setNodes((nodes) => [
       ...nodes,
@@ -41,6 +45,7 @@ export function AudioGraph() {
       case "add-connection":
       case "osc":
       case "filter":
+      case "sequencer":
         return "copy";
       case "selection":
         return "default";
@@ -61,6 +66,8 @@ export function AudioGraph() {
           return "filter";
         case "osc":
           return "osc";
+        case "sequencer":
+          return "sequencer";
       }
     })();
     addNode({ x: e.pageX, y: e.pageY, type });
@@ -95,6 +102,14 @@ export function AudioGraph() {
             case "destination":
               return (
                 <DestinationNode
+                  {...nodeState}
+                  key={nodeState.key}
+                  nodeId={nodeState.key}
+                />
+              );
+            case "sequencer":
+              return (
+                <SequencerNode
                   {...nodeState}
                   key={nodeState.key}
                   nodeId={nodeState.key}

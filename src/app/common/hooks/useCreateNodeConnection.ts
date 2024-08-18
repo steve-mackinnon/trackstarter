@@ -1,5 +1,5 @@
 import { NodeType } from "audio/audioGraph";
-import { nodeAcceptsConnections } from "audio/nodes";
+import { canNodesConnect } from "audio/nodes";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import {
   addConnectionAtom,
@@ -27,7 +27,7 @@ export function useCreateNodeConnection() {
     if (!connectionSource || connectionSource === destNode) {
       return false;
     }
-    if (nodeAcceptsConnections(getNodeType(destNode))) {
+    if (canNodesConnect(getNodeType(connectionSource), getNodeType(destNode))) {
       addConnection({ sourceId: connectionSource, destId: destNode });
       setConnectionSource(null);
       setCursorMode("selection");

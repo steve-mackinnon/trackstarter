@@ -24,6 +24,10 @@ export function useSetupHotkeys() {
           setCursorMode("filter");
           break;
         }
+        case "4": {
+          setCursorMode("sequencer");
+          break;
+        }
       }
     };
     window.addEventListener("keydown", handleKeyDown);
