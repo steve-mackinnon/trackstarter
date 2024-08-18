@@ -149,7 +149,7 @@ function compareNodesAndUpdateGraph({
   newNode: InternalNode;
   currentNode: InternalNode | null;
   parentNode: AudioNode | null;
-}) {
+}): InternalNode {
   const keyMatch = newNode.key && newNode.key === currentNode?.key;
   const addNode =
     !keyMatch && (!currentNode || newNode.type !== currentNode.type);
@@ -161,21 +161,30 @@ function compareNodesAndUpdateGraph({
     if (newNode.key) {
       keyedNodes.set(newNode.key, newNode);
     }
-    newNode.parent = parentNode;
+    newNode = produce(newNode, (node) => {
+      node.parent = parentNode;
+    });
     // Build the new audio node
     const nodeOrSequencerId = buildAudioNode(newNode);
     if (nodeOrSequencerId instanceof AudioNode) {
-      newNode.audioNode = nodeOrSequencerId;
+      newNode = produce(newNode, (node) => {
+        node.audioNode = nodeOrSequencerId;
+      });
       if (parentNode) {
         newNode.audioNode?.connect(parentNode);
       }
     } else if (typeof nodeOrSequencerId === "number") {
-      newNode.sequencerCallbackId = nodeOrSequencerId;
+      newNode = produce(newNode, (node) => {
+        node.sequencerCallbackId = nodeOrSequencerId;
+      });
     }
   } else {
-    newNode.audioNode = currentNode.audioNode;
+    newNode = produce(newNode, (node) => {
+      node.audioNode = currentNode.audioNode;
+    });
   }
   applyPropUpdates(newNode, currentNode);
+  return newNode;
 }
 
 /// Recursively iterates over the children of newNode and currentNode and adds or
@@ -230,7 +239,7 @@ function buildAudioGraph({
   currentNode: InternalNode | null;
   parentNode: AudioNode | null;
 }): AudioNode | null {
-  compareNodesAndUpdateGraph({ newNode, currentNode, parentNode });
+  newNode = compareNodesAndUpdateGraph({ newNode, currentNode, parentNode });
   // Note: compareAndUpdateChildren() will recursively call buildAudioGraph() for child nodes
   // to build out the entire tree.
   compareChildNodesAndUpdateGraph(newNode, currentNode);
