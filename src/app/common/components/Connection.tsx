@@ -1,25 +1,23 @@
 import { useAtomValue } from "jotai";
-import { nodesAtom } from "state";
+import { nodePositionsAtom } from "state";
 
 export function Connection({ source, dest }: { source: string; dest: string }) {
-  const nodes = useAtomValue(nodesAtom);
+  const nodePositions = useAtomValue(nodePositionsAtom);
 
-  const sourceNode = nodes.find((n) => n.key === source);
-  const destNode = nodes.find((n) => n.key === dest);
+  const sourcePos = nodePositions[source];
+  const destPos = nodePositions[dest];
 
-  if (!sourceNode || !destNode) {
+  if (!sourcePos || !destPos) {
     return null;
   }
 
-  const curveXOffset = destNode.x - sourceNode.x;
+  const curveXOffset = destPos.x - sourcePos.x;
   return (
     <svg className="absolute w-full h-full pointer-events-none">
       <path
-        d={`M ${sourceNode.x} ${sourceNode.y} C ${
-          sourceNode.x + curveXOffset
-        } ${sourceNode.y}, ${destNode.x - curveXOffset} ${destNode.y}, ${
-          destNode.x
-        } ${destNode.y}`}
+        d={`M ${sourcePos.x} ${sourcePos.y} C ${sourcePos.x + curveXOffset} ${
+          sourcePos.y
+        }, ${destPos.x - curveXOffset} ${destPos.y}, ${destPos.x} ${destPos.y}`}
         stroke="white"
         strokeWidth="2px"
         fill="transparent"

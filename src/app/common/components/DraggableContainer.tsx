@@ -1,6 +1,6 @@
 import { useSetAtom } from "jotai";
 import { PropsWithChildren, useEffect, useState } from "react";
-import { updateNodePositionAtom } from "state";
+import { setNodePositionAtom } from "state";
 import { NodeConnectionPort } from "./NodeConnectionPort";
 interface DragState {
   xOffset: number;
@@ -26,7 +26,7 @@ export function DraggableContainer({
   const [pos, setPos] = useState({ x, y });
   const [dragState, setDragState] = useState<DragState | null>(null);
   const [isMouseOver, setIsMouseOver] = useState(false);
-  const updateNodePosition = useSetAtom(updateNodePositionAtom);
+  const setNodePosition = useSetAtom(setNodePositionAtom);
 
   useEffect(() => {
     const mouseMove = (e: MouseEvent) => {
@@ -47,7 +47,7 @@ export function DraggableContainer({
     const mouseUp = (e: any) => {
       e.stopPropagation();
       setDragState(null);
-      updateNodePosition({ id: nodeId, x: pos.x, y: pos.y });
+      setNodePosition({ key: nodeId, x: pos.x, y: pos.y });
     };
     window.addEventListener("mouseup", mouseUp);
 

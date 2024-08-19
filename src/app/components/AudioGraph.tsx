@@ -5,8 +5,14 @@ import { Connection } from "common/components/Connection";
 import { useSetupHotkeys } from "common/hooks/useSetupHotkeys";
 import { useUpdateAudioGraphOnStateChange } from "common/hooks/useUpdateAudioGraphOnStateChange";
 import { Oscillator } from "components/Oscillator";
-import { useAtom, useAtomValue } from "jotai";
-import { connectionsAtom, cursorModeAtom, nodesAtom } from "state";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import {
+  connectionsAtom,
+  cursorModeAtom,
+  nodePositionsAtom,
+  nodesAtom,
+  setNodePositionAtom,
+} from "state";
 import { uniqueId } from "utils";
 import { CursorModeSelector } from "./CursorModeSelector";
 import { DestinationNode } from "./DestinationNode";
@@ -17,6 +23,8 @@ export function AudioGraph() {
   const [nodes, setNodes] = useAtom(nodesAtom);
   const [cursorMode, setCursorMode] = useAtom(cursorModeAtom);
   const connections = useAtomValue(connectionsAtom);
+  const nodePositions = useAtomValue(nodePositionsAtom);
+  const setNodePosition = useSetAtom(setNodePositionAtom);
   useSetupHotkeys();
   useUpdateAudioGraphOnStateChange();
 
@@ -31,13 +39,13 @@ export function AudioGraph() {
     type: NodeType;
     props: any;
   }) => {
+    const key = uniqueId();
+    setNodePosition({ key, x, y });
     setNodes((nodes) => [
       ...nodes,
       {
-        x,
-        y,
         type,
-        key: uniqueId(),
+        key,
         props,
       },
     ]);
@@ -90,39 +98,23 @@ export function AudioGraph() {
     >
       <ul>
         {nodes.map((nodeState) => {
+          const { x, y } = nodePositions[nodeState.key];
+          const props = {
+            ...nodeState,
+            x,
+            y,
+            key: nodeState.key,
+            nodeId: nodeState.key,
+          };
           switch (nodeState.type) {
             case "osc":
-              return (
-                <Oscillator
-                  {...nodeState}
-                  key={nodeState.key}
-                  nodeId={nodeState.key}
-                />
-              );
+              return <Oscillator {...props} />;
             case "filter":
-              return (
-                <Filter
-                  {...nodeState}
-                  key={nodeState.key}
-                  nodeId={nodeState.key}
-                />
-              );
+              return <Filter {...props} />;
             case "destination":
-              return (
-                <DestinationNode
-                  {...nodeState}
-                  key={nodeState.key}
-                  nodeId={nodeState.key}
-                />
-              );
+              return <DestinationNode {...props} />;
             case "sequencer":
-              return (
-                <SequencerNode
-                  {...nodeState}
-                  key={nodeState.key}
-                  nodeId={nodeState.key}
-                />
-              );
+              return <SequencerNode {...props} />;
           }
         })}
       </ul>

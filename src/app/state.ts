@@ -1,32 +1,29 @@
 import { NodeType } from "audio/audioGraph";
 import { produce } from "immer";
 import { atom } from "jotai";
-import { uniqueId } from "utils";
 
 export interface NodeState {
-  x: number;
-  y: number;
   key: string;
   type: NodeType;
   props?: any;
 }
 
 export const nodesAtom = atom<NodeState[]>([
-  { x: 100, y: 0, key: uniqueId(), type: "destination" },
+  { key: "dest", type: "destination" },
 ]);
 
-export const updateNodePositionAtom = atom(
+export const nodePositionsAtom = atom<{
+  [key: string]: { x: number; y: number };
+}>({ dest: { x: 100, y: 100 } });
+
+export const setNodePositionAtom = atom(
   (get) => null,
-  (get, set, { id, x, y }: { id: string; x: number; y: number }) => {
-    let nodes = get(nodesAtom);
-    const index = nodes.findIndex((n) => n.key === id);
-    if (index === -1) {
-      throw new Error(`Failed to find node with id: ${id}`);
-    }
+  (get, set, { key, x, y }: { key: string; x: number; y: number }) => {
+    let nodes = get(nodePositionsAtom);
     nodes = produce(nodes, (n) => {
-      n[index] = { ...nodes[index], x, y, key: id };
+      n[key] = { x, y };
     });
-    set(nodesAtom, [...nodes]);
+    set(nodePositionsAtom, nodes);
   }
 );
 
