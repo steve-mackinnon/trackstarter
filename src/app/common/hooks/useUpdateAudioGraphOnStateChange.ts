@@ -1,5 +1,6 @@
 import { Node, render } from "audio/audioGraph";
 import { output } from "audio/nodes";
+import { produce } from "immer";
 import { useAtomValue } from "jotai";
 import { useEffect } from "react";
 import { connectionsAtom, nodesAtom } from "state";
@@ -19,7 +20,7 @@ export function useUpdateAudioGraphOnStateChange() {
         // Sequencer nodes should have their destinations set via props, so just
         // push them as a top-level child
         audioGraph.children?.push(root);
-        return;
+        return root;
       }
       const children = connections[root.key!];
       if (children) {
@@ -28,14 +29,17 @@ export function useUpdateAudioGraphOnStateChange() {
           if (!child) {
             throw new Error(`Could not find child with ID ${childId}`);
           }
-          root.children?.push(child);
-          populateAudioGraph(child);
+          root = produce(root, (r) => {
+            r.children = r.children
+              ? [...r.children, populateAudioGraph(child)]
+              : [populateAudioGraph(child)];
+          });
         }
       }
+      return root;
     };
     const audioGraph = output(undefined, []);
     audioGraph.key = destNode.key;
-    populateAudioGraph(audioGraph);
-    render(audioGraph);
+    render(populateAudioGraph(audioGraph));
   }, [nodes, connections]);
 }
