@@ -1,4 +1,4 @@
-import { Node, render } from "audio/audioGraph";
+import { Node, render, SequencerNode } from "audio/audioGraph";
 import { output } from "audio/nodes";
 import { produce } from "immer";
 import { useAtomValue } from "jotai";
@@ -15,11 +15,12 @@ export function useUpdateAudioGraphOnStateChange() {
       throw new Error("Destination node unexpectedly missing");
     }
 
+    const sequencers: SequencerNode[] = [];
     const populateAudioGraph = (root: Node) => {
       if (root.type === "sequencer") {
-        // Sequencer nodes should have their destinations set via props, so just
-        // push them as a top-level child
-        audioGraph.children?.push(root);
+        // Push sequencers to a flat array to be added as top-level children
+        // after the graph is populated.
+        sequencers.push(root);
         return root;
       }
       const children = connections[root.key!];
@@ -31,15 +32,22 @@ export function useUpdateAudioGraphOnStateChange() {
           }
           root = produce(root, (r) => {
             r.children = r.children
-              ? [...r.children, populateAudioGraph(child)]
-              : [populateAudioGraph(child)];
+              ? [...r.children, populateAudioGraph(child as Node)]
+              : [populateAudioGraph(child as Node)];
           });
         }
       }
       return root;
     };
-    const audioGraph = output(undefined, []);
-    audioGraph.key = destNode.key;
-    render(populateAudioGraph(audioGraph));
+    let audioGraph = populateAudioGraph({
+      ...output(undefined, []),
+      key: destNode.key,
+    });
+    // Add sequencers separately
+    audioGraph = produce(audioGraph, (ag) => {
+      ag.children.push(...sequencers);
+    });
+
+    render(audioGraph);
   }, [nodes, connections]);
 }

@@ -5,25 +5,23 @@ import { semitonesToHz } from "./utils";
 const context = new AudioContext();
 
 export type NodeType = "osc" | "filter" | "sequencer" | "destination";
-export interface Node {
-  children?: Node[];
+
+interface BaseNode {
+  children: Node[];
   type: NodeType;
-  props?: any;
   key?: string;
+  audioNode?: AudioNode;
+  sequencerCallbackId?: SequencerCallbackId;
+  parent?: AudioNode;
 }
 
 type SequencerCallbackId = number;
-interface InternalNode extends Node {
-  audioNode: AudioNode | null;
-  sequencerCallbackId: SequencerCallbackId | null;
-  parent: AudioNode | null;
-}
 
 export interface OscProps {
   type: OscillatorType;
   frequency: number;
 }
-export interface OscNode extends Node {
+export interface OscNode extends BaseNode {
   type: "osc";
   props: OscProps;
 }
@@ -33,28 +31,34 @@ export interface FilterProps {
   frequency: number;
   q: number;
 }
-export interface FilterNode extends Node {
+export interface FilterNode extends BaseNode {
   type: "filter";
   props: FilterProps;
+}
+
+export interface DestinationNode extends BaseNode {
+  type: "destination";
+  props?: any;
 }
 
 export interface SequencerProps {
   // Uses Tone's time notation described here:
   // https://github.com/Tonejs/Tone.js/wiki/Time
   rate: string;
-  // numSteps: number;
   transposition: number;
   destinationNodes: string[];
 }
 
-export interface SequencerNode extends Node {
+export interface SequencerNode extends BaseNode {
   type: "sequencer";
   props: SequencerProps;
 }
 
-let currentRoot: InternalNode | null = null;
+export type Node = OscNode | FilterNode | SequencerNode | DestinationNode;
 
-function buildOscNode(node: InternalNode & OscNode): OscillatorNode {
+let currentRoot: DestinationNode | null = null;
+
+function buildOscNode(node: OscNode): OscillatorNode {
   const oscNode = new OscillatorNode(context);
   const oscType = node.props.type;
   oscNode.type = oscType;
@@ -85,9 +89,7 @@ function findNodeWithKey(root: Node, key: string): Node | null {
   return null;
 }
 
-function buildAudioNode(
-  node: InternalNode
-): AudioNode | SequencerCallbackId | null {
+function buildAudioNode(node: Node): AudioNode | SequencerCallbackId | null {
   switch (node.type) {
     case "osc": {
       // Osc nodes are created dynamically when they are triggered by a sequence
@@ -102,17 +104,16 @@ function buildAudioNode(
         if (!currentRoot) {
           return;
         }
-        const seqNode = node as SequencerNode;
-        for (const nodeKey of seqNode.props.destinationNodes) {
+        for (const nodeKey of node.props.destinationNodes) {
           const destNode = findNodeWithKey(currentRoot, nodeKey);
-          if (!destNode) {
+          if (!destNode || destNode.type !== "osc") {
             throw new Error(
               `Unable to connect sequencer to node with key: ${nodeKey}`
             );
           }
-          const osc = buildOscNode(destNode as OscNode & InternalNode);
+          const osc = buildOscNode(destNode);
           osc.frequency.value = semitonesToHz(
-            seqNode.props.transposition,
+            node.props.transposition,
             (destNode as OscNode).props.frequency
           );
           osc.start(time);
@@ -123,10 +124,10 @@ function buildAudioNode(
   }
 }
 
-function deleteNode(node: InternalNode) {
+function deleteNode(node: Node) {
   // Remove existing node
   if (node.children) {
-    node.children.forEach((n) => deleteNode(n as InternalNode));
+    node.children.forEach((n) => deleteNode(n));
   }
   node.audioNode?.disconnect();
   if (node.sequencerCallbackId) {
@@ -158,10 +159,10 @@ function compareNodesAndUpdateGraph({
   currentNode,
   parentNode,
 }: {
-  newNode: InternalNode;
-  currentNode: InternalNode | null;
+  newNode: Node;
+  currentNode: Node | null;
   parentNode: AudioNode | null;
-}): InternalNode {
+}): Node {
   const keyMatch = newNode.key && newNode.key === currentNode?.key;
   const addNode =
     !keyMatch && (!currentNode || newNode.type !== currentNode.type);
@@ -171,7 +172,7 @@ function compareNodesAndUpdateGraph({
       deleteNode(currentNode);
     }
     newNode = produce(newNode, (node) => {
-      node.parent = parentNode;
+      node.parent = parentNode ?? undefined;
     });
     // Build the new audio node
     const nodeOrSequencerId = buildAudioNode(newNode);
@@ -200,9 +201,9 @@ function compareNodesAndUpdateGraph({
 /// Recursively iterates over the children of newNode and currentNode and adds or
 /// removes AudioNodes from the tree to satisfy the requested state.
 function compareChildNodesAndUpdateGraph(
-  newParent: InternalNode,
-  currentParent: InternalNode | null
-): InternalNode {
+  newParent: Node,
+  currentParent: Node | null
+): Node {
   if (newParent.children) {
     newParent.children.forEach((newChild: Node, index: number) => {
       const currentChild =
@@ -213,9 +214,9 @@ function compareChildNodesAndUpdateGraph(
           : null;
       newParent = produce(newParent, (parent) => {
         parent.children![index] = buildAudioGraph({
-          newNode: newChild as InternalNode,
-          currentNode: currentChild as InternalNode | null,
-          parentNode: newParent.audioNode,
+          newNode: newChild,
+          currentNode: currentChild,
+          parentNode: newParent.audioNode ?? null,
         });
       });
     });
@@ -230,7 +231,7 @@ function compareChildNodesAndUpdateGraph(
   ) {
     // Delete any children that are no longer in the child array
     for (let i = numNewChildren; i < currentParent.children!.length; ++i) {
-      deleteNode(currentParent.children![i] as InternalNode);
+      deleteNode(currentParent.children![i]);
     }
   }
   return newParent;
@@ -248,10 +249,10 @@ function buildAudioGraph({
   currentNode,
   parentNode,
 }: {
-  newNode: InternalNode;
-  currentNode: InternalNode | null;
+  newNode: Node;
+  currentNode: Node | null;
   parentNode: AudioNode | null;
-}): InternalNode {
+}): Node {
   newNode = compareNodesAndUpdateGraph({ newNode, currentNode, parentNode });
   // Note: compareAndUpdateChildren() will recursively call buildAudioGraph() for child nodes
   // to build out the entire tree.
@@ -263,7 +264,7 @@ function buildAudioGraph({
 /// the minimum number of WebAudio node operations to fulfill the requested state.
 export function render(newRoot: Node) {
   newRoot = buildAudioGraph({
-    newNode: newRoot as InternalNode,
+    newNode: newRoot,
     currentNode: currentRoot,
     parentNode: null,
   });

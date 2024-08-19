@@ -9,7 +9,7 @@ import {
   SequencerProps,
 } from "./audioGraph";
 
-export function output(props: any, children?: Node[]): Node {
+export function output(props: any, children: Node[]): Node {
   return {
     type: "destination",
     props,
@@ -17,7 +17,7 @@ export function output(props: any, children?: Node[]): Node {
   };
 }
 
-export function osc(props: OscProps, children?: Node[], key?: string): OscNode {
+export function osc(props: OscProps, children: Node[], key?: string): OscNode {
   return {
     type: "osc",
     props,
@@ -26,7 +26,7 @@ export function osc(props: OscProps, children?: Node[], key?: string): OscNode {
   };
 }
 
-export function filter(props: FilterProps, children?: Node[]): FilterNode {
+export function filter(props: FilterProps, children: Node[]): FilterNode {
   return {
     type: "filter",
     props,
@@ -38,6 +38,7 @@ export function sequencer(props: SequencerProps): SequencerNode {
   return {
     type: "sequencer",
     props,
+    children: [],
   };
 }
 
