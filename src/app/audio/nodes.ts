@@ -53,3 +53,37 @@ export function canNodesConnect(sourceType: NodeType, destType: NodeType) {
       return false;
   }
 }
+
+export function defaultOscProps(): OscProps {
+  return {
+    type: "sawtooth",
+    frequency: 200,
+  };
+}
+
+export function defaultFilterProps(): FilterProps {
+  return {
+    type: "lowpass",
+    frequency: 900,
+    q: 0.707,
+  };
+}
+
+export function defaultSequencerProps(): SequencerProps {
+  return {
+    rate: "16n",
+    transposition: 0,
+    destinationNodes: [],
+  };
+}
+
+export function defaultPropsForType(type: NodeType) {
+  switch (type) {
+    case "filter":
+      return defaultFilterProps();
+    case "osc":
+      return defaultOscProps();
+    case "sequencer":
+      return defaultSequencerProps();
+  }
+}

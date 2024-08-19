@@ -1,6 +1,7 @@
 "use client";
 
 import { NodeType } from "audio/audioGraph";
+import { defaultPropsForType } from "audio/nodes";
 import { Connection } from "common/components/Connection";
 import { useSetupHotkeys } from "common/hooks/useSetupHotkeys";
 import { useUpdateAudioGraphOnStateChange } from "common/hooks/useUpdateAudioGraphOnStateChange";
@@ -81,12 +82,7 @@ export function AudioGraph() {
           return "sequencer";
       }
     })();
-    let props: any =
-      type === "sequencer" ? { destinationNodes: [], rate: "16n" } : {};
-    if (type === "osc") {
-      props = { frequency: 200 };
-    }
-    addNode({ x: e.pageX, y: e.pageY, type, props });
+    addNode({ x: e.pageX, y: e.pageY, type, props: defaultPropsForType(type) });
     setCursorMode("selection");
   };
 
