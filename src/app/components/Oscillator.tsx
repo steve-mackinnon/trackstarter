@@ -1,8 +1,17 @@
 import { DraggableContainer } from "common/components/DraggableContainer";
+import { useSetAtom } from "jotai";
 import { useState } from "react";
+import { updateNodeStateAtom } from "state";
 
-export function Oscillator(props: { x: number; y: number; nodeId: string }) {
-  const [frequency, setFrequency] = useState(200);
+export function Oscillator(props: {
+  x: number;
+  y: number;
+  nodeId: string;
+  props: any;
+}) {
+  // const [frequency, setFrequency] = useState(200);
+  const updateNodeState = useSetAtom(updateNodeStateAtom);
+
   const [type, setType] = useState<OscillatorType>("sine");
 
   return (
@@ -13,8 +22,18 @@ export function Oscillator(props: { x: number; y: number; nodeId: string }) {
       <input
         id="frequencySlider"
         type="range"
-        value={frequency}
-        onChange={(e) => setFrequency(Number.parseFloat(e.target.value))}
+        value={props.props.frequency}
+        min={20}
+        max={1000}
+        onChange={(e) =>
+          updateNodeState({
+            key: props.nodeId,
+            props: {
+              ...props.props,
+              frequency: Number.parseFloat(e.target.value),
+            },
+          })
+        }
         onMouseDown={(e) => {
           // Prevents drag from starting
           e.stopPropagation();

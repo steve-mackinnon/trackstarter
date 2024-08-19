@@ -60,3 +60,18 @@ export const addConnectionAtom = atom(
     set(connectionsAtom, updated);
   }
 );
+
+export const updateNodeStateAtom = atom(
+  (get) => null,
+  (get, set, { key, props }: { key: string; props: any }) => {
+    let nodes = get(nodesAtom);
+    const nodeIndex = nodes.findIndex((n) => n.key === key);
+    if (nodeIndex === -1) {
+      throw new Error(`Unable to find node with key ${key}`);
+    }
+    nodes = produce(nodes, (n) => {
+      n[nodeIndex].props = { ...props };
+    });
+    set(nodesAtom, nodes);
+  }
+);
