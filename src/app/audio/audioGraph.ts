@@ -209,7 +209,7 @@ function compareChildNodesAndUpdateGraph(
       const currentChild =
         currentParent &&
         currentParent.children &&
-        currentParent.children.length < index
+        currentParent.children.length > index
           ? currentParent.children[index]
           : null;
       newParent = produce(newParent, (parent) => {
