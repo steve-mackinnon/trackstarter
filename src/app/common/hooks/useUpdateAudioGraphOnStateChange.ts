@@ -14,25 +14,22 @@ export function useUpdateAudioGraphOnStateChange() {
       throw new Error("Destination node unexpectedly missing");
     }
 
-    const populateAudioGraph = (audioGraph: Node) => {
-      const children = connections[audioGraph.key!];
+    const populateAudioGraph = (root: Node) => {
+      if (root.type === "sequencer") {
+        // Sequencer nodes should have their destinations set via props, so just
+        // push them as a top-level child
+        audioGraph.children?.push(root);
+        return;
+      }
+      const children = connections[root.key!];
       if (children) {
-        if (audioGraph.type === "sequencer") {
-          // Special case sequencer which doesn't follow the same children pattern
-          // as other nodes.
-          audioGraph.props.destinationNodes = [];
-          for (const childId of children) {
-            audioGraph.props.destinationNodes.push(childId);
+        for (const childId of children) {
+          const child = nodes.find((n) => n.key === childId);
+          if (!child) {
+            throw new Error(`Could not find child with ID ${childId}`);
           }
-        } else {
-          for (const childId of children) {
-            const child = nodes.find((n) => n.key === childId);
-            if (!child) {
-              throw new Error(`Could not find child with ID ${childId}`);
-            }
-            audioGraph.children?.push(child);
-            populateAudioGraph(child);
-          }
+          root.children?.push(child);
+          populateAudioGraph(child);
         }
       }
     };

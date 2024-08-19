@@ -54,8 +54,6 @@ export interface SequencerNode extends Node {
 
 let currentRoot: InternalNode | null = null;
 
-let keyedNodes = new Map<string, InternalNode>();
-
 function buildOscNode(node: InternalNode & OscNode): OscillatorNode {
   const oscNode = new OscillatorNode(context);
   const oscType = node.props.type;
@@ -72,6 +70,21 @@ function buildOscNode(node: InternalNode & OscNode): OscillatorNode {
   return oscNode;
 }
 
+function findNodeWithKey(root: Node, key: string): Node | null {
+  if (root.key === key) {
+    return root;
+  }
+  if (root.children) {
+    for (const child of root.children) {
+      const node = findNodeWithKey(child, key);
+      if (node) {
+        return node;
+      }
+    }
+  }
+  return null;
+}
+
 function buildAudioNode(
   node: InternalNode
 ): AudioNode | SequencerCallbackId | null {
@@ -86,9 +99,12 @@ function buildAudioNode(
       return context.destination;
     case "sequencer": {
       return Tone.getTransport().scheduleRepeat((time) => {
+        if (!currentRoot) {
+          return;
+        }
         const seqNode = node as SequencerNode;
         for (const nodeKey of seqNode.props.destinationNodes) {
-          const destNode = keyedNodes.get(nodeKey);
+          const destNode = findNodeWithKey(currentRoot, nodeKey);
           if (!destNode) {
             throw new Error(
               `Unable to connect sequencer to node with key: ${nodeKey}`
@@ -108,10 +124,6 @@ function buildAudioNode(
 }
 
 function deleteNode(node: InternalNode) {
-  if (node.key) {
-    keyedNodes.delete(node.key);
-  }
-
   // Remove existing node
   if (node.children) {
     node.children.forEach((n) => deleteNode(n as InternalNode));
@@ -158,9 +170,6 @@ function compareNodesAndUpdateGraph({
       // Remove existing node
       deleteNode(currentNode);
     }
-    if (newNode.key) {
-      keyedNodes.set(newNode.key, newNode);
-    }
     newNode = produce(newNode, (node) => {
       node.parent = parentNode;
     });
@@ -180,6 +189,7 @@ function compareNodesAndUpdateGraph({
     }
   } else {
     newNode = produce(newNode, (node) => {
+      node.parent = currentNode.parent;
       node.audioNode = currentNode.audioNode;
     });
   }
@@ -192,7 +202,7 @@ function compareNodesAndUpdateGraph({
 function compareChildNodesAndUpdateGraph(
   newParent: InternalNode,
   currentParent: InternalNode | null
-) {
+): InternalNode {
   if (newParent.children) {
     newParent.children.forEach((newChild: Node, index: number) => {
       const currentChild =
@@ -201,10 +211,12 @@ function compareChildNodesAndUpdateGraph(
         currentParent.children.length < index
           ? currentParent.children[index]
           : null;
-      buildAudioGraph({
-        newNode: newChild as InternalNode,
-        currentNode: currentChild as InternalNode | null,
-        parentNode: newParent.audioNode,
+      newParent = produce(newParent, (parent) => {
+        parent.children![index] = buildAudioGraph({
+          newNode: newChild as InternalNode,
+          currentNode: currentChild as InternalNode | null,
+          parentNode: newParent.audioNode,
+        });
       });
     });
   }
@@ -221,6 +233,7 @@ function compareChildNodesAndUpdateGraph(
       deleteNode(currentParent.children![i] as InternalNode);
     }
   }
+  return newParent;
 }
 
 /// Recursively builds a WebAudio graph by diffing the new tree (rooted at newNode) with
@@ -238,18 +251,18 @@ function buildAudioGraph({
   newNode: InternalNode;
   currentNode: InternalNode | null;
   parentNode: AudioNode | null;
-}): AudioNode | null {
+}): InternalNode {
   newNode = compareNodesAndUpdateGraph({ newNode, currentNode, parentNode });
   // Note: compareAndUpdateChildren() will recursively call buildAudioGraph() for child nodes
   // to build out the entire tree.
-  compareChildNodesAndUpdateGraph(newNode, currentNode);
-  return newNode.audioNode;
+  newNode = compareChildNodesAndUpdateGraph(newNode, currentNode);
+  return newNode;
 }
 
 /// Renders the tree rooted in `newRoot` by comparing it to the current tree and applying
 /// the minimum number of WebAudio node operations to fulfill the requested state.
 export function render(newRoot: Node) {
-  buildAudioGraph({
+  newRoot = buildAudioGraph({
     newNode: newRoot as InternalNode,
     currentNode: currentRoot,
     parentNode: null,

@@ -24,10 +24,12 @@ export function AudioGraph() {
     x,
     y,
     type,
+    props,
   }: {
     x: number;
     y: number;
     type: NodeType;
+    props: any;
   }) => {
     setNodes((nodes) => [
       ...nodes,
@@ -36,6 +38,7 @@ export function AudioGraph() {
         y,
         type,
         key: uniqueId(),
+        props,
       },
     ]);
   };
@@ -70,7 +73,12 @@ export function AudioGraph() {
           return "sequencer";
       }
     })();
-    addNode({ x: e.pageX, y: e.pageY, type });
+    let props: any =
+      type === "sequencer" ? { destinationNodes: [], rate: "16n" } : {};
+    if (type === "osc") {
+      props = { frequency: 200 };
+    }
+    addNode({ x: e.pageX, y: e.pageY, type, props });
     setCursorMode("selection");
   };
 

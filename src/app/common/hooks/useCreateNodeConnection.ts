@@ -1,6 +1,7 @@
 import { NodeType } from "audio/audioGraph";
 import { canNodesConnect } from "audio/nodes";
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { produce } from "immer";
+import { useAtom, useSetAtom } from "jotai";
 import {
   addConnectionAtom,
   connectionSourceNodeAtom,
@@ -15,7 +16,7 @@ export function useCreateNodeConnection() {
   const [_, addConnection] = useAtom(addConnectionAtom);
   const setCursorMode = useSetAtom(cursorModeAtom);
 
-  const nodes = useAtomValue(nodesAtom);
+  const [nodes, setNodes] = useAtom(nodesAtom);
   const getNodeType = (id: string): NodeType => {
     const node = nodes.find((n) => n.key === id);
     if (!node) {
@@ -27,7 +28,23 @@ export function useCreateNodeConnection() {
     if (!connectionSource || connectionSource === destNode) {
       return false;
     }
-    if (canNodesConnect(getNodeType(connectionSource), getNodeType(destNode))) {
+    const sourceType = getNodeType(connectionSource);
+    if (canNodesConnect(sourceType, getNodeType(destNode))) {
+      if (sourceType === "sequencer") {
+        // For sequencer nodes, connections are represented via destinationNodes prop
+        const seqNodeIndex = nodes.findIndex((n) => n.key === connectionSource);
+        if (seqNodeIndex === -1) {
+          throw new Error("Failed to find sequencer node");
+        }
+        const newNodes = produce(nodes, (n) => {
+          if (n[seqNodeIndex].props.destinationNodes) {
+            n[seqNodeIndex].props.destinationNodes.push(destNode);
+          } else {
+            n[seqNodeIndex].props.destinationNodes = [destNode];
+          }
+        });
+        setNodes(newNodes);
+      }
       addConnection({ sourceId: connectionSource, destId: destNode });
       setConnectionSource(null);
       setCursorMode("selection");
