@@ -5,11 +5,11 @@ import { atom } from "jotai";
 export interface NodeState {
   key: string;
   type: NodeType;
-  props?: any;
+  props: any;
 }
 
 export const nodesAtom = atom<NodeState[]>([
-  { key: "dest", type: "destination" },
+  { key: "dest", type: "destination", props: undefined },
 ]);
 
 export const nodePositionsAtom = atom<{

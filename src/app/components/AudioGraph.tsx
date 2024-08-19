@@ -19,6 +19,7 @@ import { CursorModeSelector } from "./CursorModeSelector";
 import { DestinationNode } from "./DestinationNode";
 import { Filter } from "./Filter";
 import { SequencerNode } from "./SequencerNode";
+import { TransportButton } from "./TransportButton";
 
 export function AudioGraph() {
   const [nodes, setNodes] = useAtom(nodesAtom);
@@ -92,6 +93,7 @@ export function AudioGraph() {
       style={{ cursor }}
       onMouseDown={(e) => handleMouseDown(e)}
     >
+      <TransportButton />
       <ul>
         {nodes.map((nodeState) => {
           const { x, y } = nodePositions[nodeState.key];

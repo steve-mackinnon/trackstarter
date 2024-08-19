@@ -269,9 +269,6 @@ export function render(newRoot: Node) {
     parentNode: null,
   });
   currentRoot = produce(currentRoot, () => newRoot);
-  if (context.state !== "running") {
-    start();
-  }
 }
 
 export function start() {
@@ -279,4 +276,8 @@ export function start() {
   Tone.getTransport().loop = true;
   Tone.getTransport().setLoopPoints("1:1:1", "17:1:1");
   Tone.getTransport().start();
+}
+
+export function stop() {
+  Tone.getTransport().stop();
 }
