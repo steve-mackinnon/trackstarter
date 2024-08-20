@@ -1,4 +1,5 @@
-import Image from "next/image";
+"use strict";
+
 import { AudioGraph } from "./components/AudioGraph";
 
 export default function Home() {
