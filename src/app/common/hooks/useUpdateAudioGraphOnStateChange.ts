@@ -15,12 +15,12 @@ export function useUpdateAudioGraphOnStateChange() {
       throw new Error("Destination node unexpectedly missing");
     }
 
-    const sequencers: SequencerNode[] = [];
+    const sequencers: Set<SequencerNode> = new Set();
     const populateAudioGraph = (root: Node) => {
       if (root.type === "sequencer") {
         // Push sequencers to a flat array to be added as top-level children
         // after the graph is populated.
-        sequencers.push(root);
+        sequencers.add(root);
         return root;
       }
       const children = connections[root.key!];
@@ -45,7 +45,12 @@ export function useUpdateAudioGraphOnStateChange() {
     });
     // Add sequencers separately
     audioGraph = produce(audioGraph, (ag) => {
-      ag.children.push(...sequencers);
+      const seqs = Array.from(sequencers);
+      if (!ag.children) {
+        ag.children = [...seqs];
+      } else {
+        ag.children.push(...seqs);
+      }
     });
 
     render(audioGraph);
