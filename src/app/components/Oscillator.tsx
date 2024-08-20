@@ -1,18 +1,15 @@
+import { OscProps } from "audio/audioGraph";
 import { DraggableContainer } from "common/components/DraggableContainer";
 import { useSetAtom } from "jotai";
-import { useState } from "react";
 import { updateNodeStateAtom } from "state";
 
 export function Oscillator(props: {
   x: number;
   y: number;
   nodeId: string;
-  props: any;
+  props: OscProps;
 }) {
-  // const [frequency, setFrequency] = useState(200);
   const updateNodeState = useSetAtom(updateNodeStateAtom);
-
-  const [type, setType] = useState<OscillatorType>("sine");
 
   return (
     <DraggableContainer {...props} label="Oscillator" hasConnectionPort={true}>
@@ -46,8 +43,16 @@ export function Oscillator(props: {
         className="text-black"
         name="shape"
         id="shape"
-        onChange={(e) => setType(e.target.value as OscillatorType)}
-        value={type}
+        onChange={(e) => {
+          updateNodeState({
+            key: props.nodeId,
+            props: {
+              ...props.props,
+              type: e.target.value as OscillatorType,
+            },
+          });
+        }}
+        value={props.props.type}
       >
         <option value="sine">Sine</option>
         <option value="sawtooth">Saw</option>

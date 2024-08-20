@@ -1,16 +1,8 @@
-import { NodeType } from "audio/audioGraph";
+import { Node } from "audio/audioGraph";
 import { produce } from "immer";
 import { atom } from "jotai";
 
-export interface NodeState {
-  key: string;
-  type: NodeType;
-  props: any;
-}
-
-export const nodesAtom = atom<NodeState[]>([
-  { key: "dest", type: "destination", props: undefined },
-]);
+export const nodesAtom = atom<Node[]>([{ key: "dest", type: "destination" }]);
 
 export const nodePositionsAtom = atom<{
   [key: string]: { x: number; y: number };

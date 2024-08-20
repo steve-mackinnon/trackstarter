@@ -7,7 +7,7 @@ const context = new AudioContext();
 export type NodeType = "osc" | "filter" | "sequencer" | "destination";
 
 interface BaseNode {
-  children: Node[];
+  children?: Node[];
   type: NodeType;
   key?: string;
   audioNode?: AudioNode;

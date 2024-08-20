@@ -96,13 +96,16 @@ export function AudioGraph() {
       <TransportButton />
       <ul>
         {nodes.map((nodeState) => {
-          const { x, y } = nodePositions[nodeState.key];
+          if (!nodeState.key) {
+            throw new Error("Missing key for node");
+          }
+          const { x, y } = nodePositions[nodeState.key!];
           const props = {
-            ...nodeState,
             x,
             y,
             key: nodeState.key,
             nodeId: nodeState.key,
+            props: nodeState.props,
           };
           switch (nodeState.type) {
             case "osc":
