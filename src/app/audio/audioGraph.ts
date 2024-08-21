@@ -56,6 +56,28 @@ export interface SequencerNode extends BaseNode {
 
 export type Node = OscNode | FilterNode | SequencerNode | DestinationNode;
 
+/// Renders the tree rooted in `newRoot` by comparing it to the current tree and applying
+/// the minimum number of WebAudio node operations to fulfill the requested state.
+export function render(newRoot: Node) {
+  newRoot = buildAudioGraph({
+    newNode: newRoot,
+    currentNode: currentRoot,
+    parentNode: null,
+  });
+  currentRoot = produce(currentRoot, () => newRoot);
+}
+
+export function start() {
+  Tone.getTransport().bpm.value = 128;
+  Tone.getTransport().loop = true;
+  Tone.getTransport().setLoopPoints("1:1:1", "17:1:1");
+  Tone.getTransport().start();
+}
+
+export function stop() {
+  Tone.getTransport().stop();
+}
+
 let currentRoot: DestinationNode | null = null;
 
 function buildOscNode(node: OscNode): OscillatorNode {
@@ -66,7 +88,7 @@ function buildOscNode(node: OscNode): OscillatorNode {
   const dest = node.parent;
   if (!dest) {
     throw new Error(
-      "Missing parent node to connect to. Some audio will not be generated"
+      "Missing parent node to connect to. Some audio will not be generated",
     );
   } else {
     oscNode.connect(dest);
@@ -100,26 +122,29 @@ function buildAudioNode(node: Node): AudioNode | SequencerCallbackId | null {
     case "destination":
       return context.destination;
     case "sequencer": {
-      return Tone.getTransport().scheduleRepeat((time) => {
-        if (!currentRoot) {
-          return;
-        }
-        for (const nodeKey of node.props.destinationNodes) {
-          const destNode = findNodeWithKey(currentRoot, nodeKey);
-          if (!destNode || destNode.type !== "osc") {
-            throw new Error(
-              `Unable to connect sequencer to node with key: ${nodeKey}`
-            );
+      return Tone.getTransport().scheduleRepeat(
+        (time) => {
+          if (!currentRoot) {
+            return;
           }
-          const osc = buildOscNode(destNode);
-          osc.frequency.value = semitonesToHz(
-            node.props.transposition,
-            (destNode as OscNode).props.frequency
-          );
-          osc.start(time);
-          osc.stop(time + 0.1);
-        }
-      }, (node as SequencerNode).props.rate);
+          for (const nodeKey of node.props.destinationNodes) {
+            const destNode = findNodeWithKey(currentRoot, nodeKey);
+            if (!destNode || destNode.type !== "osc") {
+              throw new Error(
+                `Unable to connect sequencer to node with key: ${nodeKey}`,
+              );
+            }
+            const osc = buildOscNode(destNode);
+            osc.frequency.value = semitonesToHz(
+              node.props.transposition,
+              (destNode as OscNode).props.frequency,
+            );
+            osc.start(time);
+            osc.stop(time + 0.1);
+          }
+        },
+        (node as SequencerNode).props.rate,
+      );
     }
   }
 }
@@ -202,7 +227,7 @@ function compareNodesAndUpdateGraph({
 /// removes AudioNodes from the tree to satisfy the requested state.
 function compareChildNodesAndUpdateGraph(
   newParent: Node,
-  currentParent: Node | null
+  currentParent: Node | null,
 ): Node {
   if (newParent.children) {
     newParent.children.forEach((newChild: Node, index: number) => {
@@ -258,26 +283,4 @@ function buildAudioGraph({
   // to build out the entire tree.
   newNode = compareChildNodesAndUpdateGraph(newNode, currentNode);
   return newNode;
-}
-
-/// Renders the tree rooted in `newRoot` by comparing it to the current tree and applying
-/// the minimum number of WebAudio node operations to fulfill the requested state.
-export function render(newRoot: Node) {
-  newRoot = buildAudioGraph({
-    newNode: newRoot,
-    currentNode: currentRoot,
-    parentNode: null,
-  });
-  currentRoot = produce(currentRoot, () => newRoot);
-}
-
-export function start() {
-  Tone.getTransport().bpm.value = 128;
-  Tone.getTransport().loop = true;
-  Tone.getTransport().setLoopPoints("1:1:1", "17:1:1");
-  Tone.getTransport().start();
-}
-
-export function stop() {
-  Tone.getTransport().stop();
 }
