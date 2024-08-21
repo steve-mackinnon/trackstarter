@@ -1,8 +1,11 @@
-import { produce } from "immer";
+import { produce, setAutoFreeze } from "immer";
 import * as Tone from "tone";
 import { semitonesToHz } from "./utils";
 
 const context = new AudioContext();
+// Disable auto freezing in immer so we can mutate the current state when
+// setting props
+setAutoFreeze(false);
 
 export type NodeType = "osc" | "filter" | "sequencer" | "destination";
 
@@ -76,6 +79,35 @@ export function start() {
 
 export function stop() {
   Tone.getTransport().stop();
+}
+
+type NodePropsMap = {
+  osc: OscProps;
+  filter: FilterProps;
+  sequencer: SequencerProps;
+  destination: any;
+};
+
+export function setProperty<T extends keyof NodePropsMap>(
+  nodeKey: string,
+  nodeType: T,
+  propId: keyof NodePropsMap[T],
+  value: NodePropsMap[T][typeof propId],
+) {
+  if (!currentRoot) {
+    throw new Error(`Attempting to set property before render() was called`);
+  }
+  const node = findNodeWithKey(currentRoot, nodeKey);
+  if (!node) {
+    throw new Error(`Failed to find node with key ${nodeKey}`);
+  }
+  if (node.type === nodeType) {
+    node.props[propId] = value;
+  } else {
+    throw new Error(
+      `Node types were incompatible ${nodeType} and ${node.type}`,
+    );
+  }
 }
 
 let currentRoot: DestinationNode | null = null;

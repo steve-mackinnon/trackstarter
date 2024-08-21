@@ -1,7 +1,6 @@
-import { OscProps } from "audio/audioGraph";
+import { OscProps, setProperty } from "audio/audioGraph";
 import { DraggableContainer } from "common/components/DraggableContainer";
-import { useSetAtom } from "jotai";
-import { updateNodeStateAtom } from "state";
+import { useState } from "react";
 
 export function Oscillator(props: {
   x: number;
@@ -9,7 +8,8 @@ export function Oscillator(props: {
   nodeId: string;
   props: OscProps;
 }) {
-  const updateNodeState = useSetAtom(updateNodeStateAtom);
+  const [frequency, setFrequency] = useState(props.props.frequency);
+  const [type, setType] = useState(props.props.type);
 
   return (
     <DraggableContainer {...props} label="Oscillator" hasConnectionPort={true}>
@@ -19,18 +19,14 @@ export function Oscillator(props: {
       <input
         id="frequencySlider"
         type="range"
-        value={props.props.frequency}
+        value={frequency}
         min={20}
         max={1000}
-        onChange={(e) =>
-          updateNodeState({
-            key: props.nodeId,
-            props: {
-              ...props.props,
-              frequency: Number.parseFloat(e.target.value),
-            },
-          })
-        }
+        onChange={(e) => {
+          const freq = Number.parseFloat(e.target.value);
+          setFrequency(freq);
+          setProperty(props.nodeId, "osc", "frequency", freq);
+        }}
         onMouseDown={(e) => {
           // Prevents drag from starting
           e.stopPropagation();
@@ -44,13 +40,9 @@ export function Oscillator(props: {
         name="shape"
         id="shape"
         onChange={(e) => {
-          updateNodeState({
-            key: props.nodeId,
-            props: {
-              ...props.props,
-              type: e.target.value as OscillatorType,
-            },
-          });
+          const type = e.target.value as OscillatorType;
+          setType(type);
+          setProperty(props.nodeId, "osc", "type", type);
         }}
         value={props.props.type}
       >
