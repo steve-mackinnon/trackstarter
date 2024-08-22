@@ -1,7 +1,8 @@
 import { useSetAtom } from "jotai";
 import { PropsWithChildren, useEffect, useState } from "react";
-import { setNodePositionAtom } from "state";
+import { removeNodeAtom, setNodePositionAtom } from "state";
 import { NodeConnectionPort } from "./NodeConnectionPort";
+import { X } from "lucide-react";
 interface DragState {
   xOffset: number;
   yOffset: number;
@@ -14,6 +15,22 @@ export interface DraggableContainerProps {
   hasConnectionPort: boolean;
   nodeId: string;
   className?: string;
+  deletable?: boolean;
+}
+
+export function RemoveButton({ nodeId }: { nodeId: string }) {
+  const removeNode = useSetAtom(removeNodeAtom);
+
+  return (
+    <button
+      className="absolute right-2 top-1"
+      onClick={(_) => {
+        removeNode(nodeId);
+      }}
+    >
+      <X />
+    </button>
+  );
 }
 
 export function DraggableContainer({
@@ -24,6 +41,7 @@ export function DraggableContainer({
   children,
   nodeId,
   className,
+  deletable,
 }: PropsWithChildren<DraggableContainerProps>) {
   const [pos, setPos] = useState({ x, y });
   const [dragState, setDragState] = useState<DragState | null>(null);
@@ -90,7 +108,10 @@ export function DraggableContainer({
       onMouseEnter={() => setIsMouseOver(true)}
       onMouseLeave={() => setIsMouseOver(false)}
     >
-      <label className="pb-1 select-none font-bold">{label}</label>
+      <label className="pb-1 select-none font-bold py-1">{label}</label>
+      {(deletable === undefined || deletable === true) && (
+        <RemoveButton nodeId={nodeId} />
+      )}
       {children}
       {hasConnectionPort && <NodeConnectionPort nodeId={nodeId} />}
     </div>

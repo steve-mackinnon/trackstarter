@@ -113,7 +113,7 @@ export function AudioGraph() {
             case "filter":
               return <Filter {...props} />;
             case "destination":
-              return <DestinationNode {...props} />;
+              return <DestinationNode {...props} deletable={false} />;
             case "sequencer":
               return <SequencerNode {...props} />;
           }
@@ -127,7 +127,7 @@ export function AudioGraph() {
               dest={destNodeId}
               key={`${nodeId}-${destNodeId}`}
             />
-          )),
+          ))
         )}
       </ul>
       <CursorModeSelector className="absolute left-1/2 bottom-10" />
