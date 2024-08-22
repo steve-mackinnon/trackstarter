@@ -1,8 +1,11 @@
 import { produce, setAutoFreeze } from "immer";
 import * as Tone from "tone";
-import { semitonesToHz } from "./utils";
+import { Sequencer } from "./sequencer";
 
 const context = new AudioContext();
+
+const sequencerStepCountMap = new Map<string, number>();
+
 // Disable auto freezing in immer so we can mutate the current state when
 // setting props
 setAutoFreeze(false);
@@ -13,16 +16,15 @@ interface BaseNode {
   children?: Node[];
   type: NodeType;
   key?: string;
-  sequencerCallbackId?: SequencerCallbackId;
+  sequencer?: Sequencer;
   parent?: AudioNode;
 }
-
-type SequencerCallbackId = number;
 
 export interface OscProps {
   type: OscillatorType;
   frequency: number;
 }
+
 export interface OscNode extends BaseNode {
   type: "osc";
   props: OscProps;
@@ -52,6 +54,8 @@ export interface SequencerProps {
   rate: string;
   transposition: number;
   destinationNodes: string[];
+  length: number;
+  steps: number;
 }
 
 export interface SequencerNode extends BaseNode {
@@ -133,7 +137,10 @@ function buildOscNode(node: OscNode): OscillatorNode {
   return oscNode;
 }
 
-function findNodeWithKey(root: Node, key: string): Node | null {
+function findNodeWithKey(root: Node | null, key: string): Node | null {
+  if (!root) {
+    return null;
+  }
   if (root.key === key) {
     return root;
   }
@@ -148,7 +155,7 @@ function findNodeWithKey(root: Node, key: string): Node | null {
   return null;
 }
 
-function buildAudioNode(node: Node): AudioNode | SequencerCallbackId | null {
+function buildAudioNode(node: Node): AudioNode | Sequencer | null {
   switch (node.type) {
     case "osc": {
       // Osc nodes are created dynamically when they are triggered by a sequence
@@ -160,28 +167,10 @@ function buildAudioNode(node: Node): AudioNode | SequencerCallbackId | null {
     case "destination":
       return context.destination;
     case "sequencer": {
-      return Tone.getTransport().scheduleRepeat(
-        (time) => {
-          if (!currentRoot) {
-            return;
-          }
-          for (const nodeKey of node.props.destinationNodes) {
-            const destNode = findNodeWithKey(currentRoot, nodeKey);
-            if (!destNode || destNode.type !== "osc") {
-              throw new Error(
-                `Unable to connect sequencer to node with key: ${nodeKey}`,
-              );
-            }
-            const osc = buildOscNode(destNode);
-            osc.frequency.value = semitonesToHz(
-              node.props.transposition,
-              (destNode as OscNode).props.frequency,
-            );
-            osc.start(time);
-            osc.stop(time + 0.1);
-          }
-        },
-        (node as SequencerNode).props.rate,
+      return new Sequencer(
+        node,
+        (key) => findNodeWithKey(currentRoot, key),
+        (dest) => buildOscNode(dest as OscNode),
       );
     }
   }
@@ -193,9 +182,7 @@ function deleteNode(node: Node) {
     node.children.forEach((n) => deleteNode(n));
   }
   node.audioNode?.disconnect();
-  if (node.sequencerCallbackId) {
-    Tone.getTransport().clear(node.sequencerCallbackId);
-  }
+  node.sequencer?.stop();
 }
 
 function applyPropUpdates(newNode: Node, currentNode: Node | null) {
@@ -238,18 +225,18 @@ function compareNodesAndUpdateGraph({
       node.parent = parentNode ?? undefined;
     });
     // Build the new audio node
-    const nodeOrSequencerId = buildAudioNode(newNode);
-    if (nodeOrSequencerId instanceof AudioNode) {
+    const nodeOrSequencer = buildAudioNode(newNode);
+    if (nodeOrSequencer instanceof AudioNode) {
       newNode = produce(newNode, (node) => {
-        node.audioNode = nodeOrSequencerId;
+        node.audioNode = nodeOrSequencer;
       });
       applyNodeProps(newNode);
       if (parentNode) {
         newNode.audioNode?.connect(parentNode);
       }
-    } else if (typeof nodeOrSequencerId === "number") {
+    } else if (nodeOrSequencer instanceof Sequencer) {
       newNode = produce(newNode, (node) => {
-        node.sequencerCallbackId = nodeOrSequencerId;
+        node.sequencer = nodeOrSequencer;
       });
     }
   } else {

@@ -75,6 +75,8 @@ export function defaultSequencerProps(): SequencerProps {
     rate: "16n",
     transposition: 0,
     destinationNodes: [],
+    steps: 3,
+    length: 16,
   };
 }
 

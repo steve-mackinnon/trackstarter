@@ -13,6 +13,7 @@ export interface DraggableContainerProps {
   label: string;
   hasConnectionPort: boolean;
   nodeId: string;
+  className?: string;
 }
 
 export function DraggableContainer({
@@ -22,6 +23,7 @@ export function DraggableContainer({
   hasConnectionPort,
   children,
   nodeId,
+  className,
 }: PropsWithChildren<DraggableContainerProps>) {
   const [pos, setPos] = useState({ x, y });
   const [dragState, setDragState] = useState<DragState | null>(null);
@@ -73,7 +75,10 @@ export function DraggableContainer({
         boxSizing: "border-box",
         background: isMouseOver ? "darkturquoise" : "slategray",
       }}
-      className={`absolute flex flex-col bg-gray-500 pb-2 items-center rounded-2xl`}
+      className={
+        (className ? className : "") +
+        ` absolute flex flex-col bg-gray-500 pb-2 items-center rounded-2xl`
+      }
       onMouseDown={(e) => {
         e.stopPropagation();
         setDragState({
