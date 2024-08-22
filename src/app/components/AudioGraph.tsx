@@ -93,7 +93,7 @@ export function AudioGraph() {
       style={{ cursor }}
       onMouseDown={(e) => handleMouseDown(e)}
     >
-      <TransportButton />
+      <TransportButton className="absolute left-1/2 top-5 w-12 h-12" />
       <ul>
         {nodes.map((nodeState) => {
           if (!nodeState.key) {
@@ -127,7 +127,7 @@ export function AudioGraph() {
               dest={destNodeId}
               key={`${nodeId}-${destNodeId}`}
             />
-          ))
+          )),
         )}
       </ul>
       <CursorModeSelector className="absolute left-1/2 bottom-10" />
