@@ -13,7 +13,6 @@ interface BaseNode {
   children?: Node[];
   type: NodeType;
   key?: string;
-  audioNode?: AudioNode;
   sequencerCallbackId?: SequencerCallbackId;
   parent?: AudioNode;
 }
@@ -27,21 +26,24 @@ export interface OscProps {
 export interface OscNode extends BaseNode {
   type: "osc";
   props: OscProps;
+  audioNode?: OscillatorNode;
 }
 
 export interface FilterProps {
-  type: "lowpass" | "highpass";
+  type: BiquadFilterType;
   frequency: number;
   q: number;
 }
 export interface FilterNode extends BaseNode {
   type: "filter";
   props: FilterProps;
+  audioNode?: BiquadFilterNode;
 }
 
 export interface DestinationNode extends BaseNode {
   type: "destination";
-  props?: any;
+  props: any;
+  audioNode?: never;
 }
 
 export interface SequencerProps {
@@ -55,6 +57,7 @@ export interface SequencerProps {
 export interface SequencerNode extends BaseNode {
   type: "sequencer";
   props: SequencerProps;
+  audioNode?: any;
 }
 
 export type Node = OscNode | FilterNode | SequencerNode | DestinationNode;
@@ -81,19 +84,12 @@ export function stop() {
   Tone.getTransport().stop();
 }
 
-type NodePropsMap = {
-  osc: OscProps;
-  filter: FilterProps;
-  sequencer: SequencerProps;
-  destination: any;
-};
+type NodeProps<T extends Node["type"]> = Extract<Node, { type: T }>["props"];
 
-export function setProperty<T extends keyof NodePropsMap>(
-  nodeKey: string,
-  nodeType: T,
-  propId: keyof NodePropsMap[T],
-  value: NodePropsMap[T][typeof propId],
-) {
+export function setProperty<
+  T extends Node["type"],
+  P extends keyof NodeProps<T>,
+>(nodeKey: string, nodeType: T, propId: P, value: NodeProps<T>[P]) {
   if (!currentRoot) {
     throw new Error(`Attempting to set property before render() was called`);
   }
@@ -103,6 +99,7 @@ export function setProperty<T extends keyof NodePropsMap>(
   }
   if (node.type === nodeType) {
     node.props[propId] = value;
+    applyNodeProps(node);
   } else {
     throw new Error(
       `Node types were incompatible ${nodeType} and ${node.type}`,
@@ -111,6 +108,14 @@ export function setProperty<T extends keyof NodePropsMap>(
 }
 
 let currentRoot: DestinationNode | null = null;
+
+function applyNodeProps(node: Node) {
+  if (node.type === "filter" && node.audioNode) {
+    node.audioNode.frequency.value = node.props.frequency;
+    node.audioNode.type = node.props.type;
+    node.audioNode.Q.value = node.props.q;
+  }
+}
 
 function buildOscNode(node: OscNode): OscillatorNode {
   const oscNode = new OscillatorNode(context);
@@ -149,8 +154,9 @@ function buildAudioNode(node: Node): AudioNode | SequencerCallbackId | null {
       // Osc nodes are created dynamically when they are triggered by a sequence
       return null;
     }
-    case "filter":
+    case "filter": {
       return new BiquadFilterNode(context);
+    }
     case "destination":
       return context.destination;
     case "sequencer": {
@@ -237,6 +243,7 @@ function compareNodesAndUpdateGraph({
       newNode = produce(newNode, (node) => {
         node.audioNode = nodeOrSequencerId;
       });
+      applyNodeProps(newNode);
       if (parentNode) {
         newNode.audioNode?.connect(parentNode);
       }

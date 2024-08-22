@@ -44,7 +44,7 @@ export function Oscillator(props: {
           setType(type);
           setProperty(props.nodeId, "osc", "type", type);
         }}
-        value={props.props.type}
+        value={type}
       >
         <option value="sine">Sine</option>
         <option value="sawtooth">Saw</option>

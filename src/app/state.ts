@@ -2,7 +2,9 @@ import { Node } from "audio/audioGraph";
 import { produce } from "immer";
 import { atom } from "jotai";
 
-export const nodesAtom = atom<Node[]>([{ key: "dest", type: "destination" }]);
+export const nodesAtom = atom<Node[]>([
+  { key: "dest", type: "destination", props: undefined },
+]);
 
 export const nodePositionsAtom = atom<{
   [key: string]: { x: number; y: number };
@@ -16,7 +18,7 @@ export const setNodePositionAtom = atom(
       n[key] = { x, y };
     });
     set(nodePositionsAtom, nodes);
-  }
+  },
 );
 
 export type CursorMode =
@@ -33,7 +35,7 @@ export const cursorModeAtom = atom(
       set(connectionSourceNodeAtom, null);
     }
     set(cursorModeStorageAtom, value);
-  }
+  },
 );
 
 export const connectionSourceNodeAtom = atom<string | null>(null);
@@ -50,7 +52,7 @@ export const addConnectionAtom = atom(
     }
     updated[destId] = [...(updated[destId] || []), sourceId];
     set(connectionsAtom, updated);
-  }
+  },
 );
 
 export const updateNodeStateAtom = atom(
@@ -65,5 +67,5 @@ export const updateNodeStateAtom = atom(
       n[nodeIndex].props = { ...props };
     });
     set(nodesAtom, nodes);
-  }
+  },
 );
