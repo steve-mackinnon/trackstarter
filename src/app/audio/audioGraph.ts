@@ -77,15 +77,33 @@ export function render(newRoot: Node) {
   currentRoot = produce(currentRoot, () => newRoot);
 }
 
+let sequencerCallbackId: number | null = null;
+let stepIndex = 0;
+const SEQUENCE_LENGTH = 1024;
+
 export function start() {
   Tone.getTransport().bpm.value = 128;
   Tone.getTransport().loop = true;
   Tone.getTransport().setLoopPoints("1:1:1", "17:1:1");
   Tone.getTransport().start();
+  sequencerCallbackId = Tone.getTransport().scheduleRepeat((t) => {
+    if (!currentRoot || !currentRoot.children) {
+      return;
+    }
+    // Assume all sequencers are top-level children
+    for (const child of currentRoot.children) {
+      child.sequencer?.playStep(stepIndex, t);
+    }
+    stepIndex = (stepIndex + 1) % SEQUENCE_LENGTH;
+  }, "16n");
 }
 
 export function stop() {
   Tone.getTransport().stop();
+  if (sequencerCallbackId) {
+    Tone.getTransport().clear(sequencerCallbackId);
+    sequencerCallbackId = null;
+  }
 }
 
 type NodeProps<T extends Node["type"]> = Extract<Node, { type: T }>["props"];
@@ -182,7 +200,6 @@ function deleteNode(node: Node) {
     node.children.forEach((n) => deleteNode(n));
   }
   node.audioNode?.disconnect();
-  node.sequencer?.stop();
 }
 
 function applyPropUpdates(newNode: Node, currentNode: Node | null) {
@@ -243,6 +260,7 @@ function compareNodesAndUpdateGraph({
     newNode = produce(newNode, (node) => {
       node.parent = currentNode.parent;
       node.audioNode = currentNode.audioNode;
+      node.sequencer = currentNode.sequencer;
     });
   }
   applyPropUpdates(newNode, currentNode);

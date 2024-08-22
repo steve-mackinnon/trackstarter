@@ -16,42 +16,32 @@ function getActiveSteps(length: number, numSteps: number): Set<number> {
 export class Sequencer {
   constructor(
     private node: SequencerNode,
-    findNode: (key: string) => Node | null,
-    buildOsc: (destNode: Node) => OscillatorNode,
-  ) {
-    this.callbackId = Tone.getTransport().scheduleRepeat(
-      (time) => {
-        const activeSteps = getActiveSteps(
-          this.node.props.length,
-          this.node.props.steps,
-        );
-        if (activeSteps.has(this.stepIndex)) {
-          for (const nodeKey of node.props.destinationNodes) {
-            const destNode = findNode(nodeKey);
-            if (!destNode || destNode.type !== "osc") {
-              throw new Error(
-                `Unable to connect sequencer to node with key: ${nodeKey}`,
-              );
-            }
-            const osc = buildOsc(destNode);
-            osc.frequency.value = semitonesToHz(
-              node.props.transposition,
-              (destNode as OscNode).props.frequency,
-            );
-            osc.start(time);
-            osc.stop(time + 0.1);
-          }
-        }
-        this.stepIndex = (this.stepIndex + 1) % this.node.props.length;
-      },
-      (node as SequencerNode).props.rate,
+    private findNode: (key: string) => Node | null,
+    private buildOsc: (destNode: Node) => OscillatorNode,
+  ) {}
+
+  playStep(stepIndex: number, time: number) {
+    stepIndex = stepIndex % this.node.props.length;
+    const activeSteps = getActiveSteps(
+      this.node.props.length,
+      this.node.props.steps,
     );
+    if (activeSteps.has(stepIndex)) {
+      for (const nodeKey of this.node.props.destinationNodes) {
+        const destNode = this.findNode(nodeKey);
+        if (!destNode || destNode.type !== "osc") {
+          throw new Error(
+            `Unable to connect sequencer to node with key: ${nodeKey}`,
+          );
+        }
+        const osc = this.buildOsc(destNode);
+        osc.frequency.value = semitonesToHz(
+          this.node.props.transposition,
+          (destNode as OscNode).props.frequency,
+        );
+        osc.start(time);
+        osc.stop(time + 0.1);
+      }
+    }
   }
-
-  stop() {
-    Tone.getTransport().clear(this.callbackId);
-  }
-
-  private callbackId: number;
-  private stepIndex = 0;
 }
