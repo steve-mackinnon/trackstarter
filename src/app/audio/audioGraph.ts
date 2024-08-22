@@ -91,11 +91,11 @@ export function setProperty<
   P extends keyof NodeProps<T>,
 >(nodeKey: string, nodeType: T, propId: P, value: NodeProps<T>[P]) {
   if (!currentRoot) {
-    throw new Error(`Attempting to set property before render() was called`);
+    return;
   }
   const node = findNodeWithKey(currentRoot, nodeKey);
   if (!node) {
-    throw new Error(`Failed to find node with key ${nodeKey}`);
+    return;
   }
   if (node.type === nodeType) {
     node.props[propId] = value;
