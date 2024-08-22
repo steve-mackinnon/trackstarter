@@ -1,4 +1,5 @@
 import { setProperty } from "audio/audioGraph";
+import { AudioParamSlider } from "common/components/AudioParamSlider";
 import { DraggableContainer } from "common/components/DraggableContainer";
 import { useState } from "react";
 
@@ -26,43 +27,25 @@ export function Filter(props: { x: number; y: number; nodeId: string }) {
         <option value="lowpass">Lowpass</option>
         <option value="highpass">Highpass</option>
       </select>
-      <label htmlFor="frequencySlider" className="select-none">
-        Frequency
-      </label>
-      <input
-        id="frequencySlider"
-        type="range"
+      <AudioParamSlider
+        label="Frequency"
+        id="frequency"
         min={20}
         max={20000}
-        value={frequency}
-        onChange={(e) => {
-          const freq = Number.parseFloat(e.target.value);
-          setFrequency(freq);
-          setProperty(props.nodeId, "filter", "frequency", freq);
-        }}
-        onMouseDown={(e) => {
-          // Prevents drag from starting
-          e.stopPropagation();
-        }}
+        default={1000}
+        scaling={2}
+        handleValueChange={(v) =>
+          setProperty(props.nodeId, "filter", "frequency", v)
+        }
       />
-      <label htmlFor="q-slider" className="select-none">
-        Q
-      </label>
-      <input
-        id="q-slider"
-        type="range"
+      <AudioParamSlider
+        label="Q"
+        id="q"
         min={0.1}
-        max={5}
-        value={q}
-        onChange={(e) => {
-          const _q = Number.parseFloat(e.target.value);
-          setQ(_q);
-          setProperty(props.nodeId, "filter", "q", _q);
-        }}
-        onMouseDown={(e) => {
-          // Prevents drag from starting
-          e.stopPropagation();
-        }}
+        max={12}
+        scaling={2}
+        default={0.707}
+        handleValueChange={(v) => setProperty(props.nodeId, "filter", "q", v)}
       />
     </DraggableContainer>
   );

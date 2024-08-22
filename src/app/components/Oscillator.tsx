@@ -1,4 +1,5 @@
 import { OscProps, setProperty } from "audio/audioGraph";
+import { AudioParamSlider } from "common/components/AudioParamSlider";
 import { DraggableContainer } from "common/components/DraggableContainer";
 import { useState } from "react";
 
@@ -13,24 +14,16 @@ export function Oscillator(props: {
 
   return (
     <DraggableContainer {...props} label="Oscillator" hasConnectionPort={true}>
-      <label htmlFor="frequencySlider" className="select-none">
-        Frequency
-      </label>
-      <input
-        id="frequencySlider"
-        type="range"
-        value={frequency}
+      <AudioParamSlider
+        label="Frequency"
+        id="frequency"
         min={20}
-        max={1000}
-        onChange={(e) => {
-          const freq = Number.parseFloat(e.target.value);
-          setFrequency(freq);
-          setProperty(props.nodeId, "osc", "frequency", freq);
-        }}
-        onMouseDown={(e) => {
-          // Prevents drag from starting
-          e.stopPropagation();
-        }}
+        max={20000}
+        default={props.props.frequency}
+        scaling={3}
+        handleValueChange={(v) =>
+          setProperty(props.nodeId, "osc", "frequency", v)
+        }
       />
       <label htmlFor="shape" className="select-none">
         Shape
