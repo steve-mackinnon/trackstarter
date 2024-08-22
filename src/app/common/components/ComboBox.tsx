@@ -8,7 +8,7 @@ interface ComboBoxProps<T extends string, U extends T> {
 }
 
 export function ComboBox<T extends string, U extends T>(
-  props: ComboBoxProps<T, U>,
+  props: ComboBoxProps<T, U>
 ) {
   const [value, setValue] = useState<T>(props.defaultValue);
 
@@ -29,7 +29,9 @@ export function ComboBox<T extends string, U extends T>(
         value={value}
       >
         {props.choices.map((v) => (
-          <option value={v}>{v}</option>
+          <option value={v} key={v}>
+            {v}
+          </option>
         ))}
       </select>
     </div>

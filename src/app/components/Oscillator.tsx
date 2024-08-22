@@ -1,7 +1,7 @@
 import { OscProps, setProperty } from "audio/audioGraph";
 import { AudioParamSlider } from "common/components/AudioParamSlider";
+import { ComboBox } from "common/components/ComboBox";
 import { DraggableContainer } from "common/components/DraggableContainer";
-import { useState } from "react";
 
 export function Oscillator(props: {
   x: number;
@@ -9,9 +9,6 @@ export function Oscillator(props: {
   nodeId: string;
   props: OscProps;
 }) {
-  const [frequency, setFrequency] = useState(props.props.frequency);
-  const [type, setType] = useState(props.props.type);
-
   return (
     <DraggableContainer {...props} label="Oscillator" hasConnectionPort={true}>
       <AudioParamSlider
@@ -25,25 +22,12 @@ export function Oscillator(props: {
           setProperty(props.nodeId, "osc", "frequency", v)
         }
       />
-      <label htmlFor="shape" className="select-none">
-        Shape
-      </label>
-      <select
-        className="text-black"
-        name="shape"
-        id="shape"
-        onChange={(e) => {
-          const type = e.target.value as OscillatorType;
-          setType(type);
-          setProperty(props.nodeId, "osc", "type", type);
-        }}
-        value={type}
-      >
-        <option value="sine">Sine</option>
-        <option value="sawtooth">Saw</option>
-        <option value="square">Square</option>
-        <option value="triangle">Triangle</option>
-      </select>
+      <ComboBox
+        label="Shape"
+        choices={["sine", "sawtooth", "square", "triangle"]}
+        defaultValue="sawtooth"
+        onChange={(v) => setProperty(props.nodeId, "osc", "type", v)}
+      />
     </DraggableContainer>
   );
 }
