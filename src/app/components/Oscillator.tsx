@@ -24,6 +24,7 @@ export function Oscillator(props: {
         max={1200}
         default={props.props.detune}
         scaling={1}
+        abbreviateLargeValues={false}
         handleValueChange={(v) => setProperty(props.nodeId, "osc", "detune", v)}
       />
     </DraggableContainer>
