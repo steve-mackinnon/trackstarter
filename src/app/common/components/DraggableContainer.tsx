@@ -1,8 +1,8 @@
 import { useSetAtom } from "jotai";
+import { X } from "lucide-react";
 import { PropsWithChildren, useEffect, useState } from "react";
 import { removeNodeAtom, setNodePositionAtom } from "state";
 import { NodeConnectionPort } from "./NodeConnectionPort";
-import { X } from "lucide-react";
 interface DragState {
   xOffset: number;
   yOffset: number;
@@ -74,7 +74,7 @@ export function DraggableContainer({
     return () => {
       window.removeEventListener("mouseup", mouseUp);
     };
-  }, [pos]);
+  }, [pos, nodeId, setNodePosition]);
 
   const getBorderColor = () => {
     if (dragState) {
@@ -95,7 +95,7 @@ export function DraggableContainer({
       }}
       className={
         (className ? className : "") +
-        ` absolute flex flex-col bg-gray-500 pb-2 items-center rounded-2xl`
+        ` absolute flex flex-col bg-gray-500 pb-2 items-center rounded-2xl gap-y-2`
       }
       onMouseDown={(e) => {
         e.stopPropagation();
