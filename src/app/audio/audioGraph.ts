@@ -22,7 +22,7 @@ interface BaseNode {
 
 export interface OscProps {
   type: OscillatorType;
-  frequency: number;
+  detune: number;
 }
 
 export interface OscNode extends BaseNode {
@@ -48,6 +48,20 @@ export interface DestinationNode extends BaseNode {
   audioNode?: never;
 }
 
+export type Note =
+  | "C"
+  | "C#"
+  | "D"
+  | "D#"
+  | "E"
+  | "F"
+  | "F#"
+  | "G"
+  | "G#"
+  | "A"
+  | "A#"
+  | "B";
+
 export interface SequencerProps {
   // Uses Tone's time notation described here:
   // https://github.com/Tonejs/Tone.js/wiki/Time
@@ -56,6 +70,8 @@ export interface SequencerProps {
   destinationNodes: string[];
   length: number;
   steps: number;
+  rootNote: Note;
+  octave: number;
 }
 
 export interface SequencerNode extends BaseNode {
@@ -110,7 +126,7 @@ type NodeProps<T extends Node["type"]> = Extract<Node, { type: T }>["props"];
 
 export function setProperty<
   T extends Node["type"],
-  P extends keyof NodeProps<T>,
+  P extends keyof NodeProps<T>
 >(nodeKey: string, nodeType: T, propId: P, value: NodeProps<T>[P]) {
   if (!currentRoot) {
     return;
@@ -124,7 +140,7 @@ export function setProperty<
     applyNodeProps(node);
   } else {
     throw new Error(
-      `Node types were incompatible ${nodeType} and ${node.type}`,
+      `Node types were incompatible ${nodeType} and ${node.type}`
     );
   }
 }
@@ -143,11 +159,10 @@ function buildOscNode(node: OscNode): OscillatorNode {
   const oscNode = new OscillatorNode(context);
   const oscType = node.props.type;
   oscNode.type = oscType;
-  oscNode.frequency.value = node.props.frequency;
   const dest = node.parent;
   if (!dest) {
     throw new Error(
-      "Missing parent node to connect to. Some audio will not be generated",
+      "Missing parent node to connect to. Some audio will not be generated"
     );
   } else {
     oscNode.connect(dest);
@@ -188,7 +203,7 @@ function buildAudioNode(node: Node): AudioNode | Sequencer | null {
       return new Sequencer(
         node,
         (key) => findNodeWithKey(currentRoot, key),
-        (dest) => buildOscNode(dest as OscNode),
+        (dest) => buildOscNode(dest as OscNode)
       );
     }
   }
@@ -271,7 +286,7 @@ function compareNodesAndUpdateGraph({
 /// removes AudioNodes from the tree to satisfy the requested state.
 function compareChildNodesAndUpdateGraph(
   newParent: Node,
-  currentParent: Node | null,
+  currentParent: Node | null
 ): Node {
   if (newParent.children) {
     newParent.children.forEach((newChild: Node, index: number) => {

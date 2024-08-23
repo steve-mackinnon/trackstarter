@@ -16,6 +16,7 @@ function scaleValue({
 }
 
 function formatValue(value: number, maxValue: number): string {
+  return value.toFixed(0);
   if (value >= 1000) {
     const v = value / 1000;
     const decimals = value >= 10000 ? 1 : 2;

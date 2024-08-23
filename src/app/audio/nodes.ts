@@ -58,7 +58,7 @@ export function canNodesConnect(sourceType: NodeType, destType: NodeType) {
 export function defaultOscProps(): OscProps {
   return {
     type: "sawtooth",
-    frequency: 200,
+    detune: 0,
   };
 }
 
@@ -77,6 +77,8 @@ export function defaultSequencerProps(): SequencerProps {
     destinationNodes: [],
     steps: 3,
     length: 16,
+    rootNote: "C",
+    octave: 3,
   };
 }
 

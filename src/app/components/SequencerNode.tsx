@@ -1,39 +1,29 @@
-import { SequencerProps, setProperty } from "audio/audioGraph";
+import { Note, SequencerProps, setProperty } from "audio/audioGraph";
 import { ComboBox } from "common/components/ComboBox";
 import { DraggableContainer } from "common/components/DraggableContainer";
 import { useState } from "react";
 
 const MAX_STEPS = 32;
 const STEP_CHOICES = Array.from({ length: MAX_STEPS }, (_, i) =>
-  (i + 1).toString(),
+  (i + 1).toString()
 );
 
-function SequenceInfo({
-  label,
-  currentValue,
-  onChange,
-}: {
-  label: string;
-  currentValue: number;
-  onChange: (val: number) => void;
-}) {
-  const [value, setValue] = useState(currentValue);
+const NOTE_CHOICES = [
+  "C",
+  "C#",
+  "D",
+  "D#",
+  "E",
+  "F",
+  "F#",
+  "G",
+  "G#",
+  "A",
+  "A#",
+  "B",
+];
+const OCTAVE_CHOICES = Array.from({ length: 6 }, (_, i) => i.toString());
 
-  return (
-    <div className="flex w-full justify-between">
-      <ComboBox
-        label={label}
-        choices={STEP_CHOICES}
-        defaultValue={value.toString()}
-        onChange={(v) => {
-          const val = Number.parseInt(v);
-          setValue(val);
-          onChange(val);
-        }}
-      />
-    </div>
-  );
-}
 export function SequencerNode(props: {
   x: number;
   y: number;
@@ -42,6 +32,8 @@ export function SequencerNode(props: {
 }) {
   const [length, setLength] = useState(props.props.length);
   const [steps, setSteps] = useState(props.props.steps);
+  const [root, setRoot] = useState(props.props.rootNote);
+  const [octave, setOctave] = useState(props.props.octave);
 
   return (
     <DraggableContainer
@@ -50,20 +42,40 @@ export function SequencerNode(props: {
       hasConnectionPort={true}
       className={"gap-y-2"}
     >
-      <SequenceInfo
-        currentValue={length}
+      <ComboBox
+        defaultValue={length.toString()}
         label="Length"
+        choices={STEP_CHOICES}
         onChange={(v) => {
-          setLength(v);
-          setProperty(props.nodeId, "sequencer", "length", v);
+          const val = Number.parseInt(v);
+          setLength(val);
+          setProperty(props.nodeId, "sequencer", "length", val);
         }}
       />
-      <SequenceInfo
-        currentValue={steps}
+      <ComboBox
+        defaultValue={steps.toString()}
         label="Steps"
+        choices={STEP_CHOICES}
         onChange={(v) => {
-          setSteps(v);
-          setProperty(props.nodeId, "sequencer", "steps", v);
+          const val = Number.parseInt(v);
+          setSteps(val);
+          setProperty(props.nodeId, "sequencer", "steps", val);
+        }}
+      />
+      <ComboBox
+        defaultValue={root}
+        label="Note"
+        choices={NOTE_CHOICES}
+        onChange={(v) => {
+          setRoot(v.toString() as Note);
+        }}
+      />
+      <ComboBox
+        defaultValue={octave.toString()}
+        label="Octave"
+        choices={OCTAVE_CHOICES}
+        onChange={(v) => {
+          setOctave(Number.parseInt(v));
         }}
       />
     </DraggableContainer>

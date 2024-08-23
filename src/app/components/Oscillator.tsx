@@ -11,22 +11,20 @@ export function Oscillator(props: {
 }) {
   return (
     <DraggableContainer {...props} label="Oscillator" hasConnectionPort={true}>
-      <AudioParamSlider
-        label="Frequency"
-        id="frequency"
-        min={20}
-        max={20000}
-        default={props.props.frequency}
-        scaling={3}
-        handleValueChange={(v) =>
-          setProperty(props.nodeId, "osc", "frequency", v)
-        }
-      />
       <ComboBox
         label="Shape"
         choices={["sine", "sawtooth", "square", "triangle"]}
         defaultValue="sawtooth"
         onChange={(v) => setProperty(props.nodeId, "osc", "type", v)}
+      />
+      <AudioParamSlider
+        label="Detune"
+        id="detune"
+        min={-1200}
+        max={1200}
+        default={props.props.detune}
+        scaling={1}
+        handleValueChange={(v) => setProperty(props.nodeId, "osc", "detune", v)}
       />
     </DraggableContainer>
   );
