@@ -68,10 +68,14 @@ export interface SequencerProps {
   destinationNodes: string[];
   length: number;
   steps: number;
-  rootNote: Note;
+  // rootNote: Note;
   octave: number;
   /// must be [0, 1]
   probability: number;
+  // Ordered list of notes to play in the sequence. If notes.length()
+  // is smaller than length, the sequence will wrap until the sequence
+  // restarts.
+  notes: string[];
 }
 
 export interface SequencerNode extends BaseNode {
@@ -236,55 +240,9 @@ function applyPropUpdates(newNode: Node, currentNode: Node | null) {
   }
 }
 
-function compareNodesAndUpdateGraph({
-  newNode,
-  currentNode,
-  parentNode,
-}: {
-  newNode: Node;
-  currentNode: Node | null;
-  parentNode: AudioNode | null;
-}): Node {
-  const keyMatch = newNode.key && newNode.key === currentNode?.key;
-  const addNode =
-    !keyMatch && (!currentNode || newNode.type !== currentNode.type);
-  if (addNode) {
-    if (currentNode) {
-      // Remove existing node
-      deleteNode(currentNode);
-    }
-    newNode = produce(newNode, (node) => {
-      node.parent = parentNode ?? undefined;
-    });
-    // Build the new audio node
-    const nodeOrSequencer = buildAudioNode(newNode);
-    if (nodeOrSequencer instanceof AudioNode) {
-      newNode = produce(newNode, (node) => {
-        node.audioNode = nodeOrSequencer;
-      });
-      applyNodeProps(newNode);
-      if (parentNode) {
-        newNode.audioNode?.connect(parentNode);
-      }
-    } else if (nodeOrSequencer instanceof Sequencer) {
-      newNode = produce(newNode, (node) => {
-        node.sequencer = nodeOrSequencer;
-      });
-    }
-  } else {
-    newNode = produce(newNode, (node) => {
-      node.parent = currentNode.parent;
-      node.audioNode = currentNode.audioNode;
-      node.sequencer = currentNode.sequencer;
-    });
-  }
-  applyPropUpdates(newNode, currentNode);
-  return newNode;
-}
-
 /// Recursively iterates over the children of newNode and currentNode and adds or
 /// removes AudioNodes from the tree to satisfy the requested state.
-function compareChildNodesAndUpdateGraph(
+function applyChildNodeUpdates(
   newParent: Node,
   currentParent: Node | null
 ): Node {
@@ -337,9 +295,39 @@ function buildAudioGraph({
   currentNode: Node | null;
   parentNode: AudioNode | null;
 }): Node {
-  newNode = compareNodesAndUpdateGraph({ newNode, currentNode, parentNode });
-  // Note: compareAndUpdateChildren() will recursively call buildAudioGraph() for child nodes
-  // to build out the entire tree.
-  newNode = compareChildNodesAndUpdateGraph(newNode, currentNode);
-  return newNode;
+  const keyMatch = newNode.key && newNode.key === currentNode?.key;
+  const addNode =
+    !keyMatch && (!currentNode || newNode.type !== currentNode.type);
+  if (addNode) {
+    if (currentNode) {
+      // Remove existing node
+      deleteNode(currentNode);
+    }
+    newNode = produce(newNode, (node) => {
+      node.parent = parentNode ?? undefined;
+    });
+    // Build the new audio node
+    const nodeOrSequencer = buildAudioNode(newNode);
+    if (nodeOrSequencer instanceof AudioNode) {
+      newNode = produce(newNode, (node) => {
+        node.audioNode = nodeOrSequencer;
+      });
+      applyNodeProps(newNode);
+      if (parentNode) {
+        newNode.audioNode?.connect(parentNode);
+      }
+    } else if (nodeOrSequencer instanceof Sequencer) {
+      newNode = produce(newNode, (node) => {
+        node.sequencer = nodeOrSequencer;
+      });
+    }
+  } else {
+    newNode = produce(newNode, (node) => {
+      node.parent = currentNode.parent;
+      node.audioNode = currentNode.audioNode;
+      node.sequencer = currentNode.sequencer;
+    });
+  }
+  applyPropUpdates(newNode, currentNode);
+  return applyChildNodeUpdates(newNode, currentNode);
 }
