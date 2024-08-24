@@ -89,7 +89,7 @@ export function AudioGraph() {
 
   return (
     <div
-      className="absolute top-0 bottom-0 left-0 right-0 bg-indigo-950"
+      className="absolute top-0 bottom-0 left-0 right-0 bg-black"
       style={{ cursor }}
       onMouseDown={(e) => handleMouseDown(e)}
     >
