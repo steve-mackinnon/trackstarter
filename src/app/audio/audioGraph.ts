@@ -4,8 +4,6 @@ import { Sequencer } from "./sequencer";
 
 const context = new AudioContext();
 
-const sequencerStepCountMap = new Map<string, number>();
-
 // Disable auto freezing in immer so we can mutate the current state when
 // setting props
 setAutoFreeze(false);
@@ -63,8 +61,8 @@ export type Note =
   | "B";
 
 export interface SequencerProps {
-  // Uses Tone's time notation described here:
-  // https://github.com/Tonejs/Tone.js/wiki/Time
+  /// Uses Tone's time notation described here:
+  /// https://github.com/Tonejs/Tone.js/wiki/Time
   rate: string;
   transposition: number;
   destinationNodes: string[];
@@ -72,6 +70,8 @@ export interface SequencerProps {
   steps: number;
   rootNote: Note;
   octave: number;
+  /// must be [0, 1]
+  probability: number;
 }
 
 export interface SequencerNode extends BaseNode {
@@ -93,7 +93,7 @@ export function render(newRoot: Node) {
   currentRoot = produce(currentRoot, () => newRoot);
 }
 
-let sequencerCallbackId: number | null = null;
+let hasStarted = false;
 let stepIndex = 0;
 const SEQUENCE_LENGTH = 1024;
 
@@ -102,7 +102,10 @@ export function start() {
   Tone.getTransport().loop = true;
   Tone.getTransport().setLoopPoints("1:1:1", "17:1:1");
   Tone.getTransport().start();
-  sequencerCallbackId = Tone.getTransport().scheduleRepeat((t) => {
+  if (hasStarted) {
+    return;
+  }
+  Tone.getTransport().scheduleRepeat((t) => {
     if (!currentRoot || !currentRoot.children) {
       return;
     }
@@ -112,14 +115,11 @@ export function start() {
     }
     stepIndex = (stepIndex + 1) % SEQUENCE_LENGTH;
   }, "16n");
+  hasStarted = true;
 }
 
 export function stop() {
   Tone.getTransport().stop();
-  if (sequencerCallbackId) {
-    Tone.getTransport().clear(sequencerCallbackId);
-    sequencerCallbackId = null;
-  }
 }
 
 type NodeProps<T extends Node["type"]> = Extract<Node, { type: T }>["props"];
