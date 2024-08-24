@@ -1,3 +1,4 @@
+import { Note } from "tonal";
 import { Node, SequencerNode } from "./audioGraph";
 
 function noteToFrequency(
@@ -57,6 +58,7 @@ export class Sequencer {
       this.node.props.steps
     );
     if (activeSteps.has(stepIndex)) {
+      const noteIndex = stepIndex % this.node.props.notes.length;
       for (const nodeKey of this.node.props.destinationNodes) {
         const oscNode = this.findNode(nodeKey);
         if (!oscNode || oscNode.type !== "osc") {
@@ -71,12 +73,11 @@ export class Sequencer {
           continue;
         }
         const osc = this.buildOsc(oscNode);
-        const frequency = noteToFrequency(
-          this.node.props.rootNote,
-          this.node.props.octave,
-          oscNode.props.detune
-        );
-        osc.frequency.value = frequency;
+        const freq = Note.freq(this.node.props.notes[noteIndex]);
+        if (freq == null) {
+          throw new Error("Error determining note frequency");
+        }
+        osc.frequency.value = freq;
         osc.start(time);
         osc.stop(time + 0.1);
       }

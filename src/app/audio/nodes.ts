@@ -77,9 +77,9 @@ export function defaultSequencerProps(): SequencerProps {
     destinationNodes: [],
     steps: 3,
     length: 16,
-    rootNote: "C",
     octave: 3,
     probability: 1,
+    notes: ["D2", "D#2", "F1", "G3", "F2", "F2", "D#1", "C#2"],
   };
 }
 

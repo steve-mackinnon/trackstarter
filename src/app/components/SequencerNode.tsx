@@ -1,4 +1,5 @@
-import { Note, SequencerProps, setProperty } from "audio/audioGraph";
+import { SequencerProps, setProperty } from "audio/audioGraph";
+import { generateSequence, Mood } from "audio/sequenceGenerator";
 import { AudioParamSlider } from "common/components/AudioParamSlider";
 import { ComboBox } from "common/components/ComboBox";
 import { DraggableContainer } from "common/components/DraggableContainer";
@@ -9,21 +10,18 @@ const STEP_CHOICES = Array.from({ length: MAX_STEPS }, (_, i) =>
   (i + 1).toString()
 );
 
-const NOTE_CHOICES = [
-  "C",
-  "C#",
-  "D",
-  "D#",
-  "E",
-  "F",
-  "F#",
-  "G",
-  "G#",
-  "A",
-  "A#",
-  "B",
-];
 const OCTAVE_CHOICES = Array.from({ length: 6 }, (_, i) => i.toString());
+const MOOD_CHOICES: Mood[] = [
+  "Uplifting",
+  "Dark",
+  "Exotic",
+  "Mysterious",
+  "Dramatic",
+  "Sophisticated",
+  "Dreamy",
+  "Groovy",
+  "Surreal",
+];
 
 export function SequencerNode(props: {
   x: number;
@@ -33,9 +31,16 @@ export function SequencerNode(props: {
 }) {
   const [length, setLength] = useState(props.props.length);
   const [steps, setSteps] = useState(props.props.steps);
-  const [root, setRoot] = useState(props.props.rootNote);
   const [octave, setOctave] = useState(props.props.octave);
   const [probability, setProbability] = useState(props.props.probability * 100);
+  const [notes, setNotes] = useState(props.props.notes);
+  const [mood, setMood] = useState<Mood>("Dark");
+
+  const generateNewSequence = () => {
+    const sequence = generateSequence(mood, 8, "C", octave);
+    setNotes(sequence);
+    setProperty(props.nodeId, "sequencer", "notes", sequence);
+  };
 
   return (
     <DraggableContainer
@@ -65,16 +70,6 @@ export function SequencerNode(props: {
         }}
       />
       <ComboBox
-        defaultValue={root}
-        label="Note"
-        choices={NOTE_CHOICES}
-        onChange={(v) => {
-          const note = v.toString() as Note;
-          setRoot(note);
-          setProperty(props.nodeId, "sequencer", "rootNote", note);
-        }}
-      />
-      <ComboBox
         defaultValue={octave.toString()}
         label="Octave"
         choices={OCTAVE_CHOICES}
@@ -96,6 +91,20 @@ export function SequencerNode(props: {
           setProperty(props.nodeId, "sequencer", "probability", v / 100);
         }}
       />
+      <ComboBox
+        label="Mood"
+        defaultValue={mood}
+        choices={MOOD_CHOICES}
+        onChange={(v: Mood) => {
+          setMood(v);
+        }}
+      />
+      <button onClick={() => generateNewSequence()}>Randomize</button>
+      <ol>
+        {notes.map((note) => (
+          <span>{note}</span>
+        ))}
+      </ol>
     </DraggableContainer>
   );
 }
