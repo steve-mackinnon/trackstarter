@@ -339,6 +339,8 @@ function buildAudioGraph({
       node.audioNode = currentNode.audioNode;
       node.sequencer = currentNode.sequencer;
     });
+    // Ensures the sequencer is updated with any new props
+    newNode.sequencer?.setNode(newNode as SequencerNode);
   }
   applyPropUpdates(newNode, currentNode);
   return applyChildNodeUpdates(newNode, currentNode);

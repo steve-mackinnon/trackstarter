@@ -26,6 +26,10 @@ export class Sequencer {
     private buildOsc: (destNode: Node) => OscillatorNode
   ) {}
 
+  setNode(node: SequencerNode) {
+    this.node = node;
+  }
+
   playStep(stepIndex: number, time: number) {
     stepIndex = stepIndex % this.node.props.length;
     // TODO: proper type guard for SequencerEvent[]
