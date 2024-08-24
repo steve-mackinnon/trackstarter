@@ -130,6 +130,7 @@ export function start() {
 
 export function stop() {
   Tone.getTransport().stop();
+  stepIndex = 0;
 }
 
 type NodeProps<T extends Node["type"]> = Extract<Node, { type: T }>["props"];
