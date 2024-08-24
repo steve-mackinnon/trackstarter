@@ -5,6 +5,8 @@ import { defaultSequencerProps, osc, output, sequencer } from "audio/nodes";
 import {
   chordProgressionToSequencerEvents,
   generateChordProgression,
+  getRandomMood,
+  getRandomNote,
 } from "audio/sequenceGenerator";
 import { useSetupHotkeys } from "common/hooks/useSetupHotkeys";
 import { useUpdateAudioGraphOnStateChange } from "common/hooks/useUpdateAudioGraphOnStateChange";
@@ -19,7 +21,11 @@ export function SongStarterView() {
       <TransportButton className="absolute flex left-1/2 top-5 " />
       <button
         onClick={() => {
-          const chords = generateChordProgression("Dark", 5);
+          const chords = generateChordProgression(
+            getRandomNote(),
+            getRandomMood(),
+            4
+          );
           const sequence = chordProgressionToSequencerEvents(chords);
           render(
             output(undefined, [

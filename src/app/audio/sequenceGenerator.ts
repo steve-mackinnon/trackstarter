@@ -24,6 +24,41 @@ const MOOD_TO_SCALE: Record<Mood, string> = {
   Uplifting: "ionian",
 };
 
+const MOODS: Mood[] = [
+  "Uplifting",
+  "Dark",
+  "Dramatic",
+  "Dreamy",
+  "Exotic",
+  "Groovy",
+  "Mysterious",
+  "Sophisticated",
+  "Surreal",
+  "Uplifting",
+];
+
+export function getRandomMood(): Mood {
+  return MOODS[Math.floor(Math.random() * MOODS.length - 1)];
+}
+
+const NOTES: Note[] = [
+  "A",
+  "A#",
+  "B",
+  "C",
+  "C#",
+  "D",
+  "D#",
+  "E",
+  "F",
+  "F#",
+  "G",
+  "G#",
+];
+export function getRandomNote(): Note {
+  return NOTES[Math.floor(Math.random() * NOTES.length - 1)];
+}
+
 export function generateSequence(
   mood: Mood,
   length: number,
@@ -41,10 +76,11 @@ export function generateSequence(
 }
 
 export function generateChordProgression(
+  rootNote: Note,
   mood: Mood,
   notesPerChord: number
 ): string[][] {
-  const notes = Scale.get(`C4 ${MOOD_TO_SCALE[mood]}`);
+  const notes = Scale.get(`${rootNote}4 ${MOOD_TO_SCALE[mood]}`);
   const chordDegrees = [0, 3, 0, 4];
   return chordDegrees.map((degree) =>
     chordForScale(notes, degree, notesPerChord)
