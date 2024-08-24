@@ -60,6 +60,12 @@ export type Note =
   | "A#"
   | "B";
 
+export interface SequencerEvent {
+  note: string;
+  startStep: number;
+  endStep: number;
+}
+
 export interface SequencerProps {
   /// Uses Tone's time notation described here:
   /// https://github.com/Tonejs/Tone.js/wiki/Time
@@ -75,7 +81,7 @@ export interface SequencerProps {
   // Ordered list of notes to play in the sequence. If notes.length()
   // is smaller than length, the sequence will wrap until the sequence
   // restarts.
-  notes: string[];
+  notes: string[] | SequencerEvent[];
 }
 
 export interface SequencerNode extends BaseNode {
@@ -163,13 +169,19 @@ function buildOscNode(node: OscNode): OscillatorNode {
   const oscNode = new OscillatorNode(context);
   const oscType = node.props.type;
   oscNode.type = oscType;
+
+  // Patch in a gain node to attenuate the osc signal and avoid clipping
+  const gainNode = new GainNode(context);
+  gainNode.gain.value = 0.1;
+  oscNode.connect(gainNode);
+
   const dest = node.parent;
   if (!dest) {
     throw new Error(
       "Missing parent node to connect to. Some audio will not be generated"
     );
   } else {
-    oscNode.connect(dest);
+    gainNode.connect(dest);
   }
   return oscNode;
 }

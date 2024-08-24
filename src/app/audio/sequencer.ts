@@ -1,37 +1,6 @@
 import { Note } from "tonal";
-import { Node, SequencerNode } from "./audioGraph";
-
-function noteToFrequency(
-  note: string,
-  octave: number,
-  detuneCents: number
-): number {
-  const noteMap: { [key: string]: number } = {
-    C: 0,
-    "C#": 1,
-    Db: 1,
-    D: 2,
-    "D#": 3,
-    Eb: 3,
-    E: 4,
-    F: 5,
-    "F#": 6,
-    Gb: 6,
-    G: 7,
-    "G#": 8,
-    Ab: 8,
-    A: 9,
-    "A#": 10,
-    Bb: 10,
-    B: 11,
-  };
-  const midiNumber = 12 * (octave + 1) + noteMap[note];
-  const frequency = 440 * Math.pow(2, (midiNumber - 49) / 12);
-  if (detuneCents !== 0) {
-    return frequency * Math.pow(2, detuneCents / 1200);
-  }
-  return frequency;
-}
+import * as Tone from "tone";
+import { Node, SequencerEvent, SequencerNode } from "./audioGraph";
 
 function getActiveSteps(length: number, numSteps: number): Set<number> {
   const indices: Set<number> = new Set();
@@ -44,6 +13,12 @@ function getActiveSteps(length: number, numSteps: number): Set<number> {
   return indices;
 }
 
+function lengthOf16thNoteInSeconds(bpm: number): number {
+  const secondsPerBeat = 60 / bpm;
+  const lengthOf16thNote = secondsPerBeat / 4;
+  return lengthOf16thNote;
+}
+
 export class Sequencer {
   constructor(
     private node: SequencerNode,
@@ -53,6 +28,18 @@ export class Sequencer {
 
   playStep(stepIndex: number, time: number) {
     stepIndex = stepIndex % this.node.props.length;
+    // TODO: proper type guard for SequencerEvent[]
+    if (
+      this.node.props.notes.length &&
+      (this.node.props.notes[0] as SequencerEvent).note !== undefined
+    ) {
+      this.playSequencerEvents(
+        stepIndex,
+        time,
+        this.node.props.notes as SequencerEvent[]
+      );
+      return;
+    }
     const activeSteps = getActiveSteps(
       this.node.props.length,
       this.node.props.steps
@@ -73,13 +60,46 @@ export class Sequencer {
           continue;
         }
         const osc = this.buildOsc(oscNode);
-        const freq = Note.freq(this.node.props.notes[noteIndex]);
+        const freq = Note.freq(this.node.props.notes[noteIndex] as string);
         if (freq == null) {
           throw new Error("Error determining note frequency");
         }
         osc.frequency.value = freq;
         osc.start(time);
         osc.stop(time + 0.1);
+      }
+    }
+  }
+
+  private playSequencerEvents(
+    stepIndex: number,
+    time: number,
+    events: SequencerEvent[]
+  ) {
+    events = events.filter((e) => e.startStep === stepIndex);
+    if (events.length === 0) {
+      return;
+    }
+    const stepDuration = lengthOf16thNoteInSeconds(
+      Tone.getTransport().bpm.value
+    );
+    for (const nodeKey of this.node.props.destinationNodes) {
+      const oscNode = this.findNode(nodeKey);
+      if (!oscNode || oscNode.type !== "osc") {
+        throw new Error(
+          `Unable to connect sequencer to node with key: ${nodeKey}`
+        );
+      }
+      for (const event of events) {
+        const osc = this.buildOsc(oscNode);
+        const freq = Note.freq(event.note);
+        if (freq === null) {
+          throw new Error("Failed to convert note to frequency");
+        }
+        osc.frequency.value = freq;
+        osc.start(time);
+        const eventDuration = (event.endStep - event.startStep) * stepDuration;
+        osc.stop(time + eventDuration);
       }
     }
   }

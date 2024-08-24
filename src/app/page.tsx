@@ -1,7 +1,8 @@
 "use strict";
 
-import { AudioGraph } from "./components/AudioGraph";
+import { SongStarterView } from "components/SongStarterView";
 
 export default function Home() {
-  return <AudioGraph />;
+  // return <AudioGraph />;
+  return <SongStarterView />;
 }

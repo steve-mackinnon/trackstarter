@@ -102,7 +102,7 @@ export function SequencerNode(props: {
       <button onClick={() => generateNewSequence()}>Randomize</button>
       <ol>
         {notes.map((note) => (
-          <span>{note}</span>
+          <span>{note as string}</span>
         ))}
       </ol>
     </DraggableContainer>
