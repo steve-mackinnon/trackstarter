@@ -37,8 +37,12 @@ const MOODS: Mood[] = [
   "Uplifting",
 ];
 
+function getRandomValue<T>(array: T[]): T {
+  return array[Math.floor(Math.random() * (array.length - 1))];
+}
+
 export function getRandomMood(): Mood {
-  return MOODS[Math.floor(Math.random() * MOODS.length - 1)];
+  return getRandomValue(MOODS);
 }
 
 const NOTES: Note[] = [
@@ -56,7 +60,7 @@ const NOTES: Note[] = [
   "G#",
 ];
 export function getRandomNote(): Note {
-  return NOTES[Math.floor(Math.random() * NOTES.length - 1)];
+  return getRandomValue(NOTES);
 }
 
 export function generateSequence(
