@@ -1,4 +1,5 @@
 import { Note, SequencerProps, setProperty } from "audio/audioGraph";
+import { AudioParamSlider } from "common/components/AudioParamSlider";
 import { ComboBox } from "common/components/ComboBox";
 import { DraggableContainer } from "common/components/DraggableContainer";
 import { useState } from "react";
@@ -34,6 +35,7 @@ export function SequencerNode(props: {
   const [steps, setSteps] = useState(props.props.steps);
   const [root, setRoot] = useState(props.props.rootNote);
   const [octave, setOctave] = useState(props.props.octave);
+  const [probability, setProbability] = useState(props.props.probability * 100);
 
   return (
     <DraggableContainer
@@ -67,7 +69,9 @@ export function SequencerNode(props: {
         label="Note"
         choices={NOTE_CHOICES}
         onChange={(v) => {
-          setRoot(v.toString() as Note);
+          const note = v.toString() as Note;
+          setRoot(note);
+          setProperty(props.nodeId, "sequencer", "rootNote", note);
         }}
       />
       <ComboBox
@@ -75,7 +79,21 @@ export function SequencerNode(props: {
         label="Octave"
         choices={OCTAVE_CHOICES}
         onChange={(v) => {
-          setOctave(Number.parseInt(v));
+          const octave = Number.parseInt(v);
+          setOctave(octave);
+          setProperty(props.nodeId, "sequencer", "octave", octave);
+        }}
+      />
+      <AudioParamSlider
+        label="Chance"
+        min={0}
+        max={100}
+        default={probability}
+        scaling={1}
+        id={props.nodeId}
+        handleValueChange={(v) => {
+          setProbability(v);
+          setProperty(props.nodeId, "sequencer", "probability", v / 100);
         }}
       />
     </DraggableContainer>

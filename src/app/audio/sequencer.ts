@@ -64,6 +64,12 @@ export class Sequencer {
             `Unable to connect sequencer to node with key: ${nodeKey}`
           );
         }
+        if (
+          this.node.props.probability < 1 &&
+          Math.random() > this.node.props.probability
+        ) {
+          continue;
+        }
         const osc = this.buildOsc(oscNode);
         const frequency = noteToFrequency(
           this.node.props.rootNote,

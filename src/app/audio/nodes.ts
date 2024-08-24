@@ -79,6 +79,7 @@ export function defaultSequencerProps(): SequencerProps {
     length: 16,
     rootNote: "C",
     octave: 3,
+    probability: 1,
   };
 }
 
