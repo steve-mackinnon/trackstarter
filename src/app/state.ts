@@ -113,3 +113,5 @@ export const removeNodeAtom = atom(
     set(connectionsAtom, connections);
   }
 );
+
+export const isPlayingAtom = atom(false);

@@ -1,9 +1,11 @@
-import { useSetAtom } from "jotai";
+import { start, stop } from "audio/audioGraph";
+import { useAtom, useSetAtom } from "jotai";
 import { useEffect } from "react";
-import { cursorModeAtom } from "state";
+import { cursorModeAtom, isPlayingAtom } from "state";
 
 export function useSetupHotkeys() {
   const setCursorMode = useSetAtom(cursorModeAtom);
+  const [isPlaying, setIsPlaying] = useAtom(isPlayingAtom);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -28,6 +30,17 @@ export function useSetupHotkeys() {
           setCursorMode("sequencer");
           break;
         }
+        case " ": {
+          e.preventDefault();
+          const playing = !isPlaying;
+          setIsPlaying(playing);
+          if (playing) {
+            start();
+          } else {
+            stop();
+          }
+          break;
+        }
       }
     };
     window.addEventListener("keydown", handleKeyDown);
@@ -35,5 +48,5 @@ export function useSetupHotkeys() {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, []);
+  }, [isPlaying, setIsPlaying, setCursorMode]);
 }
