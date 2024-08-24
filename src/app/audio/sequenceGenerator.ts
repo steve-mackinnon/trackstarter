@@ -1,44 +1,57 @@
 import { NoteWithOctave, Scale, Note as TNote } from "tonal";
 import { Note, SequencerEvent } from "./audioGraph";
 
-export type Mood =
-  | "Uplifting"
-  | "Dark"
-  | "Exotic"
-  | "Mysterious"
-  | "Dramatic"
-  | "Sophisticated"
-  | "Dreamy"
-  | "Groovy"
-  | "Surreal";
+export type Mood = "Uplifting" | "Dark" | "Exotic"; // | "Mysterious"
+// | "Dramatic"
+// | "Sophisticated"
+// | "Dreamy"
+// | "Groovy"
+// | "Surreal";
 
 const MOOD_TO_SCALE: Record<Mood, string> = {
   Dark: "aeolian",
-  Dramatic: "harmonic minor",
-  Dreamy: "lydian",
+  // Dramatic: "harmonic minor",
+  // Dreamy: "lydian",
   Exotic: "phrygian",
-  Groovy: "mixolydian",
-  Mysterious: "whole tone",
-  Sophisticated: "melodic minor",
-  Surreal: "augmented",
+  // Groovy: "mixolydian",
+  // Mysterious: "whole tone",
+  // Sophisticated: "melodic minor",
+  // Surreal: "augmented",
   Uplifting: "ionian",
+};
+
+const MOOD_TO_PROGRESSIONS: Record<Mood, string[]> = {
+  Dark: ["1-4-1-5", "1-6-1-7", "1-7-6-7", "1-6-3-7"],
+  Uplifting: [
+    "1-5-6-4",
+    "1-4-5-1",
+    "1-6-4-5",
+    "1-4-6-5",
+    "6-4-1-5",
+    "1-5-4-5",
+    "1-4-1-5",
+  ],
+  Exotic: ["1-5-6-4", "1-4-5-1", "1-2-3-7"],
 };
 
 const MOODS: Mood[] = [
   "Uplifting",
   "Dark",
-  "Dramatic",
-  "Dreamy",
+  // "Dramatic",
+  // "Dreamy",
   "Exotic",
-  "Groovy",
-  "Mysterious",
-  "Sophisticated",
-  "Surreal",
-  "Uplifting",
+  // "Groovy",
+  // "Mysterious",
+  // "Sophisticated",
+  // "Surreal",
 ];
 
 function getRandomValue<T>(array: T[]): T {
   return array[Math.floor(Math.random() * (array.length - 1))];
+}
+
+function convertChordProgression(progression: string): number[] {
+  return progression.split("-").map((chord) => parseInt(chord, 10) - 1);
 }
 
 export function getRandomMood(): Mood {
@@ -85,7 +98,9 @@ export function generateChordProgression(
   notesPerChord: number
 ): string[][] {
   const notes = Scale.get(`${rootNote}4 ${MOOD_TO_SCALE[mood]}`);
-  const chordDegrees = [0, 3, 0, 4];
+  const chordDegrees = convertChordProgression(
+    getRandomValue(MOOD_TO_PROGRESSIONS[mood])
+  );
   return chordDegrees.map((degree) =>
     chordForScale(notes, degree, notesPerChord)
   );
