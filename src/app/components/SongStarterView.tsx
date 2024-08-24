@@ -1,6 +1,6 @@
 "use client";
 
-import { render, SequencerProps, start } from "audio/audioGraph";
+import { render, start, stop } from "audio/audioGraph";
 import { defaultSequencerProps, osc, output, sequencer } from "audio/nodes";
 import {
   chordProgressionToSequencerEvents,
@@ -19,20 +19,20 @@ export function SongStarterView() {
       <TransportButton className="absolute flex left-1/2 top-5 " />
       <button
         onClick={() => {
-          const chords = generateChordProgression("Dark");
+          const chords = generateChordProgression("Dark", 5);
           const sequence = chordProgressionToSequencerEvents(chords);
-          const sequencerProps: SequencerProps = {
-            ...defaultSequencerProps(),
-            destinationNodes: ["0"],
-            notes: sequence,
-            length: 128,
-          };
           render(
             output(undefined, [
-              sequencer(sequencerProps),
+              sequencer({
+                ...defaultSequencerProps(),
+                destinationNodes: ["0"],
+                notes: sequence,
+                length: 64,
+              }),
               osc({ type: "sine", detune: 0 }, [], "0"),
             ])
           );
+          stop();
           start();
         }}
       >

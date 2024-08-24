@@ -1,4 +1,4 @@
-import { NoteWithOctave, Scale } from "tonal";
+import { NoteWithOctave, Scale, Note as TNote } from "tonal";
 import { Note, SequencerEvent } from "./audioGraph";
 
 export type Mood =
@@ -40,10 +40,15 @@ export function generateSequence(
   );
 }
 
-export function generateChordProgression(mood: Mood): string[][] {
-  const notes = Scale.get(`C4 ${MOOD_TO_SCALE[mood]}`).notes;
+export function generateChordProgression(
+  mood: Mood,
+  notesPerChord: number
+): string[][] {
+  const notes = Scale.get(`C4 ${MOOD_TO_SCALE[mood]}`);
   const chordDegrees = [0, 3, 0, 4];
-  return chordDegrees.map((degree) => chordForScale(notes, degree, 4));
+  return chordDegrees.map((degree) =>
+    chordForScale(notes, degree, notesPerChord)
+  );
 }
 
 export function chordProgressionToSequencerEvents(
@@ -54,8 +59,8 @@ export function chordProgressionToSequencerEvents(
     chord.forEach((note) => {
       events.push({
         note,
-        startStep: chordIndex * 32,
-        endStep: chordIndex * 32 + 32,
+        startStep: chordIndex * 16,
+        endStep: chordIndex * 16 + 16,
       });
     });
   });
@@ -63,11 +68,19 @@ export function chordProgressionToSequencerEvents(
 }
 
 function chordForScale(
-  scaleNotes: string[],
+  scale: Scale.Scale,
   rootDegree: number,
   numNotesInChord: number
 ): string[] {
   return Array.from({ length: numNotesInChord }).map((_, i) => {
-    return scaleNotes[(rootDegree + i * 2) % scaleNotes.length];
+    let note = scale.notes[(rootDegree + i * 2) % scale.notes.length];
+    if (Math.random() < 0.3) {
+      // Shift up an octave
+      note = TNote.transpose(note, "8P");
+    } else if (Math.random() < 0.3) {
+      // Shift down an octave
+      note = TNote.transpose(note, "-8P");
+    }
+    return note;
   });
 }
