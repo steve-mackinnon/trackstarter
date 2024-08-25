@@ -15,12 +15,12 @@ const MOOD_CHOICES: Mood[] = [
   "Uplifting",
   "Dark",
   "Exotic",
-  "Mysterious",
-  "Dramatic",
-  "Sophisticated",
-  "Dreamy",
-  "Groovy",
-  "Surreal",
+  // "Mysterious",
+  // "Dramatic",
+  // "Sophisticated",
+  // "Dreamy",
+  // "Groovy",
+  // "Surreal",
 ];
 
 export function SequencerNode(props: {
