@@ -3,10 +3,11 @@ import { defaultSequencerProps, osc, output, sequencer } from "audio/nodes";
 import { chordProgressionToSequencerEvents } from "audio/sequenceGenerator";
 import { useAtomValue } from "jotai";
 import { useEffect } from "react";
-import { chordProgressionAtom } from "state";
+import { chordProgressionAtom, harmonySynthParamsAtom } from "state";
 
 export function useRenderAudioGraph() {
   const chordProgression = useAtomValue(chordProgressionAtom);
+  const harmonySynthParams = useAtomValue(harmonySynthParamsAtom);
 
   useEffect(() => {
     if (!chordProgression) {
@@ -23,7 +24,7 @@ export function useRenderAudioGraph() {
           notes: sequence,
           length: 64,
         }),
-        osc({ type: "sine", detune: 0 }, [], "0"),
+        osc(harmonySynthParams, [], "0"),
       ])
     );
     AudioGraph.stop();
