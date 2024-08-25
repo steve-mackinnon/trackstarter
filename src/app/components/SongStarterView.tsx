@@ -1,6 +1,6 @@
 "use client";
 
-import { render, start, stop } from "audio/audioGraph";
+import * as AudioGraph from "audio/audioGraph";
 import { defaultSequencerProps, osc, output, sequencer } from "audio/nodes";
 import {
   chordProgressionToSequencerEvents,
@@ -27,7 +27,7 @@ export function SongStarterView() {
             4
           );
           const sequence = chordProgressionToSequencerEvents(chords);
-          render(
+          AudioGraph.render(
             output(undefined, [
               sequencer({
                 ...defaultSequencerProps(),
@@ -38,8 +38,8 @@ export function SongStarterView() {
               osc({ type: "sine", detune: 0 }, [], "0"),
             ])
           );
-          stop();
-          start();
+          AudioGraph.stop();
+          AudioGraph.start();
         }}
       >
         Randomize Chord Progression
