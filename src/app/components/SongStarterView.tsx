@@ -42,11 +42,12 @@ export function SongStarterView() {
       <button
         className="bg-slate-700 h-16 p-5 rounded-xl hover:bg-slate-600 active:bg-slate-500"
         onClick={() => {
-          const chordProgression = generateChordProgression(
-            getRandomNote(),
-            getRandomMood(),
-            4
-          );
+          const chordProgression = generateChordProgression({
+            rootNote: getRandomNote(),
+            mood: getRandomMood(),
+            notesPerChord: 4,
+            octave: 3,
+          });
           setChordProgression(chordProgression);
           const sequence = chordProgressionToSequencerEvents(
             chordProgression.chordNotes

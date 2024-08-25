@@ -115,13 +115,19 @@ export interface ChordProgression {
   mood: Mood;
 }
 
-export function generateChordProgression(
-  rootNote: Note,
-  mood: Mood,
-  notesPerChord: number
-): ChordProgression {
+export function generateChordProgression({
+  rootNote,
+  mood,
+  notesPerChord,
+  octave,
+}: {
+  rootNote: Note;
+  mood: Mood;
+  notesPerChord: number;
+  octave: number;
+}): ChordProgression {
   const scale = MOOD_TO_SCALE[mood];
-  const notes = Scale.get(`${rootNote}4 ${scale}`);
+  const notes = Scale.get(`${rootNote}${octave} ${scale}`);
   const progression = getRandomValue(MOOD_TO_PROGRESSIONS[mood]);
   const chordDegrees = convertChordProgression(
     getRandomValue(MOOD_TO_PROGRESSIONS[mood])
@@ -162,10 +168,11 @@ function chordForScale(
 ): string[] {
   return Array.from({ length: numNotesInChord }).map((_, i) => {
     let note = scale.notes[(rootDegree + i * 2) % scale.notes.length];
-    if (Math.random() < 0.3) {
+    const freq = TNote.get(note).freq ?? 500;
+    if (Math.random() < 0.3 && freq < 700) {
       // Shift up an octave
       note = TNote.transpose(note, "8P");
-    } else if (Math.random() < 0.3) {
+    } else if (Math.random() < 0.3 && freq > 100) {
       // Shift down an octave
       note = TNote.transpose(note, "-8P");
     }
