@@ -20,7 +20,8 @@
     "paths": {
       "@/*": ["./src/app"]
     },
-    "baseUrl": "./src/app"
+    "baseUrl": "./src/app",
+    "target": "ES2015",
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]
