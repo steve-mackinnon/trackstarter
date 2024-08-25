@@ -16,6 +16,18 @@ import { useState } from "react";
 import { isPlayingAtom } from "state";
 import { TransportButton } from "./TransportButton";
 
+function InfoReadout({ label, value }: { label: string; value?: string }) {
+  if (!value) {
+    return null;
+  }
+  return (
+    <div className="inline-flex">
+      <b className="mr-2">{label}: </b>
+      <p>{value}</p>
+    </div>
+  );
+}
+
 export function SongStarterView() {
   useSetupHotkeys();
   useUpdateAudioGraphOnStateChange();
@@ -57,17 +69,13 @@ export function SongStarterView() {
       >
         Randomize Chord Progression
       </button>
-      <b className="block">Mood: </b>
-      {chordProgression?.mood}
-      <b className="block">Root: </b>
-      {chordProgression?.rootNote}
-      <b className="block">Progression: </b>
-      {chordProgression?.progression}
-      <b className="block">Chords: </b>
-      {chordProgression?.chordNames.map(
-        (cn, i) =>
-          `${cn}${i < chordProgression.chordNames.length - 1 ? "," : ""} `
-      )}
+      <InfoReadout label="Mood" value={chordProgression?.mood} />
+      <InfoReadout label="Root" value={chordProgression?.rootNote} />
+      <InfoReadout label="Progression" value={chordProgression?.progression} />
+      <InfoReadout
+        label="Chords"
+        value={chordProgression?.chordNames.join(", ")}
+      />
     </div>
   );
 }
