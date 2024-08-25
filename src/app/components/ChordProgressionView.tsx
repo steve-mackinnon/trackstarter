@@ -1,15 +1,10 @@
-import * as AudioGraph from "audio/audioGraph";
-import { defaultSequencerProps, osc, output, sequencer } from "audio/nodes";
 import {
-  ChordProgression,
-  chordProgressionToSequencerEvents,
   generateChordProgression,
   getRandomMood,
   getRandomNote,
 } from "audio/sequenceGenerator";
-import { useSetAtom } from "jotai";
-import { useState } from "react";
-import { isPlayingAtom } from "state";
+import { useAtom, useSetAtom } from "jotai";
+import { chordProgressionAtom, isPlayingAtom } from "state";
 
 function InfoReadout({ label, value }: { label: string; value?: string }) {
   if (!value) {
@@ -24,9 +19,7 @@ function InfoReadout({ label, value }: { label: string; value?: string }) {
 }
 
 export function ChordProgressionView() {
-  const [chordProgression, setChordProgression] = useState<
-    ChordProgression | undefined
-  >();
+  const [chordProgression, setChordProgression] = useAtom(chordProgressionAtom);
   const setIsPlaying = useSetAtom(isPlayingAtom);
 
   return (
@@ -41,22 +34,6 @@ export function ChordProgressionView() {
             octave: 3,
           });
           setChordProgression(chordProgression);
-          const sequence = chordProgressionToSequencerEvents(
-            chordProgression.chordNotes
-          );
-          AudioGraph.render(
-            output(undefined, [
-              sequencer({
-                ...defaultSequencerProps(),
-                destinationNodes: ["0"],
-                notes: sequence,
-                length: 64,
-              }),
-              osc({ type: "sine", detune: 0 }, [], "0"),
-            ])
-          );
-          AudioGraph.stop();
-          AudioGraph.start();
           setIsPlaying(true);
         }}
       >

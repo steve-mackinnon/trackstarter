@@ -1,4 +1,5 @@
 import { Node } from "audio/audioGraph";
+import { ChordProgression } from "audio/sequenceGenerator";
 import { produce } from "immer";
 import { atom } from "jotai";
 
@@ -115,3 +116,5 @@ export const removeNodeAtom = atom(
 );
 
 export const isPlayingAtom = atom(false);
+
+export const chordProgressionAtom = atom<ChordProgression | null>(null);
