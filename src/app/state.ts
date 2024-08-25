@@ -1,4 +1,4 @@
-import { Node } from "audio/audioGraph";
+import { Node, OscProps } from "audio/audioGraph";
 import { ChordProgression } from "audio/sequenceGenerator";
 import { produce } from "immer";
 import { atom } from "jotai";
@@ -118,3 +118,7 @@ export const removeNodeAtom = atom(
 export const isPlayingAtom = atom(false);
 
 export const chordProgressionAtom = atom<ChordProgression | null>(null);
+export const harmonySynthParamsAtom = atom<OscProps>({
+  type: "sine",
+  detune: 0,
+});
