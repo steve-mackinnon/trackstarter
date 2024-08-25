@@ -2,8 +2,8 @@
 
 import { useRenderAudioGraph } from "common/hooks/useRenderAudioGraph";
 import { useSetupHotkeys } from "common/hooks/useSetupHotkeys";
-import { ChordProgressionView } from "./ChordProgressionView";
-import { HarmonySynthControls } from "./HarmonySynthControls";
+import { ChordProgressionControls } from "./ChordProgressionControls";
+import { ChordProgressionInfo } from "./ChordProgressionInfo";
 import { TransportButton } from "./TransportButton";
 
 export function SongStarterView() {
@@ -11,10 +11,10 @@ export function SongStarterView() {
   useRenderAudioGraph();
 
   return (
-    <div className="bg-black absolute flex flex-col gap-y-1 w-full h-full justify-center items-center">
+    <div className="bg-black absolute flex flex-col gap-y-4 w-full h-full py-32  items-center">
       <TransportButton className="absolute flex top-5 " />
-      <ChordProgressionView />
-      <HarmonySynthControls />
+      <ChordProgressionControls />
+      <ChordProgressionInfo />
     </div>
   );
 }

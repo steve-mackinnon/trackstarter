@@ -135,7 +135,7 @@ export const MOOD_TO_PROGRESSIONS = {
   ],
 } as const;
 
-const MOODS: Mood[] = [
+export const MOODS: Mood[] = [
   "Uplifting",
   "Dark",
   "Dramatic",
