@@ -26,11 +26,17 @@ export class Sequencer {
     private buildOsc: (destNode: Node) => OscillatorNode
   ) {}
 
-  setNode(node: SequencerNode) {
+  // Map from step index when osc stops to osc nodes
+  private activeOscMap: Map<number, OscillatorNode[]> = new Map();
+
+  public setNode(node: SequencerNode) {
     this.node = node;
   }
 
-  playStep(stepIndex: number, time: number) {
+  public playStep(stepIndex: number, time: number) {
+    // All active oscs at stepIndex are now stopped, so drop those refs
+    this.activeOscMap.delete(stepIndex);
+
     stepIndex = stepIndex % this.node.props.length;
     // TODO: proper type guard for SequencerEvent[]
     if (
@@ -75,6 +81,13 @@ export class Sequencer {
     }
   }
 
+  public stop() {
+    for (const [_, oscs] of this.activeOscMap) {
+      oscs.forEach((osc) => osc.stop());
+    }
+    this.activeOscMap.clear();
+  }
+
   private playSequencerEvents(
     stepIndex: number,
     time: number,
@@ -104,7 +117,19 @@ export class Sequencer {
         osc.start(time);
         const eventDuration = (event.endStep - event.startStep) * stepDuration;
         osc.stop(time + eventDuration);
+
+        this.addToOscMap(osc, event.endStep);
       }
+    }
+  }
+
+  private addToOscMap(osc: OscillatorNode, endStep: number) {
+    const cleanupIndex = (endStep + 1) % this.node.props.length;
+    const existingOscs = this.activeOscMap.get(cleanupIndex);
+    if (existingOscs) {
+      existingOscs.push(osc);
+    } else {
+      this.activeOscMap.set(cleanupIndex, [osc]);
     }
   }
 }

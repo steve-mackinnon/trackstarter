@@ -90,6 +90,7 @@ export function render(newRoot: Node) {
 
 let hasStarted = false;
 let stepIndex = 0;
+let playing = false;
 const SEQUENCE_LENGTH = 1024;
 
 export function start() {
@@ -97,27 +98,29 @@ export function start() {
   Tone.getTransport().loop = true;
   Tone.getTransport().setLoopPoints("1:1:1", "17:1:1");
   Tone.getTransport().start();
+  playing = true;
   if (hasStarted) {
     return;
   }
   Tone.getTransport().scheduleRepeat((t) => {
-    if (!currentRoot || !currentRoot.children) {
+    if (!playing || !currentRoot || !currentRoot.children) {
       return;
     }
-    // Assume all sequencers are top-level children
-    for (const child of currentRoot.children.filter(
-      (n) => n.type === "sequencer"
-    )) {
-      child.backingNode?.playStep(stepIndex, t);
-    }
+    applyToSequencers(currentRoot, (seq) =>
+      seq.backingNode?.playStep(stepIndex, t)
+    );
     stepIndex = (stepIndex + 1) % SEQUENCE_LENGTH;
   }, "16n");
   hasStarted = true;
 }
 
 export function stop() {
+  playing = false;
   Tone.getTransport().stop();
   stepIndex = 0;
+  if (currentRoot) {
+    applyToSequencers(currentRoot, (seq) => seq.backingNode?.stop());
+  }
 }
 
 type NodeProps<T extends Node["type"]> = Extract<Node, { type: T }>["props"];
@@ -331,4 +334,10 @@ function buildAudioGraph({
   }
   applyPropUpdates(newNode, currentNode);
   return applyChildNodeUpdates(newNode, currentNode);
+}
+
+function applyToSequencers(root: Node, fn: (seq: SequencerNode) => void) {
+  root.children
+    ?.filter((n) => n.type === "sequencer")
+    .forEach((seq) => fn(seq));
 }
