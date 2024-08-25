@@ -6,7 +6,7 @@ import { ChordProgressionControls } from "./ChordProgressionControls";
 import { ChordProgressionInfo } from "./ChordProgressionInfo";
 import { TransportButton } from "./TransportButton";
 
-export function SongStarterView() {
+export default function SongStarterView() {
   useSetupHotkeys();
   useRenderAudioGraph();
 
