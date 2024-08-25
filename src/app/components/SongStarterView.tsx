@@ -3,6 +3,7 @@
 import * as AudioGraph from "audio/audioGraph";
 import { defaultSequencerProps, osc, output, sequencer } from "audio/nodes";
 import {
+  ChordProgression,
   chordProgressionToSequencerEvents,
   generateChordProgression,
   getRandomMood,
@@ -10,24 +11,31 @@ import {
 } from "audio/sequenceGenerator";
 import { useSetupHotkeys } from "common/hooks/useSetupHotkeys";
 import { useUpdateAudioGraphOnStateChange } from "common/hooks/useUpdateAudioGraphOnStateChange";
+import { useState } from "react";
 import { TransportButton } from "./TransportButton";
 
 export function SongStarterView() {
   useSetupHotkeys();
   useUpdateAudioGraphOnStateChange();
+  const [chordProgression, setChordProgression] = useState<
+    ChordProgression | undefined
+  >();
 
   return (
-    <div className="bg-black absolute flex w-full h-full justify-center items-center">
+    <div className="bg-black absolute flex flex-col gap-y-1 w-full h-full justify-center items-center">
       <TransportButton className="absolute flex top-5 " />
       <button
         className="bg-slate-700 h-16 p-5 rounded-xl hover:bg-slate-600 active:bg-slate-500"
         onClick={() => {
-          const chords = generateChordProgression(
+          const chordProgression = generateChordProgression(
             getRandomNote(),
             getRandomMood(),
             4
           );
-          const sequence = chordProgressionToSequencerEvents(chords);
+          setChordProgression(chordProgression);
+          const sequence = chordProgressionToSequencerEvents(
+            chordProgression.chordNotes
+          );
           AudioGraph.render(
             output(undefined, [
               sequencer({
@@ -45,6 +53,17 @@ export function SongStarterView() {
       >
         Randomize Chord Progression
       </button>
+      <b className="block">Mood: </b>
+      {chordProgression?.mood}
+      <b className="block">Root: </b>
+      {chordProgression?.rootNote}
+      <b className="block">Progression: </b>
+      {chordProgression?.progression}
+      <b className="block">Chords: </b>
+      {chordProgression?.chordNames.map(
+        (cn, i) =>
+          `${cn}${i < chordProgression.chordNames.length - 1 ? "," : ""} `
+      )}
     </div>
   );
 }

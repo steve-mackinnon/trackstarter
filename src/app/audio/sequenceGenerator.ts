@@ -1,4 +1,4 @@
-import { NoteWithOctave, Scale, Note as TNote } from "tonal";
+import { Chord, NoteWithOctave, Scale, Note as TNote } from "tonal";
 import { SequencerEvent } from "./audioGraph";
 
 export type Mood = "Uplifting" | "Dark" | "Exotic"; // | "Mysterious"
@@ -106,18 +106,37 @@ export function generateSequence(
   );
 }
 
+export interface ChordProgression {
+  chordNotes: string[][];
+  chordNames: string[];
+  progression: string;
+  scale: string;
+  rootNote: string;
+  mood: Mood;
+}
+
 export function generateChordProgression(
   rootNote: Note,
   mood: Mood,
   notesPerChord: number
-): string[][] {
-  const notes = Scale.get(`${rootNote}4 ${MOOD_TO_SCALE[mood]}`);
+): ChordProgression {
+  const scale = MOOD_TO_SCALE[mood];
+  const notes = Scale.get(`${rootNote}4 ${scale}`);
+  const progression = getRandomValue(MOOD_TO_PROGRESSIONS[mood]);
   const chordDegrees = convertChordProgression(
     getRandomValue(MOOD_TO_PROGRESSIONS[mood])
   );
-  return chordDegrees.map((degree) =>
+  const chordNotes = chordDegrees.map((degree) =>
     chordForScale(notes, degree, notesPerChord)
   );
+  return {
+    chordNotes,
+    chordNames: chordNotes.map((notes) => Chord.detect(notes)[0]),
+    progression,
+    scale,
+    mood,
+    rootNote,
+  };
 }
 
 export function chordProgressionToSequencerEvents(
