@@ -17,9 +17,10 @@ export function SongStarterView() {
   useUpdateAudioGraphOnStateChange();
 
   return (
-    <div className="bg-black absolute flex w-full h-full">
-      <TransportButton className="absolute flex left-1/2 top-5 " />
+    <div className="bg-black absolute flex w-full h-full justify-center items-center">
+      <TransportButton className="absolute flex top-5 " />
       <button
+        className="bg-slate-700 h-16 p-5 rounded-xl hover:bg-slate-600 active:bg-slate-500"
         onClick={() => {
           const chords = generateChordProgression(
             getRandomNote(),
