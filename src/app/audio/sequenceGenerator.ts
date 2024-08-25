@@ -1,5 +1,5 @@
 import { NoteWithOctave, Scale, Note as TNote } from "tonal";
-import { Note, SequencerEvent } from "./audioGraph";
+import { SequencerEvent } from "./audioGraph";
 
 export type Mood = "Uplifting" | "Dark" | "Exotic"; // | "Mysterious"
 // | "Dramatic"
@@ -57,6 +57,20 @@ function convertChordProgression(progression: string): number[] {
 export function getRandomMood(): Mood {
   return getRandomValue(MOODS);
 }
+
+export type Note =
+  | "C"
+  | "C#"
+  | "D"
+  | "D#"
+  | "E"
+  | "F"
+  | "F#"
+  | "G"
+  | "G#"
+  | "A"
+  | "A#"
+  | "B";
 
 const NOTES: Note[] = [
   "A",

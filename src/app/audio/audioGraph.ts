@@ -14,8 +14,7 @@ interface BaseNode {
   children?: Node[];
   type: NodeType;
   key?: string;
-  sequencer?: Sequencer;
-  parent?: AudioNode;
+  parentBackingNode?: AudioNode;
 }
 
 export interface OscProps {
@@ -26,7 +25,7 @@ export interface OscProps {
 export interface OscNode extends BaseNode {
   type: "osc";
   props: OscProps;
-  audioNode?: OscillatorNode;
+  backingNode?: OscillatorNode;
 }
 
 export interface FilterProps {
@@ -37,28 +36,14 @@ export interface FilterProps {
 export interface FilterNode extends BaseNode {
   type: "filter";
   props: FilterProps;
-  audioNode?: BiquadFilterNode;
+  backingNode?: BiquadFilterNode;
 }
 
 export interface DestinationNode extends BaseNode {
   type: "destination";
   props: any;
-  audioNode?: never;
+  backingNode?: never;
 }
-
-export type Note =
-  | "C"
-  | "C#"
-  | "D"
-  | "D#"
-  | "E"
-  | "F"
-  | "F#"
-  | "G"
-  | "G#"
-  | "A"
-  | "A#"
-  | "B";
 
 export interface SequencerEvent {
   note: string;
@@ -87,7 +72,7 @@ export interface SequencerProps {
 export interface SequencerNode extends BaseNode {
   type: "sequencer";
   props: SequencerProps;
-  audioNode?: any;
+  backingNode?: Sequencer;
 }
 
 export type Node = OscNode | FilterNode | SequencerNode | DestinationNode;
@@ -98,7 +83,7 @@ export function render(newRoot: Node) {
   newRoot = buildAudioGraph({
     newNode: newRoot,
     currentNode: currentRoot,
-    parentNode: null,
+    parentBackingNode: null,
   });
   currentRoot = produce(currentRoot, () => newRoot);
 }
@@ -120,8 +105,10 @@ export function start() {
       return;
     }
     // Assume all sequencers are top-level children
-    for (const child of currentRoot.children) {
-      child.sequencer?.playStep(stepIndex, t);
+    for (const child of currentRoot.children.filter(
+      (n) => n.type === "sequencer"
+    )) {
+      child.backingNode?.playStep(stepIndex, t);
     }
     stepIndex = (stepIndex + 1) % SEQUENCE_LENGTH;
   }, "16n");
@@ -159,10 +146,10 @@ export function setProperty<
 let currentRoot: DestinationNode | null = null;
 
 function applyNodeProps(node: Node) {
-  if (node.type === "filter" && node.audioNode) {
-    node.audioNode.frequency.value = node.props.frequency;
-    node.audioNode.type = node.props.type;
-    node.audioNode.Q.value = node.props.q;
+  if (node.type === "filter" && node.backingNode) {
+    node.backingNode.frequency.value = node.props.frequency;
+    node.backingNode.type = node.props.type;
+    node.backingNode.Q.value = node.props.q;
   }
 }
 
@@ -176,7 +163,7 @@ function buildOscNode(node: OscNode): OscillatorNode {
   gainNode.gain.value = 0.1;
   oscNode.connect(gainNode);
 
-  const dest = node.parent;
+  const dest = node.parentBackingNode;
   if (!dest) {
     throw new Error(
       "Missing parent node to connect to. Some audio will not be generated"
@@ -205,7 +192,7 @@ function findNodeWithKey(root: Node | null, key: string): Node | null {
   return null;
 }
 
-function buildAudioNode(node: Node): AudioNode | Sequencer | null {
+function buildBackingNode(node: Node): AudioNode | Sequencer | null {
   switch (node.type) {
     case "osc": {
       // Osc nodes are created dynamically when they are triggered by a sequence
@@ -231,7 +218,9 @@ function deleteNode(node: Node) {
   if (node.children) {
     node.children.forEach((n) => deleteNode(n));
   }
-  node.audioNode?.disconnect();
+  if (node.backingNode && node.backingNode instanceof AudioNode) {
+    node.backingNode?.disconnect();
+  }
 }
 
 function applyPropUpdates(newNode: Node, currentNode: Node | null) {
@@ -267,11 +256,15 @@ function applyChildNodeUpdates(
         currentParent.children.length > index
           ? currentParent.children[index]
           : null;
+      const backingNode =
+        newParent.backingNode instanceof AudioNode
+          ? newParent.backingNode
+          : null;
       newParent = produce(newParent, (parent) => {
         parent.children![index] = buildAudioGraph({
           newNode: newChild,
           currentNode: currentChild,
-          parentNode: newParent.audioNode ?? null,
+          parentBackingNode: backingNode,
         });
       });
     });
@@ -302,11 +295,11 @@ function applyChildNodeUpdates(
 function buildAudioGraph({
   newNode,
   currentNode,
-  parentNode,
+  parentBackingNode,
 }: {
   newNode: Node;
   currentNode: Node | null;
-  parentNode: AudioNode | null;
+  parentBackingNode: AudioNode | null;
 }): Node {
   const keyMatch = newNode.key && newNode.key === currentNode?.key;
   const addNode =
@@ -317,31 +310,24 @@ function buildAudioGraph({
       deleteNode(currentNode);
     }
     newNode = produce(newNode, (node) => {
-      node.parent = parentNode ?? undefined;
+      node.parentBackingNode = parentBackingNode ?? undefined;
     });
     // Build the new audio node
-    const nodeOrSequencer = buildAudioNode(newNode);
-    if (nodeOrSequencer instanceof AudioNode) {
-      newNode = produce(newNode, (node) => {
-        node.audioNode = nodeOrSequencer;
-      });
-      applyNodeProps(newNode);
-      if (parentNode) {
-        newNode.audioNode?.connect(parentNode);
-      }
-    } else if (nodeOrSequencer instanceof Sequencer) {
-      newNode = produce(newNode, (node) => {
-        node.sequencer = nodeOrSequencer;
-      });
+    newNode = produce(newNode, (node) => {
+      node.backingNode = buildBackingNode(newNode) as any;
+    });
+    applyNodeProps(newNode);
+    if (parentBackingNode && newNode.backingNode instanceof AudioNode) {
+      newNode.backingNode.connect(parentBackingNode);
     }
   } else {
     newNode = produce(newNode, (node) => {
-      node.parent = currentNode.parent;
-      node.audioNode = currentNode.audioNode;
-      node.sequencer = currentNode.sequencer;
+      node.parentBackingNode = currentNode.parentBackingNode;
+      node.backingNode = currentNode.backingNode;
     });
-    // Ensures the sequencer is updated with any new props
-    newNode.sequencer?.setNode(newNode as SequencerNode);
+    if (newNode.backingNode instanceof Sequencer) {
+      newNode.backingNode.setNode(newNode as SequencerNode);
+    }
   }
   applyPropUpdates(newNode, currentNode);
   return applyChildNodeUpdates(newNode, currentNode);
