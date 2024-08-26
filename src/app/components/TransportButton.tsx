@@ -8,7 +8,7 @@ export function TransportButton({ className }: { className: string }) {
 
   return (
     <button
-      className={className + " w-10 h-10 justify-center items-center"}
+      className={className + " w-12 h-12 justify-center items-center"}
       onClick={() => {
         const play = !playing;
         setPlaying(play);

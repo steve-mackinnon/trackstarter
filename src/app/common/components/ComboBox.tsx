@@ -5,6 +5,7 @@ interface ComboBoxProps<T extends string, U extends T> {
   choices: readonly T[];
   defaultValue: U;
   onChange: (value: T) => void;
+  className?: string;
 }
 
 export function ComboBox<T extends string, U extends T>(
@@ -18,7 +19,9 @@ export function ComboBox<T extends string, U extends T>(
         {props.label}
       </label>
       <select
-        className="text-black"
+        className={`${
+          props.className ?? ""
+        } bg-black border-white border rounded-lg`}
         name={props.label}
         id={props.label}
         onChange={(e) => {

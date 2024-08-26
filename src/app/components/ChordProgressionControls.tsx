@@ -44,6 +44,7 @@ export function ChordProgressionControls() {
 
       <div className="w-64 space-y-2">
         <ComboBox
+          className="w-32"
           label="Osc"
           choices={["sine", "sawtooth", "square", "triangle"]}
           defaultValue={
@@ -55,6 +56,7 @@ export function ChordProgressionControls() {
           }}
         />
         <ComboBox
+          className="w-32"
           label="Mood"
           choices={(MOODS as string[]).concat("Any")}
           onChange={(newMood: string | null) => {
