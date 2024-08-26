@@ -19,7 +19,8 @@
     "react": "^18",
     "react-dom": "^18",
     "tonal": "^6.2.0",
-    "tone": "^15.0.4"
+    "tone": "^15.0.4",
+    "unmute-ios-audio": "^3.3.0"
   },
   "devDependencies": {
     "@types/node": "^20",
