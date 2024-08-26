@@ -3,8 +3,8 @@ import * as Tone from "tone";
 import unmuteIosAudio from "unmute-ios-audio";
 import { Sequencer } from "./sequencer";
 
-const context = new AudioContext();
 unmuteIosAudio();
+const context = new AudioContext();
 
 // Disable auto freezing in immer so we can mutate the current state when
 // setting props
