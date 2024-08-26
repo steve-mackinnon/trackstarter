@@ -280,6 +280,23 @@ export function chordProgressionToSequencerEvents(
   return events;
 }
 
+function transposeBySemitones(
+  noteWithOctave: string,
+  transpose: number
+): string {
+  const note = noteWithOctave.substring(0, noteWithOctave.length - 1);
+  const index = NOTES.findIndex((n) => n.toLowerCase() === note.toLowerCase());
+  if (index === -1) {
+    return "";
+  }
+  const octaveIncrement = index === 0 ? -1 : index === NOTES.length - 1 ? 1 : 0;
+  let octave =
+    parseInt(noteWithOctave.charAt(noteWithOctave.length - 1)) +
+    octaveIncrement;
+  const newIndex = (index + transpose) % NOTES.length;
+  return `${NOTES[newIndex]}${octave}`;
+}
+
 export function chordForScale(
   scale: Scale.Scale,
   rootDegree: ScaleDegree,
@@ -289,8 +306,8 @@ export function chordForScale(
     let note = scale.notes[(rootDegree.index + i * 2) % scale.notes.length];
     if (rootDegree.alteration && i === 0) {
       // Sharpen or flatten the root if requested
-      const shiftAmount = rootDegree.alteration === "flat" ? "-1m" : "1m";
-      note = TNote.transpose(note, shiftAmount);
+      const shiftAmount = rootDegree.alteration === "flat" ? -1 : 1;
+      note = transposeBySemitones(note, shiftAmount);
     }
     const freq = TNote.get(note).freq ?? 500;
     if (Math.random() < 0.3 && freq < 700) {
