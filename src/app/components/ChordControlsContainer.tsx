@@ -11,7 +11,7 @@ export function ChordControlsContainer() {
   return (
     <div className="flex justify-between w-72">
       {chordProgression.chordNames.map((_, i) => (
-        <ChordControls chordIndex={i} />
+        <ChordControls key={i} chordIndex={i} />
       ))}
     </div>
   );
