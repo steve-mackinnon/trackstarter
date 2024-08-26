@@ -12,6 +12,7 @@
     "@tonaljs/note": "^4.11.0",
     "@tonaljs/scale": "^4.13.0",
     "@tonaljs/scale-type": "^4.9.0",
+    "classnames": "^2.5.1",
     "immer": "^10.1.1",
     "jotai": "^2.9.3",
     "lucide-react": "^0.428.0",

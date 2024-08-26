@@ -150,6 +150,10 @@ export function setProperty<
   }
 }
 
+export function getCurrentStep(): number {
+  return stepIndex;
+}
+
 let currentRoot: DestinationNode | null = null;
 
 function applyNodeProps(node: Node) {

@@ -34,11 +34,12 @@ export function filter(props: FilterProps, children: Node[]): FilterNode {
   };
 }
 
-export function sequencer(props: SequencerProps): SequencerNode {
+export function sequencer(props: SequencerProps, key?: string): SequencerNode {
   return {
     type: "sequencer",
     props,
     children: [],
+    key,
   };
 }
 
