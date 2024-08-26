@@ -6,7 +6,6 @@ import { chordProgressionAtom, isPlayingAtom } from "state";
 
 export function ChordControls({ chordIndex }: { chordIndex: number }) {
   const [chordProgression, setChordProgression] = useAtom(chordProgressionAtom);
-  const chordName = chordProgression?.chordNames[chordIndex];
   const setIsPlaying = useSetAtom(isPlayingAtom);
   const renderAudioGraph = useRenderAudioGraph();
 
