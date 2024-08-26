@@ -1,21 +1,32 @@
 import * as AudioGraph from "audio/audioGraph";
 import { defaultSequencerProps, osc, output, sequencer } from "audio/nodes";
-import { chordProgressionToSequencerEvents } from "audio/sequenceGenerator";
+import {
+  ChordProgression,
+  chordProgressionToSequencerEvents,
+} from "audio/sequenceGenerator";
 import { useAtomValue } from "jotai";
-import { useEffect } from "react";
 import { chordProgressionAtom, harmonySynthParamsAtom } from "state";
 
 export function useRenderAudioGraph() {
-  const chordProgression = useAtomValue(chordProgressionAtom);
-  const harmonySynthParams = useAtomValue(harmonySynthParamsAtom);
+  const progressionState = useAtomValue(chordProgressionAtom);
+  const harmonySynthParamsState = useAtomValue(harmonySynthParamsAtom);
 
-  useEffect(() => {
-    if (!chordProgression) {
+  return ({
+    progression,
+    harmonySynthParams,
+    startStep,
+  }: {
+    progression?: ChordProgression;
+    harmonySynthParams?: AudioGraph.OscProps;
+    startStep?: number;
+  }) => {
+    const prog = progression ?? progressionState;
+    if (!prog) {
       return;
     }
-    const sequence = chordProgressionToSequencerEvents(
-      chordProgression.chordNotes
-    );
+    const params = harmonySynthParams ?? harmonySynthParamsState;
+
+    const sequence = chordProgressionToSequencerEvents(prog.chordNotes);
     AudioGraph.render(
       output(undefined, [
         sequencer({
@@ -24,10 +35,10 @@ export function useRenderAudioGraph() {
           notes: sequence,
           length: 64,
         }),
-        osc(harmonySynthParams, [], "0"),
+        osc(params, [], "0"),
       ])
     );
     AudioGraph.stop();
-    AudioGraph.start();
-  }, [chordProgression]);
+    AudioGraph.start(startStep);
+  };
 }

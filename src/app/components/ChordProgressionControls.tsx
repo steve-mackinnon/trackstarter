@@ -7,6 +7,7 @@ import {
   MOODS,
 } from "audio/sequenceGenerator";
 import { ComboBox } from "common/components/ComboBox";
+import { useRenderAudioGraph } from "common/hooks/useRenderAudioGraph";
 import { useAtom, useSetAtom } from "jotai";
 import { Dices } from "lucide-react";
 import { useState } from "react";
@@ -21,6 +22,7 @@ export function ChordProgressionControls() {
   const setIsPlaying = useSetAtom(isPlayingAtom);
   const [mood, setMood] = useState<Mood | null>(null);
   const setChordProgression = useSetAtom(chordProgressionAtom);
+  const renderAudioGraph = useRenderAudioGraph();
 
   const generateNewChordProgression = (mood: Mood | null) => {
     const chordProgression = generateChordProgression({
@@ -30,6 +32,7 @@ export function ChordProgressionControls() {
       octave: 3,
     });
     setChordProgression(chordProgression);
+    renderAudioGraph({ progression: chordProgression });
     setIsPlaying(true);
   };
 
@@ -51,8 +54,10 @@ export function ChordProgressionControls() {
             params.type as "sine" | "sawtooth" | "square" | "triangle"
           }
           onChange={(v) => {
-            setParams({ ...params, type: v });
+            const p = { ...params, type: v };
+            setParams(p);
             setProperty("0", "osc", "type", v);
+            renderAudioGraph({ harmonySynthParams: p });
           }}
         />
         <ComboBox

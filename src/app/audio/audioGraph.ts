@@ -93,10 +93,12 @@ let stepIndex = 0;
 let playing = false;
 const SEQUENCE_LENGTH = 1024;
 
-export function start() {
+export function start(startStep?: number) {
   Tone.getTransport().bpm.value = 128;
   Tone.getTransport().loop = true;
   Tone.getTransport().setLoopPoints("1:1:1", "17:1:1");
+
+  stepIndex = startStep ?? 0;
   Tone.getTransport().start();
   playing = true;
   if (hasStarted) {
