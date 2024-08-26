@@ -156,7 +156,7 @@ interface ScaleDegree {
   alteration?: "sharp" | "flat";
 }
 
-function parseChordProgression(progression: string): ScaleDegree[] {
+export function parseChordProgression(progression: string): ScaleDegree[] {
   return progression.split("-").map((chord) => {
     const alteration = chord.startsWith("b")
       ? "flat"
@@ -230,6 +230,7 @@ export interface ChordProgression {
   scale: string;
   rootNote: string;
   mood: Mood;
+  octave: number;
 }
 
 export function generateChordProgression({
@@ -259,6 +260,7 @@ export function generateChordProgression({
     scale,
     mood,
     rootNote,
+    octave,
   };
 }
 
@@ -278,7 +280,7 @@ export function chordProgressionToSequencerEvents(
   return events;
 }
 
-function chordForScale(
+export function chordForScale(
   scale: Scale.Scale,
   rootDegree: ScaleDegree,
   numNotesInChord: number
@@ -300,4 +302,19 @@ function chordForScale(
     }
     return note;
   });
+}
+
+export function regenerateChordAtIndex(
+  chordProgression: ChordProgression,
+  index: number
+): ChordProgression {
+  const degrees = parseChordProgression(chordProgression?.progression);
+  const numNotesInChord = chordProgression.chordNotes[0].length;
+  const scale = Scale.get(
+    `${chordProgression.rootNote}${chordProgression.octave} ${chordProgression.scale}`
+  );
+  const refreshedChord = chordForScale(scale, degrees[index], numNotesInChord);
+  const chordNotes = [...chordProgression.chordNotes];
+  chordNotes[index] = refreshedChord;
+  return { ...chordProgression, chordNotes };
 }
