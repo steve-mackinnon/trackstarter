@@ -1,5 +1,11 @@
 import * as AudioGraph from "audio/audioGraph";
-import { defaultSequencerProps, osc, output, sequencer } from "audio/nodes";
+import {
+  defaultSequencerProps,
+  filter,
+  osc,
+  output,
+  sequencer,
+} from "audio/nodes";
 import {
   ChordProgression,
   chordProgressionToSequencerEvents,
@@ -35,7 +41,11 @@ export function useRenderAudioGraph() {
           notes: sequence,
           length: 64,
         }),
-        osc(params, [], "0"),
+        filter(
+          { type: "lowpass", frequency: 700, q: 2 },
+          [osc(params, [], "0")],
+          "chord-prog-filter"
+        ),
       ])
     );
     AudioGraph.stop();

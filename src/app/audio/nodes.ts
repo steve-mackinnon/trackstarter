@@ -26,11 +26,16 @@ export function osc(props: OscProps, children: Node[], key?: string): OscNode {
   };
 }
 
-export function filter(props: FilterProps, children: Node[]): FilterNode {
+export function filter(
+  props: FilterProps,
+  children: Node[],
+  key?: string
+): FilterNode {
   return {
     type: "filter",
     props,
     children,
+    key,
   };
 }
 

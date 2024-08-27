@@ -6,6 +6,7 @@ import {
   Mood,
   MOODS,
 } from "audio/sequenceGenerator";
+import { AudioParamSlider } from "common/components/AudioParamSlider";
 import { ComboBox } from "common/components/ComboBox";
 import { useRenderAudioGraph } from "common/hooks/useRenderAudioGraph";
 import { useAtom, useSetAtom } from "jotai";
@@ -23,6 +24,7 @@ export function ChordProgressionControls() {
   const [mood, setMood] = useState<Mood | null>(null);
   const setChordProgression = useSetAtom(chordProgressionAtom);
   const renderAudioGraph = useRenderAudioGraph();
+  const [filterFreq, setFilterFreq] = useState(2000);
 
   const generateNewChordProgression = (mood: Mood | null) => {
     const chordProgression = generateChordProgression({
@@ -72,6 +74,18 @@ export function ChordProgressionControls() {
             generateNewChordProgression(newMood as Mood | null);
           }}
           defaultValue="Any"
+        />
+        <AudioParamSlider
+          label="Tone"
+          min={50}
+          max={20000}
+          scaling={3}
+          default={filterFreq}
+          id="filter-freq"
+          handleValueChange={(freq) => {
+            setFilterFreq(freq);
+            setProperty("chord-prog-filter", "filter", "frequency", freq);
+          }}
         />
       </div>
     </div>
