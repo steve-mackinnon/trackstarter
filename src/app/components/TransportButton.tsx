@@ -1,6 +1,6 @@
 import { start, stop } from "audio/audioGraph";
 import { useAtom } from "jotai";
-import { Play, Square } from "lucide-react";
+import { Pause, Play } from "lucide-react";
 import { isPlayingAtom } from "state";
 
 export function TransportButton({ className }: { className: string }) {
@@ -8,7 +8,7 @@ export function TransportButton({ className }: { className: string }) {
 
   return (
     <button
-      className={className + " w-12 h-12 justify-center items-center"}
+      className={className + " w-20 h-20 justify-center items-center"}
       onClick={() => {
         const play = !playing;
         setPlaying(play);
@@ -19,7 +19,11 @@ export function TransportButton({ className }: { className: string }) {
         }
       }}
     >
-      {playing ? <Square className="w-8 h-8" /> : <Play className="w-8 h-8" />}
+      {playing ? (
+        <Pause key="stop" className="w-8 h-8" />
+      ) : (
+        <Play key="play" className="w-8 h-8" />
+      )}
     </button>
   );
 }
