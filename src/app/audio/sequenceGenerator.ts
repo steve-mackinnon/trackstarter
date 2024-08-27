@@ -1,4 +1,4 @@
-import { Chord, NoteWithOctave, Scale, Note as TNote } from "tonal";
+import { Chord, Interval, NoteWithOctave, Scale, Note as TNote } from "tonal";
 import { SequencerEvent } from "./audioGraph";
 
 export type Mood =
@@ -280,23 +280,6 @@ export function chordProgressionToSequencerEvents(
   return events;
 }
 
-function transposeBySemitones(
-  noteWithOctave: string,
-  transpose: number
-): string {
-  const note = noteWithOctave.substring(0, noteWithOctave.length - 1);
-  const index = NOTES.findIndex((n) => n.toLowerCase() === note.toLowerCase());
-  if (index === -1) {
-    return "";
-  }
-  const octaveIncrement = index === 0 ? -1 : index === NOTES.length - 1 ? 1 : 0;
-  let octave =
-    parseInt(noteWithOctave.charAt(noteWithOctave.length - 1)) +
-    octaveIncrement;
-  const newIndex = (index + transpose) % NOTES.length;
-  return `${NOTES[newIndex]}${octave}`;
-}
-
 export function chordForScale(
   scale: Scale.Scale,
   rootDegree: ScaleDegree,
@@ -307,7 +290,7 @@ export function chordForScale(
     if (rootDegree.alteration && i === 0) {
       // Sharpen or flatten the root if requested
       const shiftAmount = rootDegree.alteration === "flat" ? -1 : 1;
-      note = transposeBySemitones(note, shiftAmount);
+      note = TNote.transpose(note, Interval.fromSemitones(shiftAmount));
     }
     const freq = TNote.get(note).freq ?? 500;
     if (Math.random() < 0.3 && freq < 700) {
@@ -316,6 +299,9 @@ export function chordForScale(
     } else if (Math.random() < 0.3 && freq > 100) {
       // Shift down an octave
       note = TNote.transpose(note, "-8P");
+    }
+    if (note === "") {
+      throw new Error("Failed to generate note in chordForScale()");
     }
     return note;
   });
