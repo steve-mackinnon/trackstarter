@@ -21,10 +21,12 @@ export function useRenderAudioGraph() {
     progression,
     harmonySynthParams,
     startStep,
+    melody,
   }: {
     progression?: ChordProgression;
     harmonySynthParams?: AudioGraph.OscProps;
     startStep?: number;
+    melody?: AudioGraph.SequencerEvent[];
   }) => {
     const prog = progression ?? progressionState;
     if (!prog) {
@@ -33,20 +35,36 @@ export function useRenderAudioGraph() {
     const params = harmonySynthParams ?? harmonySynthParamsState;
 
     const sequence = chordProgressionToSequencerEvents(prog.chordNotes);
-    AudioGraph.render(
-      output(undefined, [
+    const sequencers = [
+      sequencer({
+        ...defaultSequencerProps(),
+        destinationNodes: ["0"],
+        notes: sequence,
+        length: 64,
+      }),
+    ];
+    if (melody) {
+      sequencers.push(
         sequencer({
           ...defaultSequencerProps(),
-          destinationNodes: ["0"],
-          notes: sequence,
+          destinationNodes: ["melody-osc"],
+          notes: melody,
           length: 64,
         }),
+      );
+    }
+    AudioGraph.render(
+      output(undefined, [
+        ...sequencers,
         filter(
           { type: "lowpass", frequency: 700, q: 2 },
-          [osc(params, [], "0")],
-          "chord-prog-filter"
+          [
+            osc(params, [], "0"),
+            osc({ type: "square", detune: 0 }, [], "melody-osc"),
+          ],
+          "chord-prog-filter",
         ),
-      ])
+      ]),
     );
     AudioGraph.stop();
     AudioGraph.start(startStep);

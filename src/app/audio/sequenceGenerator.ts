@@ -255,7 +255,7 @@ export function generateChordProgression({
   );
   return {
     chordNotes,
-    chordNames: chordNotes.map((notes) => Chord.detect(notes)[0]),
+    chordNames: chordNotes.map((notes) => chordName(notes)),
     progression,
     scale,
     mood,
@@ -320,4 +320,15 @@ export function regenerateChordAtIndex(
   const chordNotes = [...chordProgression.chordNotes];
   chordNotes[index] = refreshedChord;
   return { ...chordProgression, chordNotes };
+}
+
+function chordName(notes: string[]): string {
+  // Sort to get the chord with the smallest number of characters
+  const chords = Chord.detect(notes);
+  console.log(chords);
+  chords.sort((a, b) =>
+    a.length < b.length ? -1 : a.length === b.length ? 0 : 1
+  );
+  console.log(`Sorted: ${chords}`);
+  return chords[0];
 }

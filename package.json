@@ -10,6 +10,7 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@magenta/music": "^1.23.1",
     "@tonaljs/note": "^4.11.0",
     "@tonaljs/scale": "^4.13.0",
     "@tonaljs/scale-type": "^4.9.0",

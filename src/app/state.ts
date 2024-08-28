@@ -1,4 +1,4 @@
-import { Node, OscProps } from "audio/audioGraph";
+import { Node, OscProps, SequencerEvent } from "audio/audioGraph";
 import { ChordProgression } from "audio/sequenceGenerator";
 import { produce } from "immer";
 import { atom } from "jotai";
@@ -19,7 +19,7 @@ export const setNodePositionAtom = atom(
       n[key] = { x, y };
     });
     set(nodePositionsAtom, nodes);
-  }
+  },
 );
 
 export type CursorMode =
@@ -36,7 +36,7 @@ export const cursorModeAtom = atom(
       set(connectionSourceNodeAtom, null);
     }
     set(cursorModeStorageAtom, value);
-  }
+  },
 );
 
 export const connectionSourceNodeAtom = atom<string | null>(null);
@@ -53,7 +53,7 @@ export const addConnectionAtom = atom(
     }
     updated[destId] = [...(updated[destId] || []), sourceId];
     set(connectionsAtom, updated);
-  }
+  },
 );
 
 export const updateNodeStateAtom = atom(
@@ -68,7 +68,7 @@ export const updateNodeStateAtom = atom(
       n[nodeIndex].props = { ...props };
     });
     set(nodesAtom, nodes);
-  }
+  },
 );
 
 export const removeNodeAtom = atom(
@@ -86,7 +86,7 @@ export const removeNodeAtom = atom(
         // Remove sequencer connections
         if (node.type === "sequencer") {
           node.props.destinationNodes = node.props.destinationNodes.filter(
-            (n) => n !== key
+            (n) => n !== key,
           );
         }
       }
@@ -112,7 +112,7 @@ export const removeNodeAtom = atom(
       }
     });
     set(connectionsAtom, connections);
-  }
+  },
 );
 
 export const isPlayingAtom = atom(false);
@@ -122,3 +122,5 @@ export const harmonySynthParamsAtom = atom<OscProps>({
   type: "sine",
   detune: 0,
 });
+
+export const melodyAtom = atom<SequencerEvent[] | null>(null);

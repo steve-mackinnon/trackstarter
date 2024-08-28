@@ -1,4 +1,5 @@
 import { setProperty } from "audio/audioGraph";
+import { generateMelodyForChordProgression } from "audio/melodyGenerator";
 import {
   generateChordProgression,
   getRandomMood,
@@ -16,6 +17,7 @@ import {
   chordProgressionAtom,
   harmonySynthParamsAtom,
   isPlayingAtom,
+  melodyAtom,
 } from "state";
 
 export function ChordProgressionControls() {
@@ -23,6 +25,7 @@ export function ChordProgressionControls() {
   const setIsPlaying = useSetAtom(isPlayingAtom);
   const [mood, setMood] = useState<Mood | null>(null);
   const setChordProgression = useSetAtom(chordProgressionAtom);
+  const setMelody = useSetAtom(melodyAtom);
   const renderAudioGraph = useRenderAudioGraph();
   const [filterFreq, setFilterFreq] = useState(2000);
 
@@ -36,6 +39,13 @@ export function ChordProgressionControls() {
     setChordProgression(chordProgression);
     renderAudioGraph({ progression: chordProgression });
     setIsPlaying(true);
+
+    generateMelodyForChordProgression(chordProgression.chordNames).then(
+      (seq) => {
+        setMelody(seq ?? null);
+        renderAudioGraph({ progression: chordProgression, melody: seq });
+      },
+    );
   };
 
   return (
