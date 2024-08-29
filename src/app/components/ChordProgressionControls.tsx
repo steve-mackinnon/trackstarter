@@ -68,7 +68,7 @@ export function ChordProgressionControls() {
           onChange={(v) => {
             const p = { ...params, type: v };
             setParams(p);
-            setProperty("0", "osc", "type", v);
+            setProperty("harmony-osc", "osc", "type", v);
             renderAudioGraph({ harmonySynthParams: p });
           }}
         />

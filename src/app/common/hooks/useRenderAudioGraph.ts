@@ -42,7 +42,7 @@ export function useRenderAudioGraph() {
     const sequencers = [
       sequencer({
         ...defaultSequencerProps(),
-        destinationNodes: ["0"],
+        destinationNodes: ["harmony-osc"],
         notes: sequence,
         length: 64,
       }),
@@ -66,7 +66,7 @@ export function useRenderAudioGraph() {
             frequency: params.filterFrequency,
             q: 2,
           },
-          [osc(params, [], "0")],
+          [osc(params, [], "harmony-osc")],
           "chord-prog-filter",
         ),
         osc({ type: "square", detune: 0 }, [], "melody-osc"),
