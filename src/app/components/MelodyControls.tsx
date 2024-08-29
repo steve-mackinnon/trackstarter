@@ -3,13 +3,15 @@
 import { generateMelodyForChordProgression } from "audio/melodyGenerator";
 import { Button } from "common/components/ui/button";
 import { useRenderAudioGraph } from "common/hooks/useRenderAudioGraph";
-import { useAtomValue } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import { Music, RefreshCw } from "lucide-react";
-import { chordProgressionAtom } from "state";
+import { chordProgressionAtom, melodyAtom } from "state";
 
 export function MelodyControls() {
   const chordProgression = useAtomValue(chordProgressionAtom);
   const renderAudioGraph = useRenderAudioGraph();
+  const setMelody = useSetAtom(melodyAtom);
+
   return (
     <div>
       <Button
@@ -24,6 +26,7 @@ export function MelodyControls() {
           const melody = await generateMelodyForChordProgression(
             chordProgression.chordNames,
           );
+          setMelody(melody ?? null);
           renderAudioGraph({ melody });
         }}
       >
