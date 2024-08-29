@@ -1,6 +1,6 @@
 import * as mm from "@magenta/music";
-import { SequencerEvent } from "./audioGraph";
 import { Midi } from "tonal";
+import { SequencerEvent } from "./audioGraph";
 
 const CHECKPOINT_URL =
   "https://storage.googleapis.com/magentadata/js/checkpoints/music_vae/mel_chords";
@@ -21,8 +21,8 @@ export async function generateMelodyForChordProgression(
     (ns) => {
       return {
         note: Midi.midiToNoteName(ns.pitch as number),
-        startStep: ns.quantizedStartStep as number,
-        endStep: ns.quantizedEndStep as number,
+        startStep: (ns.quantizedStartStep as number) * 2,
+        endStep: (ns.quantizedEndStep as number) * 2,
       };
     },
   );
