@@ -11,7 +11,11 @@ import {
   chordProgressionToSequencerEvents,
 } from "audio/sequenceGenerator";
 import { useAtomValue } from "jotai";
-import { chordProgressionAtom, harmonySynthParamsAtom } from "state";
+import {
+  chordProgressionAtom,
+  harmonySynthParamsAtom,
+  SynthParams,
+} from "state";
 
 export function useRenderAudioGraph() {
   const progressionState = useAtomValue(chordProgressionAtom);
@@ -24,7 +28,7 @@ export function useRenderAudioGraph() {
     melody,
   }: {
     progression?: ChordProgression;
-    harmonySynthParams?: AudioGraph.OscProps;
+    harmonySynthParams?: SynthParams;
     startStep?: number;
     melody?: AudioGraph.SequencerEvent[];
   }) => {
@@ -57,13 +61,15 @@ export function useRenderAudioGraph() {
       output(undefined, [
         ...sequencers,
         filter(
-          { type: "lowpass", frequency: 700, q: 2 },
-          [
-            osc(params, [], "0"),
-            osc({ type: "square", detune: 0 }, [], "melody-osc"),
-          ],
+          {
+            type: "lowpass",
+            frequency: params.filterFrequency,
+            q: 2,
+          },
+          [osc(params, [], "0")],
           "chord-prog-filter",
         ),
+        osc({ type: "square", detune: 0 }, [], "melody-osc"),
       ]),
     );
     AudioGraph.stop();

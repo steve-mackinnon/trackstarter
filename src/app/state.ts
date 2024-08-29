@@ -5,9 +5,14 @@ import { atom } from "jotai";
 export const isPlayingAtom = atom(false);
 
 export const chordProgressionAtom = atom<ChordProgression | null>(null);
-export const harmonySynthParamsAtom = atom<OscProps>({
+
+export interface SynthParams extends OscProps {
+  filterFrequency: number;
+}
+export const harmonySynthParamsAtom = atom<SynthParams>({
   type: "sine",
   detune: 0,
+  filterFrequency: 700,
 });
 
 export const melodyAtom = atom<SequencerEvent[] | null>(null);
