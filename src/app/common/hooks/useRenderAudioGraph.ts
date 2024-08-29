@@ -2,6 +2,7 @@ import * as AudioGraph from "audio/audioGraph";
 import {
   defaultSequencerProps,
   filter,
+  mul,
   osc,
   output,
   sequencer,
@@ -66,10 +67,12 @@ export function useRenderAudioGraph() {
             frequency: params.filterFrequency,
             q: 2,
           },
-          [osc(params, [], "harmony-osc")],
+          [mul({ multiplier: 0.1 }, [osc(params, [], "harmony-osc")])],
           "chord-prog-filter",
         ),
-        osc({ type: "square", detune: 0 }, [], "melody-osc"),
+        mul({ multiplier: 0.2 }, [
+          osc({ type: "square", detune: 0 }, [], "melody-osc"),
+        ]),
       ]),
     );
     AudioGraph.stop();

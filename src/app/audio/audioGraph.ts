@@ -10,7 +10,7 @@ unmute(context, false, false);
 // setting props
 setAutoFreeze(false);
 
-export type NodeType = "osc" | "filter" | "sequencer" | "destination";
+export type NodeType = "osc" | "filter" | "sequencer" | "destination" | "mul";
 
 interface BaseNode {
   children?: Node[];
@@ -39,6 +39,15 @@ export interface FilterNode extends BaseNode {
   type: "filter";
   props: FilterProps;
   backingNode?: BiquadFilterNode;
+}
+
+export interface MulProps {
+  multiplier: number;
+}
+export interface MulNode extends BaseNode {
+  type: "mul";
+  props: MulProps;
+  backingNode?: GainNode;
 }
 
 export interface DestinationNode extends BaseNode {
@@ -77,7 +86,12 @@ export interface SequencerNode extends BaseNode {
   backingNode?: Sequencer;
 }
 
-export type Node = OscNode | FilterNode | SequencerNode | DestinationNode;
+export type Node =
+  | OscNode
+  | FilterNode
+  | SequencerNode
+  | DestinationNode
+  | MulNode;
 
 /// Renders the tree rooted in `newRoot` by comparing it to the current tree and applying
 /// the minimum number of WebAudio node operations to fulfill the requested state.
@@ -161,6 +175,8 @@ function applyNodeProps(node: Node) {
     node.backingNode.frequency.value = node.props.frequency;
     node.backingNode.type = node.props.type;
     node.backingNode.Q.value = node.props.q;
+  } else if (node.type === "mul" && node.backingNode) {
+    node.backingNode.gain.value = node.props.multiplier;
   }
 }
 
@@ -169,19 +185,13 @@ function buildOscNode(node: OscNode): OscillatorNode {
   const oscType = node.props.type;
   oscNode.type = oscType;
 
-  // Patch in a gain node to attenuate the osc signal and avoid clipping
-  const gainNode = new GainNode(context);
-  gainNode.gain.value = 0.1;
-  oscNode.connect(gainNode);
-
   const dest = node.parentBackingNode;
   if (!dest) {
     throw new Error(
       "Missing parent node to connect to. Some audio will not be generated",
     );
-  } else {
-    gainNode.connect(dest);
   }
+  oscNode.connect(dest);
   return oscNode;
 }
 
@@ -214,6 +224,8 @@ function buildBackingNode(node: Node): AudioNode | Sequencer | null {
     }
     case "destination":
       return context.destination;
+    case "mul":
+      return new GainNode(context);
     case "sequencer": {
       return new Sequencer(
         node,

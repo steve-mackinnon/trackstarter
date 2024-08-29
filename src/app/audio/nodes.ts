@@ -1,6 +1,8 @@
 import {
   FilterNode,
   FilterProps,
+  MulNode,
+  MulProps,
   Node,
   NodeType,
   OscNode,
@@ -26,10 +28,19 @@ export function osc(props: OscProps, children: Node[], key?: string): OscNode {
   };
 }
 
+export function mul(props: MulProps, children: Node[], key?: string): MulNode {
+  return {
+    type: "mul",
+    props,
+    children,
+    key,
+  };
+}
+
 export function filter(
   props: FilterProps,
   children: Node[],
-  key?: string
+  key?: string,
 ): FilterNode {
   return {
     type: "filter",
