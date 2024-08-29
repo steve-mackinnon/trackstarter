@@ -4,6 +4,7 @@ import { useSetupHotkeys } from "common/hooks/useSetupHotkeys";
 import { ChordControlsContainer } from "./ChordControlsContainer";
 import { ChordProgressionControls } from "./ChordProgressionControls";
 import { ChordProgressionInfo } from "./ChordProgressionInfo";
+import { MelodyControls } from "./MelodyControls";
 import { TransportButton } from "./TransportButton";
 
 export default function SongStarterView() {
@@ -14,6 +15,7 @@ export default function SongStarterView() {
       <TransportButton className="absolute flex top-5 " />
       <ChordProgressionControls />
       <ChordControlsContainer />
+      <MelodyControls />
       <ChordProgressionInfo />
     </div>
   );
