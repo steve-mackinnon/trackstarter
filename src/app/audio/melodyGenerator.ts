@@ -14,6 +14,8 @@ export async function generateMelodyForChordProgression(
     await mvae.initialize();
     initialized = true;
   }
+  // MusicVAE can't handle slash chords, so just omit them
+  chordProgression = chordProgression.map((chord) => chord.split("/")[0]);
   const NUM_SAMPLES = 1;
   const TEMP = 0.5;
   const sequences = await mvae.sample(NUM_SAMPLES, TEMP, { chordProgression });
