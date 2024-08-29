@@ -40,12 +40,14 @@ export function ChordProgressionControls() {
     renderAudioGraph({ progression: chordProgression });
     setIsPlaying(true);
 
-    generateMelodyForChordProgression(chordProgression.chordNames).then(
-      (seq) => {
-        setMelody(seq ?? null);
-        renderAudioGraph({ progression: chordProgression, melody: seq });
-      },
-    );
+    const numBars = 4;
+    generateMelodyForChordProgression(
+      chordProgression.chordNames,
+      numBars,
+    ).then((seq) => {
+      setMelody(seq ?? null);
+      renderAudioGraph({ progression: chordProgression, melody: seq });
+    });
   };
 
   return (
