@@ -96,7 +96,7 @@ let playing = false;
 const SEQUENCE_LENGTH = 1024;
 
 export function start(startStep?: number) {
-  Tone.getTransport().bpm.value = 128;
+  Tone.getTransport().bpm.value = 160;
   Tone.getTransport().loop = true;
   Tone.getTransport().setLoopPoints("1:1:1", "17:1:1");
 
@@ -111,7 +111,7 @@ export function start(startStep?: number) {
       return;
     }
     applyToSequencers(currentRoot, (seq) =>
-      seq.backingNode?.playStep(stepIndex, t)
+      seq.backingNode?.playStep(stepIndex, t),
     );
     stepIndex = (stepIndex + 1) % SEQUENCE_LENGTH;
   }, "16n");
@@ -131,7 +131,7 @@ type NodeProps<T extends Node["type"]> = Extract<Node, { type: T }>["props"];
 
 export function setProperty<
   T extends Node["type"],
-  P extends keyof NodeProps<T>
+  P extends keyof NodeProps<T>,
 >(nodeKey: string, nodeType: T, propId: P, value: NodeProps<T>[P]) {
   if (!currentRoot) {
     return;
@@ -145,7 +145,7 @@ export function setProperty<
     applyNodeProps(node);
   } else {
     throw new Error(
-      `Node types were incompatible ${nodeType} and ${node.type}`
+      `Node types were incompatible ${nodeType} and ${node.type}`,
     );
   }
 }
@@ -177,7 +177,7 @@ function buildOscNode(node: OscNode): OscillatorNode {
   const dest = node.parentBackingNode;
   if (!dest) {
     throw new Error(
-      "Missing parent node to connect to. Some audio will not be generated"
+      "Missing parent node to connect to. Some audio will not be generated",
     );
   } else {
     gainNode.connect(dest);
@@ -218,7 +218,7 @@ function buildBackingNode(node: Node): AudioNode | Sequencer | null {
       return new Sequencer(
         node,
         (key) => findNodeWithKey(currentRoot, key),
-        (dest) => buildOscNode(dest as OscNode)
+        (dest) => buildOscNode(dest as OscNode),
       );
     }
   }
@@ -257,7 +257,7 @@ function applyPropUpdates(newNode: Node, currentNode: Node | null) {
 /// removes AudioNodes from the tree to satisfy the requested state.
 function applyChildNodeUpdates(
   newParent: Node,
-  currentParent: Node | null
+  currentParent: Node | null,
 ): Node {
   if (newParent.children) {
     newParent.children.forEach((newChild: Node, index: number) => {
