@@ -23,7 +23,7 @@ export class ADSR extends ConstantSourceNode {
     this.offset.linearRampToValueAtTime(1, startTime + this.props.attack);
     const reachedSustainTime = Math.min(
       stopTime,
-      this.props.attack + this.props.decay,
+      startTime + this.props.attack + this.props.decay,
     );
     // Decay
     this.offset.linearRampToValueAtTime(this.props.sustain, reachedSustainTime);
