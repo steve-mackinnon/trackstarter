@@ -1,5 +1,6 @@
 import * as AudioGraph from "audio/audioGraph";
 import {
+  adsr,
   defaultSequencerProps,
   filter,
   mul,
@@ -43,7 +44,7 @@ export function useRenderAudioGraph() {
     const sequencers = [
       sequencer({
         ...defaultSequencerProps(),
-        destinationNodes: ["harmony-osc"],
+        destinationNodes: ["harmony-osc", "harmony-amp-env"],
         notes: sequence,
         length: 64,
       }),
@@ -61,6 +62,16 @@ export function useRenderAudioGraph() {
     AudioGraph.render(
       output(undefined, [
         ...sequencers,
+        adsr(
+          {
+            attack: 0.1,
+            decay: 1,
+            sustain: 0,
+            release: 0.5,
+            connectedTo: ["harmony-osc.gain"],
+          },
+          "harmony-amp-env",
+        ),
         filter(
           {
             type: "lowpass",

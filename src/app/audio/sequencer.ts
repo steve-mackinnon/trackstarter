@@ -2,17 +2,6 @@ import { Note } from "tonal";
 import * as Tone from "tone";
 import { Node, SequencerEvent, SequencerNode } from "./audioGraph";
 
-function getActiveSteps(length: number, numSteps: number): Set<number> {
-  const indices: Set<number> = new Set();
-  const stepInterval = length / numSteps;
-
-  for (let i = 0; i < numSteps; i++) {
-    const index = Math.floor(i * stepInterval);
-    indices.add(index);
-  }
-  return indices;
-}
-
 function lengthOf16thNoteInSeconds(bpm: number): number {
   const secondsPerBeat = 60 / bpm;
   const lengthOf16thNote = secondsPerBeat / 4;
@@ -23,11 +12,16 @@ export class Sequencer {
   constructor(
     private node: SequencerNode,
     private findNode: (key: string) => Node | null,
-    private buildOsc: (destNode: Node) => OscillatorNode
+    private triggerAudioNode: (
+      node: Node,
+      frequency: number,
+      startTime: number,
+      endTime: number,
+    ) => AudioNode | undefined,
   ) {}
 
   // Map from step index when osc stops to osc nodes
-  private activeOscMap: Map<number, OscillatorNode[]> = new Map();
+  private activeNodes: Map<number, AudioNode[]> = new Map();
 
   public setNode(node: SequencerNode) {
     this.node = node;
@@ -35,7 +29,7 @@ export class Sequencer {
 
   public playStep(stepIndex: number, time: number) {
     // All active oscs at stepIndex are now stopped, so drop those refs
-    this.activeOscMap.delete(stepIndex);
+    this.activeNodes.delete(stepIndex);
 
     stepIndex = stepIndex % this.node.props.length;
     // TODO: proper type guard for SequencerEvent[]
@@ -46,90 +40,68 @@ export class Sequencer {
       this.playSequencerEvents(
         stepIndex,
         time,
-        this.node.props.notes as SequencerEvent[]
+        this.node.props.notes as SequencerEvent[],
       );
       return;
-    }
-    const activeSteps = getActiveSteps(
-      this.node.props.length,
-      this.node.props.steps
-    );
-    if (activeSteps.has(stepIndex)) {
-      const noteIndex = stepIndex % this.node.props.notes.length;
-      for (const nodeKey of this.node.props.destinationNodes) {
-        const oscNode = this.findNode(nodeKey);
-        if (!oscNode || oscNode.type !== "osc") {
-          throw new Error(
-            `Unable to connect sequencer to node with key: ${nodeKey}`
-          );
-        }
-        if (
-          this.node.props.probability < 1 &&
-          Math.random() > this.node.props.probability
-        ) {
-          continue;
-        }
-        const osc = this.buildOsc(oscNode);
-        const freq = Note.freq(this.node.props.notes[noteIndex] as string);
-        if (freq == null) {
-          throw new Error("Error determining note frequency");
-        }
-        osc.frequency.value = freq;
-        osc.start(time);
-        osc.stop(time + 0.1);
-      }
     }
   }
 
   public stop() {
-    for (const [_, oscs] of this.activeOscMap) {
-      oscs.forEach((osc) => osc.stop());
+    for (const [_, node] of this.activeNodes) {
+      node.forEach((node) => {
+        if (node instanceof OscillatorNode) {
+          (node as OscillatorNode).stop();
+        }
+      });
     }
-    this.activeOscMap.clear();
+    this.activeNodes.clear();
   }
 
   private playSequencerEvents(
     stepIndex: number,
     time: number,
-    events: SequencerEvent[]
+    events: SequencerEvent[],
   ) {
     events = events.filter((e) => e.startStep === stepIndex);
     if (events.length === 0) {
       return;
     }
     const stepDuration = lengthOf16thNoteInSeconds(
-      Tone.getTransport().bpm.value
+      Tone.getTransport().bpm.value,
     );
     for (const nodeKey of this.node.props.destinationNodes) {
-      const oscNode = this.findNode(nodeKey);
-      if (!oscNode || oscNode.type !== "osc") {
+      const node = this.findNode(nodeKey);
+      if (!node) {
         throw new Error(
-          `Unable to connect sequencer to node with key: ${nodeKey}`
+          `Unable to connect sequencer to node with key: ${nodeKey}`,
         );
       }
       for (const event of events) {
-        const osc = this.buildOsc(oscNode);
         const freq = Note.freq(event.note);
         if (freq === null) {
           throw new Error("Failed to convert note to frequency");
         }
-        osc.frequency.value = freq;
-        osc.start(time);
         const eventDuration = (event.endStep - event.startStep) * stepDuration;
-        osc.stop(time + eventDuration);
-
-        this.addToOscMap(osc, event.endStep);
+        const destNode = this.triggerAudioNode(
+          node,
+          freq,
+          time,
+          time + eventDuration,
+        );
+        if (destNode) {
+          this.addToNodeMap(destNode, event.endStep);
+        }
       }
     }
   }
 
-  private addToOscMap(osc: OscillatorNode, endStep: number) {
+  private addToNodeMap(node: AudioNode, endStep: number) {
     const cleanupIndex = (endStep + 1) % this.node.props.length;
-    const existingOscs = this.activeOscMap.get(cleanupIndex);
-    if (existingOscs) {
-      existingOscs.push(osc);
+    const existingNodes = this.activeNodes.get(cleanupIndex);
+    if (existingNodes) {
+      existingNodes.push(node);
     } else {
-      this.activeOscMap.set(cleanupIndex, [osc]);
+      this.activeNodes.set(cleanupIndex, [node]);
     }
   }
 }

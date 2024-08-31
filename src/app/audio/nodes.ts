@@ -1,4 +1,6 @@
 import {
+  ADSRNode,
+  ADSRProps,
   FilterNode,
   FilterProps,
   MulNode,
@@ -53,6 +55,15 @@ export function filter(
 export function sequencer(props: SequencerProps, key?: string): SequencerNode {
   return {
     type: "sequencer",
+    props,
+    children: [],
+    key,
+  };
+}
+
+export function adsr(props: ADSRProps, key?: string): ADSRNode {
+  return {
+    type: "adsr",
     props,
     children: [],
     key,
