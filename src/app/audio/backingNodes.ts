@@ -13,7 +13,7 @@ export function buildOscNode(
   oscNode.type = oscType;
   oscNode.frequency.value = freq;
   oscNode.start(startTime);
-  oscNode.stop(endTime);
+  let oscStopTime = endTime;
 
   const oscGain = new GainNode(context);
   oscNode.connect(oscGain);
@@ -36,9 +36,11 @@ export function buildOscNode(
           endTime,
         );
         gainEnvNode.connect(oscGain.gain);
+        oscStopTime += modulator.props.release;
       }
     });
   }
+  oscNode.stop(oscStopTime);
   return oscNode;
 }
 

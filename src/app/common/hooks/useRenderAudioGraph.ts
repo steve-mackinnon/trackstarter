@@ -64,10 +64,10 @@ export function useRenderAudioGraph() {
         ...sequencers,
         adsr(
           {
-            attack: 1,
-            decay: 0.2,
-            sustain: 0,
-            release: 0.01,
+            attack: 0.1,
+            decay: 1,
+            sustain: 0.1,
+            release: 1,
           },
           "harmony-amp-env",
         ),
