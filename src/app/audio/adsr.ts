@@ -18,6 +18,7 @@ export class ADSR extends ConstantSourceNode {
 
   trigger(startTime: number, stopTime: number) {
     this.offset.cancelScheduledValues(startTime);
+    this.offset.setValueAtTime(0, startTime);
     // Attack
     this.offset.linearRampToValueAtTime(1, startTime + this.props.attack);
     const reachedSustainTime = Math.min(

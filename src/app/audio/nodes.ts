@@ -1,6 +1,6 @@
+import { ADSRProps } from "./adsr";
 import {
   ADSRNode,
-  ADSRProps,
   FilterNode,
   FilterProps,
   MulNode,

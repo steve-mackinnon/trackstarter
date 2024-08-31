@@ -1,6 +1,7 @@
 import { produce, setAutoFreeze } from "immer";
 import * as Tone from "tone";
-import { ADSR, ADSRProps as ADSRNodeProps } from "./adsr";
+import { ADSR, ADSRProps } from "./adsr";
+import { buildOscNode } from "./backingNodes";
 import { Sequencer } from "./sequencer";
 import { unmute } from "./unmute";
 
@@ -29,6 +30,10 @@ interface BaseNode {
 export interface OscProps {
   type: OscillatorType;
   detune: number;
+  modSources?: {
+    gain?: string[];
+    frequency?: string[];
+  };
 }
 
 export interface OscNode extends BaseNode {
@@ -57,9 +62,6 @@ export interface MulNode extends BaseNode {
   backingNode?: GainNode;
 }
 
-export interface ADSRProps extends ADSRNodeProps {
-  connectedTo: string[];
-}
 export interface ADSRNode extends BaseNode {
   type: "adsr";
   props: ADSRProps;
@@ -187,22 +189,7 @@ export function getCurrentStep(): number {
 
 let currentRoot: DestinationNode | null = null;
 
-function buildOscNode(node: OscNode): OscillatorNode {
-  const oscNode = new OscillatorNode(context);
-  const oscType = node.props.type;
-  oscNode.type = oscType;
-
-  const dest = node.parent?.backingNode;
-  if (!(dest instanceof AudioNode)) {
-    throw new Error(
-      "Missing parent node to connect to. Some audio will not be generated",
-    );
-  }
-  oscNode.connect(dest);
-  return oscNode;
-}
-
-function findNodeWithKey(root: Node | null, key: string): Node | null {
+export function findNodeWithKey(root: Node | null, key: string): Node | null {
   if (!root) {
     return null;
   }
@@ -234,7 +221,8 @@ function buildBackingNode(node: Node): AudioNode | Sequencer | null {
     case "mul":
       return new GainNode(context);
     case "adsr":
-      return new ADSR(context, node.props);
+      // ADSR nodes are built on the fly when triggered
+      return null;
     case "sequencer": {
       return new Sequencer(
         node,
@@ -242,14 +230,7 @@ function buildBackingNode(node: Node): AudioNode | Sequencer | null {
         (node, freq, startTime, endTime) => {
           switch (node.type) {
             case "osc": {
-              const osc = buildOscNode(node as OscNode);
-              osc.frequency.value = freq;
-              osc.start(startTime);
-              osc.stop(endTime);
-              if (node.parent?.backingNode) {
-                osc.connect(node.parent.backingNode as AudioNode);
-              }
-              return osc;
+              return buildOscNode(context, node, freq, startTime, endTime);
             }
             case "adsr": {
               node.backingNode?.trigger(startTime, endTime);
@@ -297,61 +278,6 @@ function applyPropUpdates<T extends Node>(newNode: T, currentNode: T | null) {
     case "adsr": {
       // TODO: split out prop update handlers into a separate place
       newNode.backingNode.update(newNode.props);
-      const newConnections = newNode.props.connectedTo;
-      const currentConnections =
-        currentNode && currentNode.type === "adsr"
-          ? currentNode.props.connectedTo
-          : [];
-      const connectionsToAdd = newConnections.filter(
-        (c) => !(c in currentConnections),
-      );
-      const connectionsToRemove = currentConnections.filter(
-        (c) => !(c in newConnections),
-      );
-      const parseConnection = (connection: string): string[] => {
-        const s = connection.split(".");
-        if (s.length !== 2) {
-          throw new Error(
-            `Incorrectly formatted nodeKey.paramName pair in ADSR node's connectedTo property: ${connection}`,
-          );
-        }
-        return s;
-      };
-      const root = getRoot(newNode);
-      connectionsToAdd.forEach((connection) => {
-        const [nodeKey, paramName] = parseConnection(connection);
-        const node = findNodeWithKey(root, nodeKey);
-        if (!node) {
-          throw new Error(`Node with key not found: ${nodeKey}`);
-        }
-        if (node.backingNode && paramName in node.backingNode) {
-          const dest = (node.backingNode as any)[paramName];
-          if (dest instanceof AudioNode) {
-            newNode.backingNode?.connect(dest);
-          } else {
-            throw new Error(
-              `Parameter ${paramName} in node with key ${nodeKey} is not an AudioNode, and can't be connected to an ADSR node`,
-            );
-          }
-        }
-      });
-      connectionsToRemove.forEach((connection) => {
-        const [nodeKey, paramName] = parseConnection(connection);
-        const node = findNodeWithKey(root, nodeKey);
-        if (!node) {
-          throw new Error(`Node with key not found: ${nodeKey}`);
-        }
-        if (node.backingNode && paramName in node.backingNode) {
-          const dest = (node.backingNode as any)[paramName];
-          if (dest instanceof AudioNode) {
-            newNode.backingNode?.disconnect(dest);
-          } else {
-            throw new Error(
-              `Parameter ${paramName} in node with key ${nodeKey} is not an AudioNode, and can't be disconnected from an ADSR node`,
-            );
-          }
-        }
-      });
     }
   }
 }

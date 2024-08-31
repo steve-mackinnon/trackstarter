@@ -64,11 +64,10 @@ export function useRenderAudioGraph() {
         ...sequencers,
         adsr(
           {
-            attack: 0.1,
-            decay: 1,
+            attack: 1,
+            decay: 0.2,
             sustain: 0,
-            release: 0.5,
-            connectedTo: ["harmony-osc.gain"],
+            release: 0.01,
           },
           "harmony-amp-env",
         ),
@@ -78,10 +77,18 @@ export function useRenderAudioGraph() {
             frequency: params.filterFrequency,
             q: 2,
           },
-          [mul({ multiplier: 0.1 }, [osc(params, [], "harmony-osc")])],
+          [
+            mul({ multiplier: 0.1 }, [
+              osc(
+                { ...params, modSources: { gain: ["harmony-amp-env"] } },
+                [],
+                "harmony-osc",
+              ),
+            ]),
+          ],
           "chord-prog-filter",
         ),
-        mul({ multiplier: 0.2 }, [
+        mul({ multiplier: 0.0 }, [
           osc({ type: "square", detune: 0 }, [], "melody-osc"),
         ]),
       ]),
