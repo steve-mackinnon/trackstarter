@@ -74,6 +74,15 @@ export function useRenderAudioGraph() {
           },
           "harmony-amp-env",
         ),
+        adsr(
+          {
+            attack: 0.1,
+            decay: 0.3,
+            sustain: 0.1,
+            release: 0.1,
+          },
+          "melody-amp-env",
+        ),
         filter(
           {
             type: "lowpass",
@@ -92,7 +101,15 @@ export function useRenderAudioGraph() {
           "chord-prog-filter",
         ),
         mul({ multiplier: 0.25 }, [
-          osc({ type: "sine", detune: 0 }, [], "melody-osc"),
+          osc(
+            {
+              type: "sine",
+              detune: 0,
+              modSources: { gain: ["melody-amp-env"] },
+            },
+            [],
+            "melody-osc",
+          ),
         ]),
       ]),
     );
