@@ -175,7 +175,7 @@ export function setProperty<
   }
   if (node.type === nodeType) {
     node.props[propId] = value;
-    applyPropUpdates(node, node);
+    applyPropUpdates(node);
   } else {
     throw new Error(
       `Node types were incompatible ${nodeType} and ${node.type}`,
@@ -260,7 +260,7 @@ function deleteNode(node: Node) {
   }
 }
 
-function applyPropUpdates<T extends Node>(newNode: T, currentNode: T | null) {
+function applyPropUpdates<T extends Node>(newNode: T) {
   if (!newNode.backingNode) {
     return;
   }
@@ -366,7 +366,7 @@ function buildAudioGraph({
     }
   }
   const updatedNode = applyChildNodeUpdates(newNode, currentNode);
-  applyPropUpdates(updatedNode, currentNode);
+  applyPropUpdates(updatedNode);
   return updatedNode;
 }
 
