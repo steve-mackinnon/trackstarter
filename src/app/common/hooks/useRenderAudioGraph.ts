@@ -16,12 +16,14 @@ import { useAtomValue } from "jotai";
 import {
   chordProgressionAtom,
   harmonySynthParamsAtom,
+  melodyAtom,
   SynthParams,
 } from "state";
 
 export function useRenderAudioGraph() {
   const progressionState = useAtomValue(chordProgressionAtom);
   const harmonySynthParamsState = useAtomValue(harmonySynthParamsAtom);
+  const melodyState = useAtomValue(melodyAtom);
 
   return ({
     progression,
@@ -38,6 +40,7 @@ export function useRenderAudioGraph() {
     if (!prog) {
       return;
     }
+    const melodySequence = melody ?? melodyState;
     const params = harmonySynthParams ?? harmonySynthParamsState;
 
     const sequence = chordProgressionToSequencerEvents(prog.chordNotes);
@@ -49,12 +52,12 @@ export function useRenderAudioGraph() {
         length: 64,
       }),
     ];
-    if (melody) {
+    if (melodySequence) {
       sequencers.push(
         sequencer({
           ...defaultSequencerProps(),
           destinationNodes: ["melody-osc"],
-          notes: melody,
+          notes: melodySequence,
           length: 64,
         }),
       );
