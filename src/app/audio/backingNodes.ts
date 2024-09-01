@@ -37,6 +37,8 @@ export function buildOscNode(
         );
         gainEnvNode.connect(oscGain.gain);
         oscStopTime += modulator.props.release;
+      } else {
+        throw new Error("Failed to build modulator");
       }
     });
   }

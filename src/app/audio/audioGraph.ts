@@ -228,26 +228,13 @@ function buildBackingNode(node: Node): AudioNode | Sequencer | null {
         node,
         (key) => findNodeWithKey(currentRoot, key),
         (node, freq, startTime, endTime) => {
-          switch (node.type) {
-            case "osc": {
-              return buildOscNode(context, node, freq, startTime, endTime);
-            }
-            case "adsr": {
-              node.backingNode?.trigger(startTime, endTime);
-              break;
-            }
+          if (node.type === "osc") {
+            return buildOscNode(context, node, freq, startTime, endTime);
           }
         },
       );
     }
   }
-}
-
-function getRoot(node: Node) {
-  if (node.parent) {
-    return getRoot(node.parent);
-  }
-  return node;
 }
 
 function deleteNode(node: Node) {

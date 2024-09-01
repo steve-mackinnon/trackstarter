@@ -47,7 +47,7 @@ export function useRenderAudioGraph() {
     const sequencers = [
       sequencer({
         ...defaultSequencerProps(),
-        destinationNodes: ["harmony-osc", "harmony-amp-env"],
+        destinationNodes: ["harmony-osc"],
         notes: sequence,
         length: 64,
       }),
