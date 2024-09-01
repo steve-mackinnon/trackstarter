@@ -1,3 +1,4 @@
+import { Slider } from "common/components/ui/slider";
 import { useState } from "react";
 
 function scaleValue({
@@ -69,21 +70,20 @@ export function AudioParamSlider(props: SliderProps) {
     scaling: props.scaling,
   });
   const [normalizedValue, setNormalizedValue] = useState(
-    normalizedDefaultValue
+    normalizedDefaultValue,
   );
   const [value, setValue] = useState(props.default);
 
   return (
     <div className="w-full px-5">
-      <input
+      <Slider
         id={props.id}
-        type="range"
         min={0}
         max={1}
         step={0.01}
-        value={normalizedValue}
-        onChange={(e) => {
-          const v = Number.parseFloat(e.target.value);
+        value={[normalizedValue]}
+        onValueChange={(value) => {
+          const v = value[0];
           const scaled = scaleValue({
             normalizedValue: v,
             min: props.min,
@@ -95,7 +95,7 @@ export function AudioParamSlider(props: SliderProps) {
           props.handleValueChange(scaled);
         }}
         onMouseDown={(e) => e.stopPropagation()}
-        className="w-full"
+        className="w-full pb-4 pt-4"
       />
       <div className="flex flex-row w-full justify-between">
         <label htmlFor={props.id} className="select-none">
