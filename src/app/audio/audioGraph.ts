@@ -1,5 +1,7 @@
 import { produce, setAutoFreeze } from "immer";
 import * as Tone from "tone";
+import { ADSR, ADSRProps } from "./adsr";
+import { buildOscNode } from "./backingNodes";
 import { Sequencer } from "./sequencer";
 import { unmute } from "./unmute";
 
@@ -10,18 +12,28 @@ unmute(context, false, false);
 // setting props
 setAutoFreeze(false);
 
-export type NodeType = "osc" | "filter" | "sequencer" | "destination" | "mul";
+export type NodeType =
+  | "osc"
+  | "filter"
+  | "sequencer"
+  | "destination"
+  | "mul"
+  | "adsr";
 
 interface BaseNode {
   children?: Node[];
   type: NodeType;
   key?: string;
-  parentBackingNode?: AudioNode;
+  parent?: Node;
 }
 
 export interface OscProps {
   type: OscillatorType;
   detune: number;
+  modSources?: {
+    gain?: string[];
+    frequency?: string[];
+  };
 }
 
 export interface OscNode extends BaseNode {
@@ -48,6 +60,12 @@ export interface MulNode extends BaseNode {
   type: "mul";
   props: MulProps;
   backingNode?: GainNode;
+}
+
+export interface ADSRNode extends BaseNode {
+  type: "adsr";
+  props: ADSRProps;
+  backingNode?: ADSR;
 }
 
 export interface DestinationNode extends BaseNode {
@@ -91,7 +109,8 @@ export type Node =
   | FilterNode
   | SequencerNode
   | DestinationNode
-  | MulNode;
+  | MulNode
+  | ADSRNode;
 
 /// Renders the tree rooted in `newRoot` by comparing it to the current tree and applying
 /// the minimum number of WebAudio node operations to fulfill the requested state.
@@ -99,7 +118,7 @@ export function render(newRoot: Node) {
   newRoot = buildAudioGraph({
     newNode: newRoot,
     currentNode: currentRoot,
-    parentBackingNode: null,
+    parent: null,
   });
   currentRoot = produce(currentRoot, () => newRoot);
 }
@@ -156,7 +175,7 @@ export function setProperty<
   }
   if (node.type === nodeType) {
     node.props[propId] = value;
-    applyNodeProps(node);
+    applyPropUpdates(node);
   } else {
     throw new Error(
       `Node types were incompatible ${nodeType} and ${node.type}`,
@@ -170,32 +189,7 @@ export function getCurrentStep(): number {
 
 let currentRoot: DestinationNode | null = null;
 
-function applyNodeProps(node: Node) {
-  if (node.type === "filter" && node.backingNode) {
-    node.backingNode.frequency.value = node.props.frequency;
-    node.backingNode.type = node.props.type;
-    node.backingNode.Q.value = node.props.q;
-  } else if (node.type === "mul" && node.backingNode) {
-    node.backingNode.gain.value = node.props.multiplier;
-  }
-}
-
-function buildOscNode(node: OscNode): OscillatorNode {
-  const oscNode = new OscillatorNode(context);
-  const oscType = node.props.type;
-  oscNode.type = oscType;
-
-  const dest = node.parentBackingNode;
-  if (!dest) {
-    throw new Error(
-      "Missing parent node to connect to. Some audio will not be generated",
-    );
-  }
-  oscNode.connect(dest);
-  return oscNode;
-}
-
-function findNodeWithKey(root: Node | null, key: string): Node | null {
+export function findNodeWithKey(root: Node | null, key: string): Node | null {
   if (!root) {
     return null;
   }
@@ -226,11 +220,18 @@ function buildBackingNode(node: Node): AudioNode | Sequencer | null {
       return context.destination;
     case "mul":
       return new GainNode(context);
+    case "adsr":
+      // ADSR nodes are built on the fly when triggered
+      return null;
     case "sequencer": {
       return new Sequencer(
         node,
         (key) => findNodeWithKey(currentRoot, key),
-        (dest) => buildOscNode(dest as OscNode),
+        (node, freq, startTime, endTime) => {
+          if (node.type === "osc") {
+            return buildOscNode(context, node, freq, startTime, endTime);
+          }
+        },
       );
     }
   }
@@ -246,21 +247,24 @@ function deleteNode(node: Node) {
   }
 }
 
-function applyPropUpdates(newNode: Node, currentNode: Node | null) {
-  if (!newNode.props) {
+function applyPropUpdates<T extends Node>(newNode: T) {
+  if (!newNode.backingNode) {
     return;
   }
-  if (typeof newNode.props !== "object") {
-    throw new Error("Node.props must be an object");
-  }
-  for (const prop of Object.keys(newNode.props)) {
-    if (
-      !currentNode?.props ||
-      currentNode?.props[prop] !== newNode.props[prop]
-    ) {
-      console.log(`${newNode.type}: Update ${prop} to ${newNode.props[prop]}`);
-    } else {
-      console.log(`${newNode.type}: Not updating ${prop}`);
+  switch (newNode.type) {
+    case "filter": {
+      newNode.backingNode.frequency.value = newNode.props.frequency;
+      newNode.backingNode.type = newNode.props.type;
+      newNode.backingNode.Q.value = newNode.props.q;
+      break;
+    }
+    case "mul": {
+      newNode.backingNode.gain.value = newNode.props.multiplier;
+      break;
+    }
+    case "adsr": {
+      // TODO: split out prop update handlers into a separate place
+      newNode.backingNode.update(newNode.props);
     }
   }
 }
@@ -279,15 +283,11 @@ function applyChildNodeUpdates(
         currentParent.children.length > index
           ? currentParent.children[index]
           : null;
-      const backingNode =
-        newParent.backingNode instanceof AudioNode
-          ? newParent.backingNode
-          : null;
       newParent = produce(newParent, (parent) => {
         parent.children![index] = buildAudioGraph({
           newNode: newChild,
           currentNode: currentChild,
-          parentBackingNode: backingNode,
+          parent: newParent,
         });
       });
     });
@@ -318,11 +318,11 @@ function applyChildNodeUpdates(
 function buildAudioGraph({
   newNode,
   currentNode,
-  parentBackingNode,
+  parent,
 }: {
   newNode: Node;
   currentNode: Node | null;
-  parentBackingNode: AudioNode | null;
+  parent: Node | null;
 }): Node {
   const keyMatch = newNode.key && newNode.key === currentNode?.key;
   const addNode =
@@ -333,27 +333,28 @@ function buildAudioGraph({
       deleteNode(currentNode);
     }
     newNode = produce(newNode, (node) => {
-      node.parentBackingNode = parentBackingNode ?? undefined;
-    });
-    // Build the new audio node
-    newNode = produce(newNode, (node) => {
+      node.parent = parent ?? undefined;
+      // Build the new audio node
       node.backingNode = buildBackingNode(newNode) as any;
     });
-    applyNodeProps(newNode);
-    if (parentBackingNode && newNode.backingNode instanceof AudioNode) {
-      newNode.backingNode.connect(parentBackingNode);
+    if (
+      parent?.backingNode instanceof AudioNode &&
+      newNode.backingNode instanceof AudioNode
+    ) {
+      newNode.backingNode.connect(parent.backingNode);
     }
   } else {
     newNode = produce(newNode, (node) => {
-      node.parentBackingNode = currentNode.parentBackingNode;
+      node.parent = currentNode.parent;
       node.backingNode = currentNode.backingNode;
     });
     if (newNode.backingNode instanceof Sequencer) {
       newNode.backingNode.setNode(newNode as SequencerNode);
     }
   }
-  applyPropUpdates(newNode, currentNode);
-  return applyChildNodeUpdates(newNode, currentNode);
+  const updatedNode = applyChildNodeUpdates(newNode, currentNode);
+  applyPropUpdates(updatedNode);
+  return updatedNode;
 }
 
 function applyToSequencers(root: Node, fn: (seq: SequencerNode) => void) {

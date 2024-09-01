@@ -27,7 +27,6 @@ export function ChordProgressionControls() {
   const setChordProgression = useSetAtom(chordProgressionAtom);
   const setMelody = useSetAtom(melodyAtom);
   const renderAudioGraph = useRenderAudioGraph();
-  const [filterFreq, setFilterFreq] = useState(2000);
 
   const generateNewChordProgression = (mood: Mood | null) => {
     const chordProgression = generateChordProgression({
@@ -90,10 +89,10 @@ export function ChordProgressionControls() {
           min={50}
           max={20000}
           scaling={3}
-          default={filterFreq}
+          default={params.filterFrequency}
           id="filter-freq"
           handleValueChange={(freq) => {
-            setFilterFreq(freq);
+            setParams({ ...params, filterFrequency: freq });
             setProperty("chord-prog-filter", "filter", "frequency", freq);
           }}
         />
