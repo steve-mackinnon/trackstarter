@@ -64,10 +64,10 @@ export function useRenderAudioGraph() {
         ...sequencers,
         adsr(
           {
-            attack: 0.1,
-            decay: 1,
-            sustain: 0.1,
-            release: 1,
+            attack: 0.3,
+            decay: 0.9,
+            sustain: 0.3,
+            release: 0.1,
           },
           "harmony-amp-env",
         ),
@@ -88,8 +88,8 @@ export function useRenderAudioGraph() {
           ],
           "chord-prog-filter",
         ),
-        mul({ multiplier: 0.0 }, [
-          osc({ type: "square", detune: 0 }, [], "melody-osc"),
+        mul({ multiplier: 0.25 }, [
+          osc({ type: "sine", detune: 0 }, [], "melody-osc"),
         ]),
       ]),
     );
