@@ -48,15 +48,15 @@ export function ChordProgressionControls() {
   };
 
   return (
-    <div className="flex items-center">
+    <div className="flex">
       <button
-        className="flex bg-emerald-700 h-10 w-10 justify-center items-center rounded-3xl hover:bg-emerald-600 active:bg-emerald-500"
+        className="flex bg-emerald-700 mt-2 h-10 w-10 justify-center items-center rounded-3xl hover:bg-emerald-600 active:bg-emerald-500"
         onClick={() => generateNewChordProgression(mood)}
       >
         <Dices />
       </button>
 
-      <div className="w-64 space-y-2">
+      <div className="w-64">
         <ComboBox
           className="w-32"
           label="Osc"

@@ -10,7 +10,7 @@ export default function SongStarterView() {
   useSetupHotkeys();
 
   return (
-    <div className="bg-black absolute flex flex-col gap-y-4 w-full h-full py-32  items-center">
+    <div className="absolute flex flex-col gap-y-4 w-full h-full py-32  items-center">
       <TransportButton className="absolute flex top-5 " />
       <h2 className="text-2xl font-bold">Harmony</h2>
       <ChordProgressionControls />
