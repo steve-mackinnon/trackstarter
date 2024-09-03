@@ -7,8 +7,8 @@ import {
   Mood,
   MOODS,
 } from "audio/sequenceGenerator";
-import { AudioParamSlider } from "common/components/AudioParamSlider";
 import { ComboBox } from "common/components/ComboBox";
+import { ParameterXYPad } from "common/components/ParameterXYPad";
 import { useRenderAudioGraph } from "common/hooks/useRenderAudioGraph";
 import { useAtom, useSetAtom } from "jotai";
 import { Dices } from "lucide-react";
@@ -84,16 +84,26 @@ export function ChordProgressionControls() {
           }}
           defaultValue="Any"
         />
-        <AudioParamSlider
-          label="Tone"
-          min={50}
-          max={20000}
-          scaling={3}
-          default={params.filterFrequency}
-          id="filter-freq"
-          handleValueChange={(freq) => {
-            setParams({ ...params, filterFrequency: freq });
-            setProperty("chord-prog-filter", "filter", "frequency", freq);
+        <ParameterXYPad
+          xParam={{
+            min: 50,
+            max: 20000,
+            scaling: 3,
+            value: params.filterFrequency,
+            onChange: (value) => {
+              setParams({ ...params, filterFrequency: value });
+              setProperty("chord-prog-filter", "filter", "frequency", value);
+            },
+          }}
+          yParam={{
+            min: 0.2,
+            max: 20,
+            scaling: 3,
+            value: params.filterQ,
+            onChange: (value) => {
+              setParams({ ...params, filterQ: value });
+              setProperty("chord-prog-filter", "filter", "q", value);
+            },
           }}
         />
       </div>

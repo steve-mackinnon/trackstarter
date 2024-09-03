@@ -62,7 +62,7 @@ export function XYPad({ width = 300, height = 300, onChange }: XYPadProps) {
       setPosition({ x: normalizedX, y: normalizedY });
 
       if (onChange) {
-        onChange({ x: normalizedX, y: normalizedY });
+        onChange({ x: normalizedX, y: 1 - normalizedY });
       }
     },
     [padRef, onChange],

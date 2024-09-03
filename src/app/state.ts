@@ -8,11 +8,13 @@ export const chordProgressionAtom = atom<ChordProgression | null>(null);
 
 export interface SynthParams extends OscProps {
   filterFrequency: number;
+  filterQ: number;
 }
 export const harmonySynthParamsAtom = atom<SynthParams>({
   type: "sine",
   detune: 0,
   filterFrequency: 700,
+  filterQ: 0.707,
 });
 
 export const melodyAtom = atom<SequencerEvent[] | null>(null);
