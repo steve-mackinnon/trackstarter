@@ -103,7 +103,7 @@ export function useRenderAudioGraph() {
         mul({ multiplier: 0.25 }, [
           osc(
             {
-              type: "sine",
+              type: "sawtooth",
               detune: 0,
               modSources: { gain: ["melody-amp-env"] },
             },
