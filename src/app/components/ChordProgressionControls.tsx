@@ -48,65 +48,67 @@ export function ChordProgressionControls() {
   };
 
   return (
-    <div className="flex">
-      <button
-        className="flex bg-emerald-700 mt-2 h-10 w-10 justify-center items-center rounded-3xl hover:bg-emerald-600 active:bg-emerald-500"
-        onClick={() => generateNewChordProgression(mood)}
-      >
-        <Dices />
-      </button>
-
-      <div className="w-64">
-        <ComboBox
-          className="w-32"
-          label="Osc"
-          choices={["sine", "sawtooth", "square", "triangle"]}
-          defaultValue={
-            params.type as "sine" | "sawtooth" | "square" | "triangle"
-          }
-          onChange={(v) => {
-            const p = { ...params, type: v };
-            setParams(p);
-            setProperty("harmony-osc", "osc", "type", v);
-            renderAudioGraph({ harmonySynthParams: p });
-          }}
-        />
-        <ComboBox
-          className="w-32"
-          label="Mood"
-          choices={(MOODS as string[]).concat("Any")}
-          onChange={(newMood: string | null) => {
-            if (newMood === "Any") {
-              newMood = null;
+    <div className="w-72 flex flex-col">
+      <div className="flex pb-2">
+        <div className="flex flex-col w-20 justify-center">
+          <button
+            id="randomize-harmony"
+            className="flex bg-emerald-700 h-12 w-12 justify-center items-center rounded-3xl hover:bg-emerald-600 active:bg-emerald-500"
+            onClick={() => generateNewChordProgression(mood)}
+          >
+            <Dices />
+          </button>
+        </div>
+        <div className="flex flex-col">
+          <ComboBox
+            label="Osc"
+            choices={["sine", "sawtooth", "square", "triangle"]}
+            defaultValue={
+              params.type as "sine" | "sawtooth" | "square" | "triangle"
             }
-            setMood(newMood as Mood | null);
-            generateNewChordProgression(newMood as Mood | null);
-          }}
-          defaultValue="Any"
-        />
-        <ParameterXYPad
-          xParam={{
-            min: 50,
-            max: 20000,
-            scaling: 3,
-            value: params.filterFrequency,
-            onChange: (value) => {
-              setParams({ ...params, filterFrequency: value });
-              setProperty("chord-prog-filter", "filter", "frequency", value);
-            },
-          }}
-          yParam={{
-            min: 0.2,
-            max: 20,
-            scaling: 3,
-            value: params.filterQ,
-            onChange: (value) => {
-              setParams({ ...params, filterQ: value });
-              setProperty("chord-prog-filter", "filter", "q", value);
-            },
-          }}
-        />
+            onChange={(v) => {
+              const p = { ...params, type: v };
+              setParams(p);
+              setProperty("harmony-osc", "osc", "type", v);
+              renderAudioGraph({ harmonySynthParams: p });
+            }}
+          />
+          <ComboBox
+            label="Mood"
+            choices={(MOODS as string[]).concat("Any")}
+            onChange={(newMood: string | null) => {
+              if (newMood === "Any") {
+                newMood = null;
+              }
+              setMood(newMood as Mood | null);
+              generateNewChordProgression(newMood as Mood | null);
+            }}
+            defaultValue="Any"
+          />
+        </div>
       </div>
+      <ParameterXYPad
+        xParam={{
+          min: 50,
+          max: 20000,
+          scaling: 3,
+          value: params.filterFrequency,
+          onChange: (value) => {
+            setParams({ ...params, filterFrequency: value });
+            setProperty("chord-prog-filter", "filter", "frequency", value);
+          },
+        }}
+        yParam={{
+          min: 0.2,
+          max: 20,
+          scaling: 3,
+          value: params.filterQ,
+          onChange: (value) => {
+            setParams({ ...params, filterQ: value });
+            setProperty("chord-prog-filter", "filter", "q", value);
+          },
+        }}
+      />
     </div>
   );
 }

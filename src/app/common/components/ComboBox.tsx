@@ -12,7 +12,6 @@ interface ComboBoxProps<T extends string, U extends T> {
   choices: readonly T[];
   defaultValue: U;
   onChange: (value: T) => void;
-  className?: string;
 }
 
 export function ComboBox<T extends string, U extends T>(
@@ -21,7 +20,7 @@ export function ComboBox<T extends string, U extends T>(
   const [value, setValue] = useState<T>(props.defaultValue);
 
   return (
-    <div className="flex w-full justify-between items-center px-5 py-2">
+    <div className="flex justify-between items-center px-5 py-1">
       <label htmlFor={props.label} className="select-none w-[60px]">
         {props.label}
       </label>
@@ -33,7 +32,7 @@ export function ComboBox<T extends string, U extends T>(
         }}
         defaultValue={value}
       >
-        <SelectTrigger className="w-[180px] h-8">
+        <SelectTrigger className="w-[160px] h-8">
           <SelectValue placeholder={value} />
         </SelectTrigger>
 
