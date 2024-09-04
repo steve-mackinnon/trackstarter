@@ -5,7 +5,6 @@ import {
   getRandomMood,
   getRandomNote,
   Mood,
-  MOODS,
 } from "audio/sequenceGenerator";
 import { ComboBox } from "common/components/ComboBox";
 import { ParameterXYPad } from "common/components/ParameterXYPad";
@@ -72,18 +71,6 @@ export function ChordProgressionControls() {
               setProperty("harmony-osc", "osc", "type", v);
               renderAudioGraph({ harmonySynthParams: p });
             }}
-          />
-          <ComboBox
-            label="Mood"
-            choices={(MOODS as string[]).concat("Any")}
-            onChange={(newMood: string | null) => {
-              if (newMood === "Any") {
-                newMood = null;
-              }
-              setMood(newMood as Mood | null);
-              generateNewChordProgression(newMood as Mood | null);
-            }}
-            defaultValue="Any"
           />
         </div>
       </div>
