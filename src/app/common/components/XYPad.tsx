@@ -119,7 +119,7 @@ export function XYPad({
   return (
     <div
       ref={padRef}
-      className="relative bg-primary-foreground"
+      className="relative bg-primary-foreground rounded-xl"
       style={{ width, height }}
       onMouseDown={(e) => {
         updatePosition(
