@@ -17,22 +17,26 @@ import {
   chordProgressionAtom,
   harmonySynthParamsAtom,
   melodyAtom,
+  melodySynthParamsAtom,
   SynthParams,
 } from "state";
 
 export function useRenderAudioGraph() {
   const progressionState = useAtomValue(chordProgressionAtom);
   const harmonySynthParamsState = useAtomValue(harmonySynthParamsAtom);
+  const melodySynthParamsState = useAtomValue(melodySynthParamsAtom);
   const melodyState = useAtomValue(melodyAtom);
 
   return ({
     progression,
     harmonySynthParams,
+    melodySynthParams,
     startStep,
     melody,
   }: {
     progression?: ChordProgression;
     harmonySynthParams?: SynthParams;
+    melodySynthParams?: SynthParams;
     startStep?: number;
     melody?: AudioGraph.SequencerEvent[];
   }) => {
@@ -41,7 +45,8 @@ export function useRenderAudioGraph() {
       return;
     }
     const melodySequence = melody ?? melodyState;
-    const params = harmonySynthParams ?? harmonySynthParamsState;
+    const harmonyParams = harmonySynthParams ?? harmonySynthParamsState;
+    const melodyParams = melodySynthParams ?? melodySynthParamsState;
 
     const sequence = chordProgressionToSequencerEvents(prog.chordNotes);
     const sequencers = [
@@ -86,13 +91,13 @@ export function useRenderAudioGraph() {
         filter(
           {
             type: "lowpass",
-            frequency: params.filterFrequency,
-            q: params.filterQ,
+            frequency: harmonyParams.filterFrequency,
+            q: harmonyParams.filterQ,
           },
           [
             mul({ multiplier: 0.1 }, [
               osc(
-                { ...params, modSources: { gain: ["harmony-amp-env"] } },
+                { ...harmonyParams, modSources: { gain: ["harmony-amp-env"] } },
                 [],
                 "harmony-osc",
               ),
@@ -100,20 +105,33 @@ export function useRenderAudioGraph() {
           ],
           "chord-prog-filter",
         ),
-        mul({ multiplier: 0.25 }, [
-          osc(
-            {
-              type: "sawtooth",
-              detune: 0,
-              modSources: { gain: ["melody-amp-env"] },
-            },
-            [],
-            "melody-osc",
-          ),
-        ]),
+        filter(
+          {
+            type: "lowpass",
+            frequency: melodyParams.filterFrequency,
+            q: melodyParams.filterQ,
+          },
+          [
+            mul({ multiplier: 0.25 }, [
+              osc(
+                {
+                  type: melodyParams.type,
+                  detune: 0,
+                  modSources: { gain: ["melody-amp-env"] },
+                },
+                [],
+                "melody-osc",
+              ),
+            ]),
+          ],
+          "melody-filter",
+        ),
       ]),
     );
-    AudioGraph.stop();
-    AudioGraph.start(startStep);
+    // Re-trigger playback when a new progression or melody is rendered
+    if (progression || melody) {
+      AudioGraph.stop();
+      AudioGraph.start(startStep);
+    }
   };
 }

@@ -3,12 +3,12 @@ import { useAtom } from "jotai";
 import { Pause, Play } from "lucide-react";
 import { isPlayingAtom } from "state";
 
-export function TransportButton({ className }: { className: string }) {
+export function TransportButton() {
   const [playing, setPlaying] = useAtom(isPlayingAtom);
 
   return (
     <button
-      className={className + " w-20 h-20 justify-center items-center"}
+      className="p-4 justify-center items-center"
       onClick={() => {
         const play = !playing;
         setPlaying(play);

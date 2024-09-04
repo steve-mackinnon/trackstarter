@@ -29,6 +29,11 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+
+    --harmony-border-active: rgba(16, 166, 186, 1);
+    --harmony-border-inactive: rgba(16, 166, 186, 0.5);
+    --melody-border-active: rgba(196, 92, 189, 1);
+    --melody-border-inactive: rgba(196, 92, 189, 0.5);
   }
 
   .dark {
