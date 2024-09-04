@@ -115,7 +115,7 @@ export function useRenderAudioGraph() {
             mul({ multiplier: 0.25 }, [
               osc(
                 {
-                  type: "sawtooth",
+                  type: melodyParams.type,
                   detune: 0,
                   modSources: { gain: ["melody-amp-env"] },
                 },
@@ -128,7 +128,10 @@ export function useRenderAudioGraph() {
         ),
       ]),
     );
-    AudioGraph.stop();
-    AudioGraph.start(startStep);
+    // Re-trigger playback when a new progression or melody is rendered
+    if (progression || melody) {
+      AudioGraph.stop();
+      AudioGraph.start(startStep);
+    }
   };
 }
