@@ -8,15 +8,23 @@ interface Position {
 interface XYPadProps {
   width?: number;
   height?: number;
+  x?: number;
+  y?: number;
   onChange?: (position: { x: number; y: number }) => void;
 }
 
 const NODE_DIAMETER = 22;
 
-export function XYPad({ width = 300, height = 300, onChange }: XYPadProps) {
-  const [position, setPosition] = useState<{ x: number; y: number }>({
-    x: 0.5,
-    y: 0.5,
+export function XYPad({
+  width = 300,
+  height = 300,
+  onChange,
+  x = 0.5,
+  y = 0.5,
+}: XYPadProps) {
+  const [position, setPosition] = useState<Position>({
+    x,
+    y,
   });
   const [dragOriginOffset, setDragOriginOffset] = useState<Position | null>(
     null,
@@ -24,23 +32,16 @@ export function XYPad({ width = 300, height = 300, onChange }: XYPadProps) {
   const isDragging = !!dragOriginOffset;
 
   const padRef = useRef<HTMLDivElement>(null);
+  const nodeRef = useRef<HTMLDivElement>(null);
 
-  const handleNodeMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+  const startNodeDrag = (
+    clientX: number,
+    clientY: number,
+    e: React.BaseSyntheticEvent,
+  ) => {
     const { left, top } = e.currentTarget.getBoundingClientRect();
-    const offset = { x: e.clientX - left, y: e.clientY - top };
+    const offset = { x: clientX - left, y: clientY - top };
     setDragOriginOffset(offset);
-    console.log(`offset ${offset.x} ${offset.y}`);
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
-  const handleNodeTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-    const { x, y } = e.currentTarget.getBoundingClientRect();
-    const { clientX, clientY } = e.touches[0];
-    setDragOriginOffset({
-      x: clientX + x,
-      y: clientY + y,
-    });
     e.preventDefault();
     e.stopPropagation();
   };
@@ -136,6 +137,7 @@ export function XYPad({ width = 300, height = 300, onChange }: XYPadProps) {
       }}
     >
       <div
+        ref={nodeRef}
         className="absolute bg-primary rounded-full"
         style={{
           width: NODE_DIAMETER,
@@ -144,8 +146,10 @@ export function XYPad({ width = 300, height = 300, onChange }: XYPadProps) {
           top: `${position.y * (100 - 0 * 100)}%`,
           transformOrigin: "top left",
         }}
-        onMouseDown={handleNodeMouseDown}
-        onTouchStart={handleNodeTouchStart}
+        onMouseDown={(e) => startNodeDrag(e.clientX, e.clientY, e)}
+        onTouchStart={(e) =>
+          startNodeDrag(e.touches[0].clientX, e.touches[0].clientY, e)
+        }
       />
     </div>
   );

@@ -1,4 +1,7 @@
-import { scaleValue } from "common/utils/parameterScaling";
+import {
+  inverseScaleAndNormalizeValue,
+  scaleNormalizedValue,
+} from "common/utils/parameterScaling";
 import { XYPad } from "./XYPad";
 
 interface ParamInfo {
@@ -26,9 +29,21 @@ export function ParameterXYPad({
     <XYPad
       width={width}
       height={height}
+      x={inverseScaleAndNormalizeValue({
+        value: xParam.value,
+        min: xParam.min,
+        max: xParam.max,
+        scaling: xParam.scaling,
+      })}
+      y={inverseScaleAndNormalizeValue({
+        value: yParam.value,
+        min: yParam.min,
+        max: yParam.max,
+        scaling: yParam.scaling,
+      })}
       onChange={({ x, y }) => {
         xParam.onChange(
-          scaleValue({
+          scaleNormalizedValue({
             normalizedValue: x,
             min: xParam.min,
             max: xParam.max,
@@ -36,7 +51,7 @@ export function ParameterXYPad({
           }),
         );
         yParam.onChange(
-          scaleValue({
+          scaleNormalizedValue({
             normalizedValue: y,
             min: yParam.min,
             max: yParam.max,

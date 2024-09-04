@@ -87,7 +87,7 @@ export function useRenderAudioGraph() {
           {
             type: "lowpass",
             frequency: params.filterFrequency,
-            q: 2,
+            q: params.filterQ,
           },
           [
             mul({ multiplier: 0.1 }, [

@@ -1,4 +1,4 @@
-export function scaleValue({
+export function scaleNormalizedValue({
   normalizedValue,
   min,
   max,
@@ -13,7 +13,7 @@ export function scaleValue({
   return min + scaled * (max - min);
 }
 
-export function inverseScaleValue({
+export function inverseScaleAndNormalizeValue({
   value,
   min,
   max,
@@ -24,6 +24,9 @@ export function inverseScaleValue({
   max: number;
   scaling: number;
 }) {
-  const normalizedValue = (value - min) / (max - min);
-  return Math.pow(normalizedValue, 1 / scaling);
+  return Math.pow(normalizeValue(value, min, max), 1 / scaling);
+}
+
+function normalizeValue(value: number, min: number, max: number) {
+  return (value - min) / (max - min);
 }

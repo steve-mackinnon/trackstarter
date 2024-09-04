@@ -1,5 +1,8 @@
 import { Slider } from "common/components/ui/slider";
-import { inverseScaleValue, scaleValue } from "common/utils/parameterScaling";
+import {
+  inverseScaleAndNormalizeValue,
+  scaleNormalizedValue,
+} from "common/utils/parameterScaling";
 import { useState } from "react";
 
 function formatValue({
@@ -34,7 +37,7 @@ interface SliderProps {
 }
 
 export function AudioParamSlider(props: SliderProps) {
-  const normalizedDefaultValue = inverseScaleValue({
+  const normalizedDefaultValue = inverseScaleAndNormalizeValue({
     value: props.default,
     min: props.min,
     max: props.max,
@@ -55,7 +58,7 @@ export function AudioParamSlider(props: SliderProps) {
         value={[normalizedValue]}
         onValueChange={(value) => {
           const v = value[0];
-          const scaled = scaleValue({
+          const scaled = scaleNormalizedValue({
             normalizedValue: v,
             min: props.min,
             max: props.max,
