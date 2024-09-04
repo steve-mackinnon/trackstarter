@@ -38,11 +38,11 @@ export function XYPadContainer() {
         key={instrument}
         params={params}
         onFreqChange={(freq) => {
-          setParams({ ...params, filterFrequency: freq });
+          setParams((prevParams) => ({ ...prevParams, filterFrequency: freq }));
           setProperty(filterKey, "filter", "frequency", freq);
         }}
         onQChange={(q) => {
-          setParams({ ...params, filterQ: q });
+          setParams((prevParams) => ({ ...prevParams, filterQ: q }));
           setProperty(filterKey, "filter", "q", q);
         }}
       />
