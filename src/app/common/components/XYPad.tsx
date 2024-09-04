@@ -90,6 +90,8 @@ export function XYPad({
     };
 
     const handleTouchMove = (e: TouchEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
       const touch = e.touches[0];
       handleMove(touch.clientX, touch.clientY);
     };
@@ -131,6 +133,8 @@ export function XYPad({
         setDragOriginOffset({ x: NODE_DIAMETER / 2, y: NODE_DIAMETER / 2 });
       }}
       onTouchStart={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
         updatePosition(
           e.touches[0].clientX - NODE_DIAMETER / 2,
           e.touches[0].clientY - NODE_DIAMETER / 2,
@@ -149,9 +153,10 @@ export function XYPad({
           transformOrigin: "top left",
         }}
         onMouseDown={(e) => startNodeDrag(e.clientX, e.clientY, e)}
-        onTouchStart={(e) =>
-          startNodeDrag(e.touches[0].clientX, e.touches[0].clientY, e)
-        }
+        onTouchStart={(e) => {
+          e.preventDefault();
+          startNodeDrag(e.touches[0].clientX, e.touches[0].clientY, e);
+        }}
       />
     </div>
   );
