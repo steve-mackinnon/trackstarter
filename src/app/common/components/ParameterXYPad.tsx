@@ -17,6 +17,7 @@ interface ParameterXYPadProps {
   yParam: ParamInfo;
   width?: number;
   height?: number;
+  borderColor: string;
 }
 
 export function ParameterXYPad({
@@ -24,11 +25,13 @@ export function ParameterXYPad({
   yParam,
   width,
   height,
+  borderColor,
 }: ParameterXYPadProps) {
   return (
     <XYPad
       width={width}
       height={height}
+      borderColor={borderColor}
       x={inverseScaleAndNormalizeValue({
         value: xParam.value,
         min: xParam.min,

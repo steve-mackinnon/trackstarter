@@ -11,6 +11,7 @@ interface XYPadProps {
   x?: number;
   y?: number;
   onChange?: (position: { x: number; y: number }) => void;
+  borderColor: string;
 }
 
 const NODE_DIAMETER = 22;
@@ -21,6 +22,7 @@ export function XYPad({
   onChange,
   x = 0.5,
   y = 0.5,
+  borderColor,
 }: XYPadProps) {
   const [position, setPosition] = useState<Position>({
     x,
@@ -119,8 +121,8 @@ export function XYPad({
   return (
     <div
       ref={padRef}
-      className="relative bg-primary-foreground rounded-xl"
-      style={{ width, height }}
+      className="relative bg-primary-foreground border-2 rounded-xl"
+      style={{ width, height, borderColor: borderColor }}
       onMouseDown={(e) => {
         updatePosition(
           e.clientX - NODE_DIAMETER / 2,

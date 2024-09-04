@@ -5,14 +5,17 @@ export function FilterControlsContainer({
   params,
   onFreqChange,
   onQChange,
+  borderColor,
 }: {
   params: SynthParams;
   onFreqChange: (value: number) => void;
   onQChange: (value: number) => void;
+  borderColor: string;
 }) {
   return (
     <div>
       <ParameterXYPad
+        borderColor={borderColor}
         xParam={{
           min: 50,
           max: 20000,

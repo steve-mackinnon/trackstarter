@@ -22,19 +22,22 @@ export function XYPadContainer() {
       instrument: "harmony",
       filterKey: "chord-prog-filter",
       setParams: setHarmonySynthParams,
+      borderColor: "var(--harmony-border-active)",
     },
     {
       params: melodySynthParams,
       instrument: "melody",
       filterKey: "melody-filter",
       setParams: setMelodySynthParams,
+      borderColor: "var(--melody-border-active)",
     },
-  ].map(({ params, instrument, filterKey, setParams }) => {
+  ].map(({ params, borderColor, instrument, filterKey, setParams }) => {
     if (selectedInstrument !== instrument) {
       return null;
     }
     return (
       <FilterControlsContainer
+        borderColor={borderColor}
         key={instrument}
         params={params}
         onFreqChange={(freq) => {

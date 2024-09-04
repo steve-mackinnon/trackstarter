@@ -15,7 +15,7 @@ export function InstrumentSelectionContainer() {
   const renderAudioGraph = useRenderAudioGraph();
 
   return (
-    <div className="flex justify-between">
+    <div className="flex justify-between space-x-4">
       <InstrumentControls
         instrument="harmony"
         oscShape={harmonyParams.type as OscShape}
@@ -25,6 +25,8 @@ export function InstrumentSelectionContainer() {
           renderAudioGraph({ harmonySynthParams: newParams });
         }}
         onShuffleClicked={() => generateNewChordProgression(mood)}
+        borderColorActive={"var(--harmony-border-active)"}
+        borderColorInactive={"var(--harmony-border-inactive)"}
       />
       <InstrumentControls
         instrument="melody"
@@ -35,6 +37,8 @@ export function InstrumentSelectionContainer() {
           renderAudioGraph({ melodySynthParams: newParams });
         }}
         onShuffleClicked={() => generateNewMelody()}
+        borderColorActive="var(--melody-border-active)"
+        borderColorInactive="var(--melody-border-inactive)"
       />
     </div>
   );
