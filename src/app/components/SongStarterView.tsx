@@ -14,7 +14,7 @@ export default function SongStarterView() {
       <Header className="absolute top-4" />
       <XYPadContainer />
       <InstrumentSelectionContainer />
-      <Footer className="absolute bottom-4" />
+      <Footer className="absolute bottom-6" />
     </div>
   );
 }
