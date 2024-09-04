@@ -10,7 +10,7 @@ export default function SongStarterView() {
   useSetupHotkeys();
 
   return (
-    <div className="absolute flex flex-col gap-y-4 w-full h-full py-32  items-center">
+    <div className="absolute flex flex-col gap-y-4 w-full h-full py-20  items-center">
       <Header className="absolute top-4" />
       <XYPadContainer />
       <InstrumentSelectionContainer />
