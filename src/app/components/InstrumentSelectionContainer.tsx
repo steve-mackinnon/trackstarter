@@ -4,6 +4,7 @@ import { useRenderAudioGraph } from "common/hooks/useRenderAudioGraph";
 import { useAtom, useAtomValue } from "jotai";
 import { harmonySynthParamsAtom, melodySynthParamsAtom, moodAtom } from "state";
 import { InstrumentControls } from "./InstrumentControls";
+import { OscShape } from "./OscillatorShapeSelector";
 
 export function InstrumentSelectionContainer() {
   const [harmonyParams, setHarmonyParams] = useAtom(harmonySynthParamsAtom);
@@ -17,6 +18,7 @@ export function InstrumentSelectionContainer() {
     <div className="flex justify-between">
       <InstrumentControls
         instrument="harmony"
+        oscShape={harmonyParams.type as OscShape}
         onOscShapeChange={(shape) => {
           const newParams = { ...harmonyParams, type: shape };
           setHarmonyParams(newParams);
@@ -26,6 +28,7 @@ export function InstrumentSelectionContainer() {
       />
       <InstrumentControls
         instrument="melody"
+        oscShape={melodyParams.type as OscShape}
         onOscShapeChange={(shape) => {
           const newParams = { ...melodyParams, type: shape };
           setMelodyParams(newParams);

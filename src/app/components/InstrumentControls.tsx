@@ -7,10 +7,12 @@ import { OscillatorShapeSelector, OscShape } from "./OscillatorShapeSelector";
 
 export function InstrumentControls({
   instrument,
+  oscShape,
   onOscShapeChange,
   onShuffleClicked,
 }: {
   instrument: "harmony" | "melody";
+  oscShape: OscShape;
   onOscShapeChange: (shape: OscShape) => void;
   onShuffleClicked: () => void;
 }) {
@@ -29,7 +31,10 @@ export function InstrumentControls({
       onClick={() => setSelectedInstrument(instrument)}
     >
       <span>{instrument}</span>
-      <OscillatorShapeSelector oscShape="sine" onChange={onOscShapeChange} />
+      <OscillatorShapeSelector
+        oscShape={oscShape}
+        onChange={onOscShapeChange}
+      />
       <Button
         variant="outline"
         className="rounded-full"
