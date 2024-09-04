@@ -50,7 +50,7 @@ export function InstrumentControls({
       />
       <Button
         variant="outline"
-        className="rounded-full"
+        className="rounded-full active:bg-slate-500"
         onClick={onShuffleClicked}
       >
         <Dices />
