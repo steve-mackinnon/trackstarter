@@ -13,7 +13,10 @@ export function OscillatorShapeSelector({
 }) {
   const [shape, setShape] = useState<OscShape>(oscShape);
   const className = (s: OscShape) =>
-    cn("w-2 text-xs", { "bg-secondary": s === shape });
+    cn("w-2 text-xs h-6 w-9", {
+      "bg-secondary": s === shape,
+      "border-[1px] border-slate-400": s === shape,
+    });
 
   const updateShape = (shape: OscShape) => {
     setShape(shape);
