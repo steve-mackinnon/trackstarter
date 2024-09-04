@@ -26,11 +26,13 @@ export function useGenerateNewChordProgression() {
     renderAudioGraph({ progression: chordProgression });
     setIsPlaying(true);
 
-    generateMelodyForChordProgression(chordProgression.chordNames).then(
-      (seq) => {
-        setMelody(seq ?? null);
-        renderAudioGraph({ progression: chordProgression, melody: seq });
-      },
-    );
+    generateMelodyForChordProgression(
+      chordProgression.chordNames,
+      chordProgression.scale,
+      chordProgression.rootNote,
+    ).then((seq) => {
+      setMelody(seq ?? null);
+      renderAudioGraph({ progression: chordProgression, melody: seq });
+    });
   };
 }
