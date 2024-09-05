@@ -7,6 +7,7 @@ import { unmute } from "./unmute";
 
 const context = new AudioContext();
 unmute(context, false, false);
+Tone.setContext(context);
 
 // Disable auto freezing in immer so we can mutate the current state when
 // setting props
@@ -128,11 +129,14 @@ let stepIndex = 0;
 let playing = false;
 const SEQUENCE_LENGTH = 1024;
 
-export function start(startStep?: number) {
+export async function start(startStep?: number) {
   Tone.getTransport().bpm.value = 160;
   Tone.getTransport().loop = true;
   Tone.getTransport().setLoopPoints("1:1:1", "17:1:1");
 
+  // if (context.state !== "running") {
+  // await Tone.start();
+  // }
   stepIndex = startStep ?? 0;
   Tone.getTransport().start();
   playing = true;
@@ -153,7 +157,7 @@ export function start(startStep?: number) {
 
 export function stop() {
   playing = false;
-  Tone.getTransport().stop();
+  Tone.getTransport().pause();
   stepIndex = 0;
   if (currentRoot) {
     applyToSequencers(currentRoot, (seq) => seq.backingNode?.stop());
