@@ -88,21 +88,43 @@ export function XYPadContainer() {
   );
   const selectedInstrument = useAtomValue(selectedInstrumentAtom);
 
-  const paramMap =
-    selectedInstrument === "harmony"
-      ? buildParamMap(harmonySynthParams, "harmony", setHarmonySynthParams)
-      : buildParamMap(melodySynthParams, "melody", setMelodySynthParams);
+  const harmonySelected = selectedInstrument === "harmony";
+  const paramMap = harmonySelected
+    ? buildParamMap(harmonySynthParams, "harmony", setHarmonySynthParams)
+    : buildParamMap(melodySynthParams, "melody", setMelodySynthParams);
   const params = selectedControls === "filter" ? paramMap.filter : paramMap.amp;
-  const borderColor =
-    selectedInstrument === "harmony"
-      ? "var(--harmony-border-active)"
-      : "var(--melody-border-active)";
+  const borderColor = harmonySelected
+    ? "var(--harmony-border-active)"
+    : "var(--melody-border-active)";
 
+  const filterSelected = selectedControls === "filter";
   return (
     <div className="flex flex-col">
-      <div className="flex">
-        <Button onClick={() => setSelectedControls("filter")}>Tone</Button>
-        <Button onClick={() => setSelectedControls("amp")}>Shape</Button>
+      <div className="flex space-x-[2px]">
+        <Button
+          variant="secondary"
+          className="rounded-none rounded-tl-lg"
+          style={{
+            backgroundColor: filterSelected
+              ? "hsl(var(--secondary))"
+              : "hsl(var(--primary-foreground))",
+          }}
+          onClick={() => setSelectedControls("filter")}
+        >
+          Tone
+        </Button>
+        <Button
+          variant={"secondary"}
+          className="rounded-none rounded-tr-lg"
+          style={{
+            backgroundColor: !filterSelected
+              ? "hsl(var(--secondary))"
+              : "hsl(var(--primary-foreground))",
+          }}
+          onClick={() => setSelectedControls("amp")}
+        >
+          Shape
+        </Button>
       </div>
       <ParameterXYPad
         key={`${selectedControls}-${selectedInstrument}`}
