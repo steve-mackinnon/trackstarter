@@ -4,7 +4,7 @@ import {
 } from "common/utils/parameterScaling";
 import { XYPad } from "./XYPad";
 
-interface ParamInfo {
+export interface ParamInfo {
   min: number;
   max: number;
   scaling: number;

@@ -72,8 +72,8 @@ export function useRenderAudioGraph() {
         ...sequencers,
         adsr(
           {
-            attack: 0.3,
-            decay: 0.9,
+            attack: harmonyParams.attack,
+            decay: harmonyParams.decay,
             sustain: 0.3,
             release: 0.1,
           },
@@ -81,8 +81,8 @@ export function useRenderAudioGraph() {
         ),
         adsr(
           {
-            attack: 0.1,
-            decay: 0.3,
+            attack: melodyParams.attack,
+            decay: melodyParams.decay,
             sustain: 0.1,
             release: 0.1,
           },
@@ -103,7 +103,7 @@ export function useRenderAudioGraph() {
               ),
             ]),
           ],
-          "chord-prog-filter",
+          "harmony-filter",
         ),
         filter(
           {
