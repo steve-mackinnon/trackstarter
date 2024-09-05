@@ -74,7 +74,7 @@ export function useRenderAudioGraph() {
           {
             attack: harmonyParams.attack,
             decay: harmonyParams.decay,
-            sustain: 0.3,
+            sustain: harmonyParams.sustain,
             release: 0.1,
           },
           "harmony-amp-env",
@@ -83,7 +83,7 @@ export function useRenderAudioGraph() {
           {
             attack: melodyParams.attack,
             decay: melodyParams.decay,
-            sustain: 0.1,
+            sustain: melodyParams.sustain,
             release: 0.1,
           },
           "melody-amp-env",

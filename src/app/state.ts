@@ -11,6 +11,7 @@ export interface SynthParams extends OscProps {
   filterQ: number;
   attack: number;
   decay: number;
+  sustain: number;
 }
 
 export const harmonySynthParamsAtom = atom<SynthParams>({
@@ -20,6 +21,7 @@ export const harmonySynthParamsAtom = atom<SynthParams>({
   filterQ: 0.707,
   attack: 0.3,
   decay: 0.9,
+  sustain: 0.2,
 });
 
 export const melodySynthParamsAtom = atom<SynthParams>({
@@ -29,6 +31,7 @@ export const melodySynthParamsAtom = atom<SynthParams>({
   filterQ: 3,
   attack: 0.3,
   decay: 0.1,
+  sustain: 0.1,
 });
 
 export const melodyAtom = atom<SequencerEvent[] | null>(null);

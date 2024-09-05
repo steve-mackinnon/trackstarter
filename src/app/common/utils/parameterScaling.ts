@@ -30,3 +30,13 @@ export function inverseScaleAndNormalizeValue({
 function normalizeValue(value: number, min: number, max: number) {
   return (value - min) / (max - min);
 }
+
+export function linearMap(
+  value: number,
+  inMin: number,
+  inMax: number,
+  outMin: number,
+  outMax: number,
+): number {
+  return ((value - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
+}

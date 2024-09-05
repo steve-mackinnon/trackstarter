@@ -4,6 +4,7 @@ import {
   ParamInfo as XYPadParamInfo,
 } from "common/components/ParameterXYPad";
 import { Button } from "common/components/ui/button";
+import { linearMap } from "common/utils/parameterScaling";
 import { useAtom, useAtomValue } from "jotai";
 import { SetStateAction } from "jotai/vanilla";
 import { useState } from "react";
@@ -69,8 +70,14 @@ function buildParamMap(
         scaling: 3,
         value: synthParams.decay,
         onChange: (decay: number) => {
-          updateSynthParams((prev) => ({ ...prev, decay: decay }));
+          const sustain = linearMap(decay, 0.05, 12, 0, 0.7);
+          updateSynthParams((prev) => ({
+            ...prev,
+            decay: decay,
+            sustain: sustain,
+          }));
           setProperty(`${instrumentKey}-amp-env`, "adsr", "decay", decay);
+          setProperty(`${instrumentKey}-amp-env`, "adsr", "sustain", sustain);
         },
       },
     },
