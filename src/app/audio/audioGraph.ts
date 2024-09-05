@@ -187,7 +187,7 @@ export function getCurrentStep(): number {
   return stepIndex;
 }
 
-let currentRoot: DestinationNode | null = null;
+export let currentRoot: DestinationNode | null = null;
 
 export function findNodeWithKey(root: Node | null, key: string): Node | null {
   if (!root) {
@@ -229,7 +229,14 @@ function buildBackingNode(node: Node): AudioNode | Sequencer | null {
         (key) => findNodeWithKey(currentRoot, key),
         (node, freq, startTime, endTime) => {
           if (node.type === "osc") {
-            return buildOscNode(context, node, freq, startTime, endTime);
+            return buildOscNode(
+              context,
+              node,
+              freq,
+              startTime,
+              endTime,
+              currentRoot as Node,
+            );
           }
         },
       );

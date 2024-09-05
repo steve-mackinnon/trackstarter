@@ -7,6 +7,7 @@ export function buildOscNode(
   freq: number,
   startTime: number,
   endTime: number,
+  root: Node,
 ): OscillatorNode {
   const oscNode = new OscillatorNode(context);
   const oscType = node.props.type;
@@ -27,7 +28,7 @@ export function buildOscNode(
   if (node.props.modSources?.gain && node.props.modSources.gain.length > 0) {
     oscGain.gain.value = 0;
     node.props.modSources.gain.forEach((modulatorKey) => {
-      const modulator = findNodeWithKey(getRoot(node), modulatorKey);
+      const modulator = findNodeWithKey(root, modulatorKey);
       if (modulator && modulator.type === "adsr") {
         const gainEnvNode = buildADSRNode(
           context,
@@ -44,13 +45,6 @@ export function buildOscNode(
   }
   oscNode.stop(oscStopTime);
   return oscNode;
-}
-
-function getRoot(node: Node) {
-  if (node.parent) {
-    return getRoot(node.parent);
-  }
-  return node;
 }
 
 function buildADSRNode(
