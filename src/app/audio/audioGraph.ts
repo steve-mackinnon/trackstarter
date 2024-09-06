@@ -392,16 +392,29 @@ function buildAudioGraph({
   return updatedNode;
 }
 
+interface HasInputNode {
+  readonly input: AudioNode;
+}
+
+function isNodeWithInput(obj: any): obj is HasInputNode {
+  return obj && obj["input"] && obj["input"] instanceof AudioNode;
+}
+
 function setupAuxConnections(node: Node) {
   if (node.auxConnections) {
     node.auxConnections.forEach((key) => {
-      const auxNode = currentRoot?.children?.find((n) => n.key === key);
+      const auxNode = findNodeWithKey(currentRoot, key);
       if (
         auxNode &&
-        auxNode.backingNode instanceof AudioNode &&
+        (isNodeWithInput(auxNode.backingNode) ||
+          auxNode.backingNode instanceof AudioNode) &&
         isConnectable(node.backingNode)
       ) {
-        node.backingNode.connect(auxNode.backingNode);
+        if (isNodeWithInput(auxNode.backingNode)) {
+          node.backingNode.connect(auxNode.backingNode.input);
+        } else {
+          node.backingNode.connect(auxNode.backingNode);
+        }
       } else {
         throw new Error(
           `Failed to make aux connection to node with key: ${key}`,

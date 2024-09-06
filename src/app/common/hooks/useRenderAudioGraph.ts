@@ -2,6 +2,7 @@ import * as AudioGraph from "audio/audioGraph";
 import {
   adsr,
   defaultSequencerProps,
+  delay,
   filter,
   mul,
   osc,
@@ -89,6 +90,11 @@ export function useRenderAudioGraph() {
           "melody-amp-env",
         ),
         filter(
+          { type: "lowpass", frequency: 700, q: 10 },
+          [delay({ time: 0.4, feedback: 0.7 }, "delay")],
+          [],
+        ),
+        filter(
           {
             type: "lowpass",
             frequency: harmonyParams.filterFrequency,
@@ -125,7 +131,7 @@ export function useRenderAudioGraph() {
               ),
             ]),
           ],
-          [],
+          ["delay"],
           "melody-filter",
         ),
       ]),

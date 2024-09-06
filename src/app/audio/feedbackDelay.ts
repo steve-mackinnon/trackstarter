@@ -33,7 +33,7 @@ export class FeedbackDelay {
     this.feedbackGain.gain.value = Math.max(0, Math.min(props.feedback, 1));
   }
 
-  input(): DelayNode {
+  get input(): DelayNode {
     return this.delay;
   }
 
