@@ -2,6 +2,7 @@ import { produce, setAutoFreeze } from "immer";
 import * as Tone from "tone";
 import { ADSR, ADSRProps } from "./adsr";
 import { buildOscNode } from "./backingNodes";
+import { FeedbackDelay, FeedbackDelayProps } from "./feedbackDelay";
 import { Sequencer } from "./sequencer";
 import { unmute } from "./unmute";
 
@@ -19,13 +20,15 @@ export type NodeType =
   | "sequencer"
   | "destination"
   | "mul"
-  | "adsr";
+  | "adsr"
+  | "delay";
 
 interface BaseNode {
   children?: Node[];
   type: NodeType;
   key?: string;
   parent?: Node;
+  auxConnections?: string[];
 }
 
 export interface OscProps {
@@ -52,6 +55,7 @@ export interface FilterNode extends BaseNode {
   type: "filter";
   props: FilterProps;
   backingNode?: BiquadFilterNode;
+  auxConnections: string[];
 }
 
 export interface MulProps {
@@ -67,6 +71,12 @@ export interface ADSRNode extends BaseNode {
   type: "adsr";
   props: ADSRProps;
   backingNode?: ADSR;
+}
+
+export interface FeedbackDelayNode extends BaseNode {
+  type: "delay";
+  props: FeedbackDelayProps;
+  backingNode?: FeedbackDelay;
 }
 
 export interface DestinationNode extends BaseNode {
@@ -111,7 +121,21 @@ export type Node =
   | SequencerNode
   | DestinationNode
   | MulNode
-  | ADSRNode;
+  | ADSRNode
+  | FeedbackDelayNode;
+
+interface Connectable {
+  connect(destination: AudioNode): AudioNode;
+  disconnect(): void;
+}
+
+function isConnectable(obj: any): obj is Connectable {
+  return (
+    obj &&
+    typeof obj.connect === "function" &&
+    typeof obj.disconnect === "function"
+  );
+}
 
 /// Renders the tree rooted in `newRoot` by comparing it to the current tree and applying
 /// the minimum number of WebAudio node operations to fulfill the requested state.
@@ -122,6 +146,7 @@ export function render(newRoot: Node) {
     parent: null,
   });
   currentRoot = produce(currentRoot, () => newRoot);
+  setupAuxConnections(currentRoot!);
 }
 
 let hasStarted = false;
@@ -208,7 +233,7 @@ export function findNodeWithKey(root: Node | null, key: string): Node | null {
   return null;
 }
 
-function buildBackingNode(node: Node): AudioNode | Sequencer | null {
+function buildBackingNode(node: Node): Connectable | Sequencer | null {
   switch (node.type) {
     case "osc": {
       // Osc nodes are created dynamically when they are triggered by a sequence
@@ -224,6 +249,8 @@ function buildBackingNode(node: Node): AudioNode | Sequencer | null {
     case "adsr":
       // ADSR nodes are built on the fly when triggered
       return null;
+    case "delay":
+      return new FeedbackDelay(context, node.props);
     case "sequencer": {
       return new Sequencer(
         node,
@@ -250,8 +277,8 @@ function deleteNode(node: Node) {
   if (node.children) {
     node.children.forEach((n) => deleteNode(n));
   }
-  if (node.backingNode && node.backingNode instanceof AudioNode) {
-    node.backingNode?.disconnect();
+  if (isConnectable(node.backingNode)) {
+    node.backingNode.disconnect();
   }
 }
 
@@ -347,7 +374,7 @@ function buildAudioGraph({
     });
     if (
       parent?.backingNode instanceof AudioNode &&
-      newNode.backingNode instanceof AudioNode
+      isConnectable(newNode.backingNode)
     ) {
       newNode.backingNode.connect(parent.backingNode);
     }
@@ -363,6 +390,26 @@ function buildAudioGraph({
   const updatedNode = applyChildNodeUpdates(newNode, currentNode);
   applyPropUpdates(updatedNode);
   return updatedNode;
+}
+
+function setupAuxConnections(node: Node) {
+  if (node.auxConnections) {
+    node.auxConnections.forEach((key) => {
+      const auxNode = currentRoot?.children?.find((n) => n.key === key);
+      if (
+        auxNode &&
+        auxNode.backingNode instanceof AudioNode &&
+        isConnectable(node.backingNode)
+      ) {
+        node.backingNode.connect(auxNode.backingNode);
+      } else {
+        throw new Error(
+          `Failed to make aux connection to node with key: ${key}`,
+        );
+      }
+    });
+  }
+  node.children?.forEach((child) => setupAuxConnections(child));
 }
 
 function applyToSequencers(root: Node, fn: (seq: SequencerNode) => void) {

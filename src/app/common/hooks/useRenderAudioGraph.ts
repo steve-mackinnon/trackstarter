@@ -103,6 +103,7 @@ export function useRenderAudioGraph() {
               ),
             ]),
           ],
+          [],
           "harmony-filter",
         ),
         filter(
@@ -124,6 +125,7 @@ export function useRenderAudioGraph() {
               ),
             ]),
           ],
+          [],
           "melody-filter",
         ),
       ]),
