@@ -134,9 +134,6 @@ export async function start(startStep?: number) {
   Tone.getTransport().loop = true;
   Tone.getTransport().setLoopPoints("1:1:1", "17:1:1");
 
-  // if (context.state !== "running") {
-  // await Tone.start();
-  // }
   stepIndex = startStep ?? 0;
   Tone.getTransport().start();
   playing = true;
