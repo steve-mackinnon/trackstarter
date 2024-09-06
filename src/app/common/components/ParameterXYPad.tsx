@@ -38,12 +38,15 @@ export function ParameterXYPad({
         max: xParam.max,
         scaling: xParam.scaling,
       })}
-      y={inverseScaleAndNormalizeValue({
-        value: 1 - yParam.value,
-        min: yParam.min,
-        max: yParam.max,
-        scaling: yParam.scaling,
-      })}
+      y={
+        1 -
+        inverseScaleAndNormalizeValue({
+          value: yParam.value,
+          min: yParam.min,
+          max: yParam.max,
+          scaling: yParam.scaling,
+        })
+      }
       onChange={({ x, y }) => {
         xParam.onChange(
           scaleNormalizedValue({
