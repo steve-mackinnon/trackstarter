@@ -54,18 +54,16 @@ export function XYPad({
         return;
       }
       const rect = padRef.current.getBoundingClientRect();
-      const x = (clientX - rect.left) / rect.width;
-      const y = (clientY - rect.top) / rect.height;
+      const x = (clientX - rect.left) / (rect.width - NODE_DIAMETER);
+      const y = (clientY - rect.top) / (rect.height - NODE_DIAMETER);
 
-      const nodeWidth = NODE_DIAMETER / rect.width;
-      const nodeHeight = NODE_DIAMETER / rect.height;
-      const normalizedX = Math.max(0, Math.min(1 - nodeWidth, x));
-      const normalizedY = Math.max(0, Math.min(1 - nodeHeight, y));
+      const clampedX = Math.max(0, Math.min(1, x));
+      const clampedY = Math.max(0, Math.min(1, y));
 
-      setPosition({ x: normalizedX, y: normalizedY });
+      setPosition({ x: clampedX, y: clampedY });
 
       if (onChange) {
-        onChange({ x: normalizedX, y: normalizedY });
+        onChange({ x: clampedX, y: clampedY });
       }
     },
     [padRef, onChange],
@@ -161,6 +159,12 @@ export function XYPad({
     };
   }, [isDragging, onChange, updatePosition, dragOriginOffset]);
 
+  const nodeWidthPercentage = padRef.current
+    ? (NODE_DIAMETER / padRef.current.getBoundingClientRect().width) * 100
+    : 10;
+  const nodeHeightPercentage = padRef.current
+    ? (NODE_DIAMETER / padRef.current.getBoundingClientRect().height) * 100
+    : 10;
   return (
     <div
       ref={padRef}
@@ -180,9 +184,14 @@ export function XYPad({
         style={{
           width: NODE_DIAMETER,
           height: NODE_DIAMETER,
-          left: `${position.x * (100 - 0 * 100)}%`,
-          top: `${position.y * (100 - 0 * 100)}%`,
+          left: `${
+            nodeWidthPercentage + position.x * (100 - nodeWidthPercentage)
+          }%`,
+          top: `${
+            nodeHeightPercentage + position.y * (100 - nodeHeightPercentage)
+          }%`,
           transformOrigin: "top left",
+          transform: "translate(-100%, -100%)",
         }}
         onMouseDown={(e) => startNodeDrag(e.clientX, e.clientY, e)}
       />
