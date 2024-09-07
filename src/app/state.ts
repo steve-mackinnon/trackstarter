@@ -30,10 +30,10 @@ const defaultDelayParams: DelayParams = {
 };
 
 export const harmonySynthParamsAtom = atom<SynthParams>({
-  type: "sine",
+  type: "square",
   detune: 0,
-  filterFrequency: 700,
-  filterQ: 0.707,
+  filterFrequency: 900,
+  filterQ: 2,
   attack: 0.3,
   decay: 0.9,
   sustain: 0.2,
@@ -43,9 +43,9 @@ export const harmonySynthParamsAtom = atom<SynthParams>({
 export const melodySynthParamsAtom = atom<SynthParams>({
   type: "sawtooth",
   detune: 0,
-  filterFrequency: 2000,
-  filterQ: 3,
-  attack: 0.3,
+  filterFrequency: 3500,
+  filterQ: 4,
+  attack: 0.01,
   decay: 0.1,
   sustain: 0.1,
   delayParams: { ...defaultDelayParams },
