@@ -4,7 +4,6 @@ export type Mood =
   | "Exotic"
   | "Mysterious"
   | "Dramatic"
-  | "Sophisticated"
   | "Dreamy"
   | "Groovy"
   | "Surreal";
@@ -16,7 +15,6 @@ export const MOOD_TO_SCALE: Record<Mood, string> = {
   Exotic: "phrygian",
   Groovy: "mixolydian",
   Mysterious: "whole tone",
-  Sophisticated: "melodic minor",
   Surreal: "augmented",
   Uplifting: "ionian",
 };
@@ -85,7 +83,6 @@ export const MOOD_TO_PROGRESSIONS = {
   Sophisticated: [
     "2-5-1-4",
     "1-2-4-7",
-    "4-5-3-6",
     "2-5-1-7",
     "1-5-2-4",
     "1-#4-4-3",
@@ -140,6 +137,5 @@ export const MOODS: readonly Mood[] = [
   "Exotic",
   "Groovy",
   "Mysterious",
-  "Sophisticated",
   "Surreal",
 ];
