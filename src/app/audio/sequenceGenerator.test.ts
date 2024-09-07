@@ -1,8 +1,6 @@
 import { expect, test } from "vitest";
-import {
-  generateChordProgression,
-  parseChordProgression,
-} from "./sequenceGenerator";
+import { parseChordProgression } from "./melodicUtils";
+import { generateChordProgression } from "./sequenceGenerator";
 
 test("generating chord progression produces the correct number of chords", () => {
   const progression = generateChordProgression({

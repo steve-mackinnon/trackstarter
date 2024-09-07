@@ -1,9 +1,9 @@
+import { Mood } from "audio/melodicConstants";
 import { generateMelodyForChordProgression } from "audio/melodyGenerator";
 import {
   generateChordProgression,
   getRandomMood,
   getRandomNote,
-  Mood,
 } from "audio/sequenceGenerator";
 import { useSetAtom } from "jotai";
 import { chordProgressionAtom, isPlayingAtom, melodyAtom } from "state";

@@ -1,4 +1,4 @@
-import { Mood, MOODS } from "audio/sequenceGenerator";
+import { Mood, MOODS } from "audio/melodicConstants";
 import classNames from "classnames";
 import { ComboBox } from "common/components/ComboBox";
 import { useGenerateNewChordProgression } from "common/hooks/useGenerateNewChordProgression";

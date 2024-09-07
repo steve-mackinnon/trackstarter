@@ -1,4 +1,4 @@
-import { Chord, Interval, NoteWithOctave, Scale, Note as TNote } from "tonal";
+import { Chord, NoteWithOctave, Scale } from "tonal";
 import { SequencerEvent } from "./audioGraph";
 import {
   Mood,
@@ -6,29 +6,14 @@ import {
   MOOD_TO_SCALE,
   MOODS,
 } from "./melodicConstants";
+import {
+  chordForScale,
+  chordsForProgression,
+  parseChordProgression,
+} from "./melodicUtils";
 
 function getRandomValue<T>(array: readonly T[]): T {
   return array[Math.floor(Math.random() * (array.length - 1))];
-}
-
-interface ScaleDegree {
-  index: number;
-  alteration?: "sharp" | "flat";
-}
-
-export function parseChordProgression(progression: string): ScaleDegree[] {
-  return progression.split("-").map((chord) => {
-    const alteration = chord.startsWith("b")
-      ? "flat"
-      : chord.startsWith("#")
-      ? "sharp"
-      : undefined;
-    const skipFirstChar = alteration !== undefined;
-    return {
-      index: parseInt(chord.slice(skipFirstChar ? 1 : 0), 10) - 1,
-      alteration,
-    };
-  });
 }
 
 export function getRandomMood(): Mood {
@@ -107,12 +92,13 @@ export function generateChordProgression({
   const scale = MOOD_TO_SCALE[mood];
   const notes = Scale.get(`${rootNote}${octave} ${scale}`);
   const progression = getRandomValue(MOOD_TO_PROGRESSIONS[mood]);
-  const chordDegrees = parseChordProgression(
-    getRandomValue(MOOD_TO_PROGRESSIONS[mood]),
-  );
-  const chordNotes = chordDegrees.map((degree) =>
-    chordForScale(notes, degree, notesPerChord),
-  );
+  const { chordNotes, chordNames } = chordsForProgression({
+    progression,
+    scaleName: scale,
+    octave,
+    rootNote,
+    notesPerChord,
+  });
   return {
     chordNotes,
     chordNames: chordNotes.map((notes) => chordName(notes)),
@@ -140,33 +126,6 @@ export function chordProgressionToSequencerEvents(
   return events;
 }
 
-export function chordForScale(
-  scale: Scale.Scale,
-  rootDegree: ScaleDegree,
-  numNotesInChord: number,
-): string[] {
-  return Array.from({ length: numNotesInChord }).map((_, i) => {
-    let note = scale.notes[(rootDegree.index + i * 2) % scale.notes.length];
-    if (rootDegree.alteration && i === 0) {
-      // Sharpen or flatten the root if requested
-      const shiftAmount = rootDegree.alteration === "flat" ? -1 : 1;
-      note = TNote.transpose(note, Interval.fromSemitones(shiftAmount));
-    }
-    const freq = TNote.get(note).freq ?? 500;
-    if (Math.random() < 0.3 && freq < 700) {
-      // Shift up an octave
-      note = TNote.transpose(note, "8P");
-    } else if (Math.random() < 0.3 && freq > 100) {
-      // Shift down an octave
-      note = TNote.transpose(note, "-8P");
-    }
-    if (note === "") {
-      throw new Error("Failed to generate note in chordForScale()");
-    }
-    return note;
-  });
-}
-
 export function regenerateChordAtIndex(
   chordProgression: ChordProgression,
   index: number,
@@ -189,6 +148,5 @@ function chordName(notes: string[]): string {
   chords.sort((a, b) =>
     a.length < b.length ? -1 : a.length === b.length ? 0 : 1,
   );
-  console.log(`Sorted: ${chords}`);
   return chords[0];
 }
