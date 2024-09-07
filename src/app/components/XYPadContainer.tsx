@@ -23,6 +23,7 @@ interface ParameterInfo {
 interface ParamMap {
   filter: ParameterInfo;
   amp: ParameterInfo;
+  delay: ParameterInfo;
 }
 
 function buildParamMap(
@@ -81,6 +82,56 @@ function buildParamMap(
         },
       },
     },
+    delay: {
+      xParam: {
+        min: 0.01,
+        max: 1,
+        scaling: 1,
+        value: synthParams.delayParams.time,
+        onChange: (time: number) => {
+          updateSynthParams((prev) => {
+            const prevDelay = { ...prev.delayParams };
+            return { ...prev, delayParams: { ...prevDelay, time } };
+          });
+          setProperty(`${instrumentKey}-delay`, "delay", "time", time);
+        },
+      },
+      yParam: {
+        min: 0,
+        max: 1,
+        scaling: 1,
+        value: synthParams.delayParams.sendAmount,
+        onChange: (sendAmount: number) => {
+          const feedback = sendAmount * 0.8;
+          const lpfFrequency = linearMap(sendAmount, 0, 1, 800, 2000);
+          updateSynthParams((prev) => {
+            const prevDelay = { ...prev.delayParams };
+            return {
+              ...prev,
+              delayParams: {
+                ...prevDelay,
+                sendAmount,
+                feedback,
+                lpfFrequency,
+              },
+            };
+          });
+          setProperty(
+            `${instrumentKey}-delay-input`,
+            "mul",
+            "multiplier",
+            sendAmount,
+          );
+          setProperty(`${instrumentKey}-delay`, "delay", "feedback", feedback);
+          setProperty(
+            `${instrumentKey}-delay-filter`,
+            "filter",
+            "frequency",
+            lpfFrequency,
+          );
+        },
+      },
+    },
   };
 }
 export function XYPadContainer() {
@@ -90,21 +141,30 @@ export function XYPadContainer() {
   const [melodySynthParams, setMelodySynthParams] = useAtom(
     melodySynthParamsAtom,
   );
-  const [selectedControls, setSelectedControls] = useState<"filter" | "amp">(
-    "filter",
-  );
+  const [selectedControls, setSelectedControls] = useState<
+    "filter" | "amp" | "delay"
+  >("filter");
   const selectedInstrument = useAtomValue(selectedInstrumentAtom);
 
   const harmonySelected = selectedInstrument === "harmony";
   const paramMap = harmonySelected
     ? buildParamMap(harmonySynthParams, "harmony", setHarmonySynthParams)
     : buildParamMap(melodySynthParams, "melody", setMelodySynthParams);
-  const params = selectedControls === "filter" ? paramMap.filter : paramMap.amp;
+  const params = (() => {
+    switch (selectedControls) {
+      case "amp":
+        return paramMap.amp;
+      case "delay":
+        return paramMap.delay;
+      case "filter":
+        return paramMap.filter;
+    }
+  })();
+
   const borderColor = harmonySelected
     ? "var(--harmony-border-active)"
     : "var(--melody-border-active)";
 
-  const filterSelected = selectedControls === "filter";
   return (
     <div className="flex flex-col">
       <div className="flex space-x-[2px]">
@@ -112,9 +172,10 @@ export function XYPadContainer() {
           variant="secondary"
           className="rounded-none rounded-tl-lg"
           style={{
-            backgroundColor: filterSelected
-              ? "hsl(var(--secondary))"
-              : "hsl(var(--primary-foreground))",
+            backgroundColor:
+              selectedControls === "filter"
+                ? "hsl(var(--secondary))"
+                : "hsl(var(--primary-foreground))",
           }}
           onClick={() => setSelectedControls("filter")}
         >
@@ -122,15 +183,29 @@ export function XYPadContainer() {
         </Button>
         <Button
           variant={"secondary"}
-          className="rounded-none rounded-tr-lg"
+          className="rounded-none"
           style={{
-            backgroundColor: !filterSelected
-              ? "hsl(var(--secondary))"
-              : "hsl(var(--primary-foreground))",
+            backgroundColor:
+              selectedControls === "amp"
+                ? "hsl(var(--secondary))"
+                : "hsl(var(--primary-foreground))",
           }}
           onClick={() => setSelectedControls("amp")}
         >
           Shape
+        </Button>
+        <Button
+          variant={"secondary"}
+          className="rounded-none rounded-tr-lg"
+          style={{
+            backgroundColor:
+              selectedControls === "delay"
+                ? "hsl(var(--secondary))"
+                : "hsl(var(--primary-foreground))",
+          }}
+          onClick={() => setSelectedControls("delay")}
+        >
+          Delay
         </Button>
       </div>
       <ParameterXYPad

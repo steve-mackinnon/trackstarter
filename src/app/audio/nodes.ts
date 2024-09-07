@@ -1,6 +1,7 @@
 import { ADSRProps } from "./adsr";
 import {
   ADSRNode,
+  FeedbackDelayNode,
   FilterNode,
   FilterProps,
   MulNode,
@@ -12,6 +13,7 @@ import {
   SequencerNode,
   SequencerProps,
 } from "./audioGraph";
+import { FeedbackDelayProps } from "./feedbackDelay";
 
 export function output(props: any, children: Node[]): Node {
   return {
@@ -42,6 +44,7 @@ export function mul(props: MulProps, children: Node[], key?: string): MulNode {
 export function filter(
   props: FilterProps,
   children: Node[],
+  auxConnections: string[],
   key?: string,
 ): FilterNode {
   return {
@@ -49,6 +52,7 @@ export function filter(
     props,
     children,
     key,
+    auxConnections,
   };
 }
 
@@ -66,6 +70,19 @@ export function adsr(props: ADSRProps, key?: string): ADSRNode {
     type: "adsr",
     props,
     children: [],
+    key,
+  };
+}
+
+export function delay(
+  props: FeedbackDelayProps,
+  children: Node[],
+  key?: string,
+): FeedbackDelayNode {
+  return {
+    type: "delay",
+    props,
+    children,
     key,
   };
 }

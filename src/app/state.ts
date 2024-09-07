@@ -12,7 +12,22 @@ export interface SynthParams extends OscProps {
   attack: number;
   decay: number;
   sustain: number;
+  delayParams: DelayParams;
 }
+
+export interface DelayParams {
+  sendAmount: number;
+  time: number;
+  feedback: number;
+  lpfFrequency: number;
+}
+
+const defaultDelayParams: DelayParams = {
+  sendAmount: 0,
+  time: 0.35,
+  feedback: 0.6,
+  lpfFrequency: 800,
+};
 
 export const harmonySynthParamsAtom = atom<SynthParams>({
   type: "sine",
@@ -22,6 +37,7 @@ export const harmonySynthParamsAtom = atom<SynthParams>({
   attack: 0.3,
   decay: 0.9,
   sustain: 0.2,
+  delayParams: { ...defaultDelayParams },
 });
 
 export const melodySynthParamsAtom = atom<SynthParams>({
@@ -32,6 +48,7 @@ export const melodySynthParamsAtom = atom<SynthParams>({
   attack: 0.3,
   decay: 0.1,
   sustain: 0.1,
+  delayParams: { ...defaultDelayParams },
 });
 
 export const melodyAtom = atom<SequencerEvent[] | null>(null);
