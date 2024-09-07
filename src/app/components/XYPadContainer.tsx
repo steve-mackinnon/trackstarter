@@ -103,6 +103,7 @@ function buildParamMap(
         value: synthParams.delayParams.sendAmount,
         onChange: (sendAmount: number) => {
           const feedback = sendAmount * 0.8;
+          const lpfFrequency = linearMap(sendAmount, 0, 1, 800, 2000);
           updateSynthParams((prev) => {
             const prevDelay = { ...prev.delayParams };
             return {
@@ -111,6 +112,7 @@ function buildParamMap(
                 ...prevDelay,
                 sendAmount,
                 feedback,
+                lpfFrequency,
               },
             };
           });
@@ -121,6 +123,12 @@ function buildParamMap(
             sendAmount,
           );
           setProperty(`${instrumentKey}-delay`, "delay", "feedback", feedback);
+          setProperty(
+            `${instrumentKey}-delay-filter`,
+            "filter",
+            "frequency",
+            lpfFrequency,
+          );
         },
       },
     },
