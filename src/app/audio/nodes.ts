@@ -76,12 +76,13 @@ export function adsr(props: ADSRProps, key?: string): ADSRNode {
 
 export function delay(
   props: FeedbackDelayProps,
+  children: Node[],
   key?: string,
 ): FeedbackDelayNode {
   return {
     type: "delay",
     props,
-    children: [],
+    children,
     key,
   };
 }

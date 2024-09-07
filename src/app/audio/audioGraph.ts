@@ -300,6 +300,11 @@ function applyPropUpdates<T extends Node>(newNode: T) {
     case "adsr": {
       // TODO: split out prop update handlers into a separate place
       newNode.backingNode.update(newNode.props);
+      break;
+    }
+    case "delay": {
+      newNode.backingNode.update(newNode.props);
+      break;
     }
   }
 }
@@ -373,10 +378,15 @@ function buildAudioGraph({
       node.backingNode = buildBackingNode(newNode) as any;
     });
     if (
-      parent?.backingNode instanceof AudioNode &&
+      (parent?.backingNode instanceof AudioNode ||
+        isNodeWithInput(parent?.backingNode)) &&
       isConnectable(newNode.backingNode)
     ) {
-      newNode.backingNode.connect(parent.backingNode);
+      if (isNodeWithInput(parent.backingNode)) {
+        newNode.backingNode.connect(parent.backingNode.input);
+      } else {
+        newNode.backingNode.connect(parent.backingNode);
+      }
     }
   } else {
     newNode = produce(newNode, (node) => {

@@ -4,7 +4,7 @@ export interface FeedbackDelayProps {
 }
 
 export class FeedbackDelay {
-  constructor(context: AudioContext, props: FeedbackDelayProps) {
+  constructor(private context: AudioContext, props: FeedbackDelayProps) {
     this.delay = context.createDelay();
     this.feedbackGain = context.createGain();
     this.outputGain = context.createGain();
@@ -29,8 +29,14 @@ export class FeedbackDelay {
     if (props.time > 1) {
       throw new Error("Delay time > 1 second unsupported");
     }
-    this.delay.delayTime.value = props.time;
-    this.feedbackGain.gain.value = Math.max(0, Math.min(props.feedback, 1));
+    this.delay.delayTime.linearRampToValueAtTime(
+      props.time,
+      this.context.currentTime + 0.1,
+    );
+    this.feedbackGain.gain.linearRampToValueAtTime(
+      Math.max(0, Math.min(props.feedback, 1)),
+      this.context.currentTime + 0.02,
+    );
   }
 
   get input(): DelayNode {

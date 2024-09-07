@@ -22,6 +22,30 @@ import {
   SynthParams,
 } from "state";
 
+function filterDelay({
+  prefix,
+  sendAmount,
+  time,
+  feedback,
+}: {
+  prefix: string;
+  sendAmount: number;
+  time: number;
+  feedback: number;
+}) {
+  return filter(
+    { type: "lowpass", frequency: 700, q: 10 },
+    [
+      delay(
+        { time, feedback },
+        [mul({ multiplier: sendAmount }, [], `${prefix}-delay-input`)],
+        `${prefix}-delay`,
+      ),
+    ],
+    [],
+  );
+}
+
 export function useRenderAudioGraph() {
   const progressionState = useAtomValue(chordProgressionAtom);
   const harmonySynthParamsState = useAtomValue(harmonySynthParamsAtom);
@@ -89,11 +113,18 @@ export function useRenderAudioGraph() {
           },
           "melody-amp-env",
         ),
-        filter(
-          { type: "lowpass", frequency: 700, q: 10 },
-          [delay({ time: 0.4, feedback: 0.7 }, "delay")],
-          [],
-        ),
+        filterDelay({
+          prefix: "melody",
+          sendAmount: melodyParams.delayParams.sendAmount,
+          time: melodyParams.delayParams.time,
+          feedback: melodyParams.delayParams.feedback,
+        }),
+        filterDelay({
+          prefix: "harmony",
+          sendAmount: harmonyParams.delayParams.sendAmount,
+          time: harmonyParams.delayParams.time,
+          feedback: harmonyParams.delayParams.feedback,
+        }),
         filter(
           {
             type: "lowpass",
@@ -109,7 +140,7 @@ export function useRenderAudioGraph() {
               ),
             ]),
           ],
-          [],
+          ["harmony-delay-input"],
           "harmony-filter",
         ),
         filter(
@@ -131,7 +162,7 @@ export function useRenderAudioGraph() {
               ),
             ]),
           ],
-          ["delay"],
+          ["melody-delay-input"],
           "melody-filter",
         ),
       ]),
