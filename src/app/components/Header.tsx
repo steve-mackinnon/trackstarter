@@ -22,7 +22,6 @@ export function Header({ className }: { className?: string }) {
         }}
         defaultValue="Any"
       />
-      <div>...</div>
     </div>
   );
 }
