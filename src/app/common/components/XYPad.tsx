@@ -180,7 +180,7 @@ export function XYPad({
     >
       <div
         ref={nodeRef}
-        className="absolute bg-primary rounded-full"
+        className="absolute hover:bg-slate-700 active:bg-primary border-primary border-2 rounded-full"
         style={{
           width: NODE_DIAMETER,
           height: NODE_DIAMETER,
