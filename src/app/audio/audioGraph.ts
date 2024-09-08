@@ -2,13 +2,22 @@ import { produce, setAutoFreeze } from "immer";
 import * as Tone from "tone";
 import { ADSR, ADSRProps } from "./adsr";
 import { buildOscNode } from "./backingNodes";
-import { FeedbackDelay, FeedbackDelayProps } from "./feedbackDelay";
+import { FeedbackDelayProps } from "./feedbackDelay";
 import { Sequencer } from "./sequencer";
 import { unmute } from "./unmute";
 
 const context = new AudioContext();
 unmute(context, false, false);
 Tone.setContext(context);
+
+async function addWorklets() {
+  try {
+    await context.audioWorklet.addModule("/audio/feedbackDelayProcessor.js");
+  } catch (e) {
+    console.error(e);
+  }
+}
+addWorklets();
 
 // Disable auto freezing in immer so we can mutate the current state when
 // setting props
@@ -76,7 +85,7 @@ export interface ADSRNode extends BaseNode {
 export interface FeedbackDelayNode extends BaseNode {
   type: "delay";
   props: FeedbackDelayProps;
-  backingNode?: FeedbackDelay;
+  backingNode?: AudioNode;
 }
 
 export interface DestinationNode extends BaseNode {
@@ -250,7 +259,7 @@ function buildBackingNode(node: Node): Connectable | Sequencer | null {
       // ADSR nodes are built on the fly when triggered
       return null;
     case "delay":
-      return new FeedbackDelay(context, node.props);
+      return new AudioWorkletNode(context, "feedback-delay-processor");
     case "sequencer": {
       return new Sequencer(
         node,
@@ -303,7 +312,10 @@ function applyPropUpdates<T extends Node>(newNode: T) {
       break;
     }
     case "delay": {
-      newNode.backingNode.update(newNode.props);
+      (newNode.backingNode as any).parameters.get("delayTime")!.value =
+        newNode.props.time;
+      (newNode.backingNode as any).parameters.get("feedback")!.value =
+        newNode.props.feedback;
       break;
     }
   }
