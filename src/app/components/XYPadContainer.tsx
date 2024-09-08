@@ -4,6 +4,7 @@ import {
   ParamInfo as XYPadParamInfo,
 } from "common/components/ParameterXYPad";
 import { Button } from "common/components/ui/button";
+import { cn } from "common/utils";
 import { linearMap } from "common/utils/parameterScaling";
 import { useAtom, useAtomValue } from "jotai";
 import { SetStateAction } from "jotai/vanilla";
@@ -134,6 +135,34 @@ function buildParamMap(
     },
   };
 }
+
+function TabButton({
+  label,
+  position,
+  selected,
+  onClick,
+}: {
+  label: string;
+  position: "left" | "middle" | "right";
+  selected: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <Button
+      variant="secondary"
+      className={cn(
+        "rounded-none bg-primary-foreground",
+        { "rounded-tl-lg": position === "left" },
+        { "rounded-tr-lg": position === "right" },
+        { "bg-secondary": selected },
+      )}
+      onClick={onClick}
+    >
+      {label}
+    </Button>
+  );
+}
+
 export function XYPadContainer() {
   const [harmonySynthParams, setHarmonySynthParams] = useAtom(
     harmonySynthParamsAtom,
@@ -168,45 +197,24 @@ export function XYPadContainer() {
   return (
     <div className="flex flex-col">
       <div className="flex space-x-[2px]">
-        <Button
-          variant="secondary"
-          className="rounded-none rounded-tl-lg"
-          style={{
-            backgroundColor:
-              selectedControls === "filter"
-                ? "hsl(var(--secondary))"
-                : "hsl(var(--primary-foreground))",
-          }}
+        <TabButton
+          label="Tone"
+          position="left"
+          selected={selectedControls === "filter"}
           onClick={() => setSelectedControls("filter")}
-        >
-          Tone
-        </Button>
-        <Button
-          variant={"secondary"}
-          className="rounded-none"
-          style={{
-            backgroundColor:
-              selectedControls === "amp"
-                ? "hsl(var(--secondary))"
-                : "hsl(var(--primary-foreground))",
-          }}
+        />
+        <TabButton
+          label="Shape"
+          position="middle"
+          selected={selectedControls === "amp"}
           onClick={() => setSelectedControls("amp")}
-        >
-          Shape
-        </Button>
-        <Button
-          variant={"secondary"}
-          className="rounded-none rounded-tr-lg"
-          style={{
-            backgroundColor:
-              selectedControls === "delay"
-                ? "hsl(var(--secondary))"
-                : "hsl(var(--primary-foreground))",
-          }}
+        />
+        <TabButton
+          label="Delay"
+          position="right"
+          selected={selectedControls === "delay"}
           onClick={() => setSelectedControls("delay")}
-        >
-          Delay
-        </Button>
+        />
       </div>
       <ParameterXYPad
         key={`${selectedControls}-${selectedInstrument}`}
