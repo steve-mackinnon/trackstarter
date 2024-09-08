@@ -13,6 +13,7 @@ Tone.setContext(context);
 async function addWorklets() {
   try {
     await context.audioWorklet.addModule("/audio/feedbackDelayProcessor.js");
+    await context.audioWorklet.addModule("/audio/masterClipper.js");
   } catch (e) {
     console.error(e);
   }
@@ -30,7 +31,8 @@ export type NodeType =
   | "destination"
   | "mul"
   | "adsr"
-  | "delay";
+  | "delay"
+  | "master-clipper";
 
 interface BaseNode {
   children?: Node[];
@@ -88,6 +90,12 @@ export interface FeedbackDelayNode extends BaseNode {
   backingNode?: AudioNode;
 }
 
+export interface MasterClipperNode extends BaseNode {
+  type: "master-clipper";
+  props: undefined;
+  backingNode?: AudioNode;
+}
+
 export interface DestinationNode extends BaseNode {
   type: "destination";
   props: any;
@@ -131,7 +139,8 @@ export type Node =
   | DestinationNode
   | MulNode
   | ADSRNode
-  | FeedbackDelayNode;
+  | FeedbackDelayNode
+  | MasterClipperNode;
 
 interface Connectable {
   connect(destination: AudioNode): AudioNode;
@@ -260,6 +269,8 @@ function buildBackingNode(node: Node): Connectable | Sequencer | null {
       return null;
     case "delay":
       return new AudioWorkletNode(context, "feedback-delay-processor");
+    case "master-clipper":
+      return new AudioWorkletNode(context, "master-clipper-processor");
     case "sequencer": {
       return new Sequencer(
         node,

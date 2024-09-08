@@ -4,6 +4,7 @@ import {
   FeedbackDelayNode,
   FilterNode,
   FilterProps,
+  MasterClipperNode,
   MulNode,
   MulProps,
   Node,
@@ -71,6 +72,14 @@ export function adsr(props: ADSRProps, key?: string): ADSRNode {
     props,
     children: [],
     key,
+  };
+}
+
+export function masterClipper(children: Node[]): MasterClipperNode {
+  return {
+    type: "master-clipper",
+    props: undefined,
+    children,
   };
 }
 

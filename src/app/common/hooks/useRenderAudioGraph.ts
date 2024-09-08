@@ -4,6 +4,7 @@ import {
   defaultSequencerProps,
   delay,
   filter,
+  masterClipper,
   mul,
   osc,
   output,
@@ -96,76 +97,81 @@ export function useRenderAudioGraph() {
     AudioGraph.render(
       output(undefined, [
         ...sequencers,
-        adsr(
-          {
-            attack: harmonyParams.attack,
-            decay: harmonyParams.decay,
-            sustain: harmonyParams.sustain,
-            release: 0.1,
-          },
-          "harmony-amp-env",
-        ),
-        adsr(
-          {
-            attack: melodyParams.attack,
-            decay: melodyParams.decay,
-            sustain: melodyParams.sustain,
-            release: 0.1,
-          },
-          "melody-amp-env",
-        ),
-        filterDelay({
-          prefix: "melody",
-          sendAmount: melodyParams.delayParams.sendAmount,
-          time: melodyParams.delayParams.time,
-          feedback: melodyParams.delayParams.feedback,
-        }),
-        filterDelay({
-          prefix: "harmony",
-          sendAmount: harmonyParams.delayParams.sendAmount,
-          time: harmonyParams.delayParams.time,
-          feedback: harmonyParams.delayParams.feedback,
-        }),
-        filter(
-          {
-            type: "lowpass",
-            frequency: harmonyParams.filterFrequency,
-            q: harmonyParams.filterQ,
-          },
-          [
-            mul({ multiplier: 0.1 }, [
-              osc(
-                { ...harmonyParams, modSources: { gain: ["harmony-amp-env"] } },
-                [],
-                "harmony-osc",
-              ),
-            ]),
-          ],
-          ["harmony-delay-input"],
-          "harmony-filter",
-        ),
-        filter(
-          {
-            type: "lowpass",
-            frequency: melodyParams.filterFrequency,
-            q: melodyParams.filterQ,
-          },
-          [
-            mul({ multiplier: 0.25 }, [
-              osc(
-                {
-                  type: melodyParams.type,
-                  detune: 0,
-                  modSources: { gain: ["melody-amp-env"] },
-                },
-                [],
-                "melody-osc",
-              ),
-            ]),
-          ],
-          ["melody-delay-input"],
-          "melody-filter",
-        ),
+        masterClipper([
+          adsr(
+            {
+              attack: harmonyParams.attack,
+              decay: harmonyParams.decay,
+              sustain: harmonyParams.sustain,
+              release: 0.1,
+            },
+            "harmony-amp-env",
+          ),
+          adsr(
+            {
+              attack: melodyParams.attack,
+              decay: melodyParams.decay,
+              sustain: melodyParams.sustain,
+              release: 0.1,
+            },
+            "melody-amp-env",
+          ),
+          filterDelay({
+            prefix: "melody",
+            sendAmount: melodyParams.delayParams.sendAmount,
+            time: melodyParams.delayParams.time,
+            feedback: melodyParams.delayParams.feedback,
+          }),
+          filterDelay({
+            prefix: "harmony",
+            sendAmount: harmonyParams.delayParams.sendAmount,
+            time: harmonyParams.delayParams.time,
+            feedback: harmonyParams.delayParams.feedback,
+          }),
+          filter(
+            {
+              type: "lowpass",
+              frequency: harmonyParams.filterFrequency,
+              q: harmonyParams.filterQ,
+            },
+            [
+              mul({ multiplier: 0.1 }, [
+                osc(
+                  {
+                    ...harmonyParams,
+                    modSources: { gain: ["harmony-amp-env"] },
+                  },
+                  [],
+                  "harmony-osc",
+                ),
+              ]),
+            ],
+            ["harmony-delay-input"],
+            "harmony-filter",
+          ),
+          filter(
+            {
+              type: "lowpass",
+              frequency: melodyParams.filterFrequency,
+              q: melodyParams.filterQ,
+            },
+            [
+              mul({ multiplier: 0.25 }, [
+                osc(
+                  {
+                    type: melodyParams.type,
+                    detune: 0,
+                    modSources: { gain: ["melody-amp-env"] },
+                  },
+                  [],
+                  "melody-osc",
+                ),
+              ]),
+            ],
+            ["melody-delay-input"],
+            "melody-filter",
+          ),
+        ]),
       ]),
     );
     // Re-trigger playback when a new progression or melody is rendered
