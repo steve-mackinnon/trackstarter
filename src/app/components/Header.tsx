@@ -11,7 +11,7 @@ export function Header({ className }: { className?: string }) {
   return (
     <div className={classNames("flex justify-between", className)}>
       <ComboBox
-        label="Vibe"
+        label="vibe"
         choices={(MOODS as string[]).concat("Any")}
         onChange={(newMood: string | null) => {
           if (newMood === "Any") {

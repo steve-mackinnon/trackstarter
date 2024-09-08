@@ -151,7 +151,7 @@ function TabButton({
     <Button
       variant="secondary"
       className={cn(
-        "rounded-none bg-primary-foreground",
+        "rounded-none bg-primary-foreground select-none",
         { "rounded-tl-lg": position === "left" },
         { "rounded-tr-lg": position === "right" },
         { "bg-secondary": selected },
@@ -198,19 +198,19 @@ export function XYPadContainer() {
     <div className="flex flex-col">
       <div className="flex space-x-[2px]">
         <TabButton
-          label="Tone"
+          label="tone"
           position="left"
           selected={selectedControls === "filter"}
           onClick={() => setSelectedControls("filter")}
         />
         <TabButton
-          label="Shape"
+          label="shape"
           position="middle"
           selected={selectedControls === "amp"}
           onClick={() => setSelectedControls("amp")}
         />
         <TabButton
-          label="Delay"
+          label="delay"
           position="right"
           selected={selectedControls === "delay"}
           onClick={() => setSelectedControls("delay")}

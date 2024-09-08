@@ -30,7 +30,7 @@ export function InstrumentControls({
   return (
     <div
       className={cn(
-        "flex flex-col justify-center items-center gap-y-2 rounded-xl p-2 border-2",
+        "flex flex-col justify-center items-center gap-y-2 rounded-xl p-2 border-2 select-none",
         {
           "bg-primary-foreground": selected,
         },

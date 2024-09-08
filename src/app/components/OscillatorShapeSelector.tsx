@@ -31,28 +31,28 @@ export function OscillatorShapeSelector({
           variant="ghost"
           onClick={() => updateShape("sine")}
         >
-          Sine
+          sine
         </Button>
         <Button
           className={className("square")}
           variant="ghost"
           onClick={() => updateShape("square")}
         >
-          Sqr
+          sqr
         </Button>
         <Button
           className={className("sawtooth")}
           variant="ghost"
           onClick={() => updateShape("sawtooth")}
         >
-          Saw
+          saw
         </Button>
         <Button
           className={className("triangle")}
           variant="ghost"
           onClick={() => updateShape("triangle")}
         >
-          Tri
+          tri
         </Button>
       </div>
     </div>
