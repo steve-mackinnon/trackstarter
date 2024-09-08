@@ -2,17 +2,29 @@ function lerp(a, b, t) {
   return a + (b - a) * t;
 }
 
+const MAX_DELAY_TIME = 1;
+
 class FeedbackDelayProcessor extends AudioWorkletProcessor {
   static get parameterDescriptors() {
     return [
-      { name: "delayTime", defaultValue: 0.5, minValue: 0, maxValue: 1 },
-      { name: "feedback", defaultValue: 0.5, minValue: 0, maxValue: 1 },
+      {
+        name: "delayTime",
+        defaultValue: 0.5,
+        minValue: 0,
+        maxValue: MAX_DELAY_TIME,
+      },
+      {
+        name: "feedback",
+        defaultValue: 0.5,
+        minValue: 0,
+        maxValue: MAX_DELAY_TIME,
+      },
     ];
   }
 
   constructor() {
     super();
-    this.delayBuffer = new Float32Array(44100); // 1 second buffer at 44100 Hz
+    this.delayBuffer = new Float32Array(sampleRate * MAX_DELAY_TIME);
     this.writeIndex = 0;
     this.previousDelayTimeSamples = undefined;
   }
