@@ -154,7 +154,7 @@ function TabButton({
         "rounded-none bg-primary-foreground select-none",
         { "rounded-tl-lg": position === "left" },
         { "rounded-tr-lg": position === "right" },
-        { "bg-secondary": selected },
+        { "bg-secondary hover:bg-secondary": selected },
       )}
       onClick={onClick}
     >
