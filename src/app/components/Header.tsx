@@ -4,7 +4,7 @@ import { chordProgressionToSequencerEvents } from "audio/sequenceGenerator";
 import classNames from "classnames";
 import { ComboBox } from "common/components/ComboBox";
 import { Button } from "common/components/ui/button";
-import { useGenerateNewChordProgression } from "common/hooks/useGenerateNewChordProgression";
+import { useGenerateNewSong } from "common/hooks/useGenerateNewChordProgression";
 import { saveToFile } from "common/utils/saveToFile";
 import { useAtomValue, useSetAtom } from "jotai";
 import { Download } from "lucide-react";
@@ -12,7 +12,7 @@ import { chordProgressionAtom, melodyAtom, moodAtom } from "state";
 
 export function Header({ className }: { className?: string }) {
   const setMood = useSetAtom(moodAtom);
-  const generateNewChordProgression = useGenerateNewChordProgression();
+  const generateNewChordProgression = useGenerateNewSong();
   const melody = useAtomValue(melodyAtom);
   const harmony = useAtomValue(chordProgressionAtom);
 

@@ -1,4 +1,4 @@
-import { useGenerateNewChordProgression } from "common/hooks/useGenerateNewChordProgression";
+import { useGenerateNewSong } from "common/hooks/useGenerateNewChordProgression";
 import { useGenerateNewMelody } from "common/hooks/useGenerateNewMelody";
 import { useRenderAudioGraph } from "common/hooks/useRenderAudioGraph";
 import { useAtom, useAtomValue } from "jotai";
@@ -9,7 +9,7 @@ import { OscShape } from "./OscillatorShapeSelector";
 export function InstrumentSelectionContainer() {
   const [harmonyParams, setHarmonyParams] = useAtom(harmonySynthParamsAtom);
   const [melodyParams, setMelodyParams] = useAtom(melodySynthParamsAtom);
-  const generateNewChordProgression = useGenerateNewChordProgression();
+  const generateNewSong = useGenerateNewSong();
   const generateNewMelody = useGenerateNewMelody();
   const mood = useAtomValue(moodAtom);
   const renderAudioGraph = useRenderAudioGraph();
@@ -24,7 +24,7 @@ export function InstrumentSelectionContainer() {
           setHarmonyParams(newParams);
           renderAudioGraph({ harmonySynthParams: newParams });
         }}
-        onShuffleClicked={() => generateNewChordProgression(mood)}
+        onShuffleClicked={() => generateNewSong(mood)}
         borderColorActive={"var(--harmony-border-active)"}
         borderColorInactive={"var(--harmony-border-inactive)"}
       />

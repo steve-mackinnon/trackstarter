@@ -9,7 +9,7 @@ import { useSetAtom } from "jotai";
 import { chordProgressionAtom, isPlayingAtom, melodyAtom } from "state";
 import { useRenderAudioGraph } from "./useRenderAudioGraph";
 
-export function useGenerateNewChordProgression() {
+export function useGenerateNewSong() {
   const setChordProgression = useSetAtom(chordProgressionAtom);
   const setIsPlaying = useSetAtom(isPlayingAtom);
   const setMelody = useSetAtom(melodyAtom);
