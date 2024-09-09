@@ -152,8 +152,8 @@ function TabButton({
       variant="secondary"
       className={cn(
         "rounded-none bg-primary-foreground select-none",
-        { "rounded-tl-lg": position === "left" },
-        { "rounded-tr-lg": position === "right" },
+        { "rounded-tl-xl": position === "left" },
+        { "rounded-tr-xl": position === "right" },
         { "bg-secondary hover:bg-secondary": selected },
       )}
       onClick={onClick}
@@ -196,7 +196,7 @@ export function XYPadContainer() {
 
   return (
     <div className="flex flex-col">
-      <div className="flex space-x-[2px]">
+      <div className="flex space-x-[4px]">
         <TabButton
           label="tone"
           position="left"
@@ -216,12 +216,19 @@ export function XYPadContainer() {
           onClick={() => setSelectedControls("delay")}
         />
       </div>
-      <ParameterXYPad
-        key={`${selectedControls}-${selectedInstrument}`}
-        borderColor={borderColor}
-        xParam={params.xParam}
-        yParam={params.yParam}
-      />
+      <div
+        className={cn(
+          "bg-secondary w-[316px] h-[316px] flex items-center justify-center rounded-b-xl rounded-br-xl rounded-tr-xl",
+          { "rounded-tl-xl": selectedControls !== "filter" },
+        )}
+      >
+        <ParameterXYPad
+          key={`${selectedControls}-${selectedInstrument}`}
+          borderColor={borderColor}
+          xParam={params.xParam}
+          yParam={params.yParam}
+        />
+      </div>
     </div>
   );
 }
