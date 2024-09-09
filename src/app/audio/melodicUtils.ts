@@ -33,7 +33,6 @@ export function chordsForProgression({
 function chordName(notes: string[]): string {
   // Sort to get the chord with the smallest number of characters
   const chords = Chord.detect(notes);
-  console.log(chords);
   chords.sort((a, b) =>
     a.length < b.length ? -1 : a.length === b.length ? 0 : 1,
   );
