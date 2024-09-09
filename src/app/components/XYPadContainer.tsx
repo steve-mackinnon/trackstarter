@@ -138,12 +138,10 @@ function buildParamMap(
 
 function TabButton({
   label,
-  position,
   selected,
   onClick,
 }: {
   label: string;
-  position: "left" | "middle" | "right";
   selected: boolean;
   onClick: () => void;
 }) {
@@ -151,10 +149,8 @@ function TabButton({
     <Button
       variant="secondary"
       className={cn(
-        "rounded-none bg-primary-foreground select-none",
-        { "rounded-tl-xl": position === "left" },
-        { "rounded-tr-xl": position === "right" },
-        { "bg-secondary hover:bg-secondary": selected },
+        "rounded-none bg-primary-foreground select-none z-50 rounded-t-md",
+        { "bg-secondary hover:bg-secondary ": selected },
       )}
       onClick={onClick}
     >
@@ -199,19 +195,16 @@ export function XYPadContainer() {
       <div className="flex space-x-[4px]">
         <TabButton
           label="tone"
-          position="left"
           selected={selectedControls === "filter"}
           onClick={() => setSelectedControls("filter")}
         />
         <TabButton
           label="shape"
-          position="middle"
           selected={selectedControls === "amp"}
           onClick={() => setSelectedControls("amp")}
         />
         <TabButton
           label="delay"
-          position="right"
           selected={selectedControls === "delay"}
           onClick={() => setSelectedControls("delay")}
         />
