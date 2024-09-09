@@ -1,6 +1,7 @@
 import { Chord, Interval, Note, Scale } from "tonal";
+import { ChordProgression } from "./sequenceGenerator";
 
-interface ChordProgression {
+interface ChordProgressionInfo {
   chordNames: string[];
   chordNotes: string[][];
 }
@@ -17,7 +18,7 @@ export function chordsForProgression({
   octave: number;
   rootNote: string;
   notesPerChord: number;
-}): ChordProgression {
+}): ChordProgressionInfo {
   const chordDegrees = parseChordProgression(progression);
   const notes = Scale.get(`${rootNote}${octave} ${scaleName}`);
   const chordNotes = chordDegrees.map((degree) =>
@@ -84,4 +85,23 @@ export function chordForScale(
     }
     return note;
   });
+}
+
+export function removeFlatChords(
+  progression: ChordProgression,
+): ChordProgression {
+  const progressionWithoutFlats = progression.progression.replaceAll("b", "");
+  const { chordNames, chordNotes } = chordsForProgression({
+    progression: progressionWithoutFlats,
+    scaleName: progression.scale,
+    octave: progression.octave,
+    rootNote: progression.rootNote,
+    notesPerChord: progression.chordNotes[0].length,
+  });
+  return {
+    ...progression,
+    progression: progressionWithoutFlats,
+    chordNames,
+    chordNotes,
+  };
 }

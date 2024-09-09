@@ -1,4 +1,5 @@
 import { Mood } from "audio/melodicConstants";
+import { removeFlatChords } from "audio/melodicUtils";
 import { generateMelodyForChordProgression } from "audio/melodyGenerator";
 import {
   generateChordProgression,
@@ -26,10 +27,12 @@ export function useGenerateNewSong() {
     renderAudioGraph({ progression: chordProgression });
     setIsPlaying(true);
 
+    // Filter out any flat chords because they cause magenta to fail.
+    const progressionWithoutFlats = removeFlatChords(chordProgression);
     generateMelodyForChordProgression(
-      chordProgression.chordNames,
-      chordProgression.scale,
-      chordProgression.rootNote,
+      progressionWithoutFlats.chordNames,
+      progressionWithoutFlats.scale,
+      progressionWithoutFlats.rootNote,
     ).then((seq) => {
       setMelody(seq ?? null);
       renderAudioGraph({ progression: chordProgression, melody: seq });

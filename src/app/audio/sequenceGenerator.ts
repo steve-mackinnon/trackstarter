@@ -90,7 +90,6 @@ export function generateChordProgression({
   octave: number;
 }): ChordProgression {
   const scale = MOOD_TO_SCALE[mood];
-  const notes = Scale.get(`${rootNote}${octave} ${scale}`);
   const progression = getRandomValue(MOOD_TO_PROGRESSIONS[mood]);
   const { chordNotes, chordNames } = chordsForProgression({
     progression,
@@ -101,7 +100,7 @@ export function generateChordProgression({
   });
   return {
     chordNotes,
-    chordNames: chordNotes.map((notes) => chordName(notes)),
+    chordNames,
     progression,
     scale,
     mood,

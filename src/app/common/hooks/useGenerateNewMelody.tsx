@@ -1,3 +1,4 @@
+import { removeFlatChords } from "audio/melodicUtils";
 import { generateMelodyForChordProgression } from "audio/melodyGenerator";
 import { useAtomValue, useSetAtom } from "jotai";
 import { chordProgressionAtom, melodyAtom } from "state";
@@ -12,10 +13,11 @@ export function useGenerateNewMelody() {
     if (!chordProgression) {
       return;
     }
+    const progressionWithoutFlats = removeFlatChords(chordProgression);
     generateMelodyForChordProgression(
-      chordProgression.chordNames,
-      chordProgression.scale,
-      chordProgression.rootNote,
+      progressionWithoutFlats.chordNames,
+      progressionWithoutFlats.scale,
+      progressionWithoutFlats.rootNote,
     ).then((seq) => {
       setMelody(seq ?? null);
       renderAudioGraph({ progression: chordProgression, melody: seq });
