@@ -10,6 +10,10 @@ import { useAtomValue, useSetAtom } from "jotai";
 import { Download } from "lucide-react";
 import { chordProgressionAtom, melodyAtom, moodAtom } from "state";
 
+const iOSDevice =
+  /(iPad|iPhone|iPod)/g.test(navigator.userAgent) ||
+  (navigator.userAgent.includes("Mac") && "ontouchend" in document);
+
 export function Header({ className }: { className?: string }) {
   const setMood = useSetAtom(moodAtom);
   const generateNewChordProgression = useGenerateNewSong();
@@ -45,15 +49,17 @@ export function Header({ className }: { className?: string }) {
         }}
         defaultValue="Any"
       />
-      <Button
-        variant={"secondary"}
-        disabled={!melody || !harmony}
-        onClick={() => writeCurrentStateToMidiFile()}
-        aria-label="Download MIDI"
-      >
-        <Download className="px-1" />
-        MIDI
-      </Button>
+      {!iOSDevice && (
+        <Button
+          variant={"secondary"}
+          disabled={!melody || !harmony}
+          onClick={() => writeCurrentStateToMidiFile()}
+          aria-label="Download MIDI"
+        >
+          <Download className="px-1" />
+          MIDI
+        </Button>
+      )}
     </div>
   );
 }
