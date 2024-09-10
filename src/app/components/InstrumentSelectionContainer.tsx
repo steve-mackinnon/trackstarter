@@ -36,7 +36,7 @@ export function InstrumentSelectionContainer() {
           setMelodyParams(newParams);
           renderAudioGraph({ melodySynthParams: newParams });
         }}
-        onShuffleClicked={() => generateNewMelody()}
+        onShuffleClicked={() => generateNewMelody({ restartPlayback: false })}
         borderColorActive="var(--melody-border-active)"
         borderColorInactive="var(--melody-border-inactive)"
       />

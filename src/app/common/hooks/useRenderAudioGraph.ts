@@ -60,12 +60,14 @@ export function useRenderAudioGraph() {
     melodySynthParams,
     startStep,
     melody,
+    restartPlayback = false,
   }: {
     progression?: ChordProgression;
     harmonySynthParams?: SynthParams;
     melodySynthParams?: SynthParams;
     startStep?: number;
     melody?: AudioGraph.SequencerEvent[];
+    restartPlayback?: boolean;
   }) => {
     const prog = progression ?? progressionState;
     if (!prog) {
@@ -174,8 +176,13 @@ export function useRenderAudioGraph() {
         ]),
       ]),
     );
-    // Re-trigger playback when a new progression or melody is rendered
-    if (progression || melody) {
+    // Re-trigger playback when a new progression is rendered OR when a new
+    // melody is rendered and playback is stopped (to prevent restarting active
+    // playback when only the melody changes)
+    if (
+      restartPlayback ||
+      ((progression || melody) && !AudioGraph.isPlaying())
+    ) {
       AudioGraph.stop();
       AudioGraph.start(startStep);
     }

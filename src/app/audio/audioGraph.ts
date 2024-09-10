@@ -204,6 +204,10 @@ export function stop() {
   }
 }
 
+export function isPlaying() {
+  return playing;
+}
+
 type NodeProps<T extends Node["type"]> = Extract<Node, { type: T }>["props"];
 
 export function setProperty<
