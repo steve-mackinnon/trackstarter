@@ -1,5 +1,5 @@
 import { Button } from "common/components/ui/button";
-import { useGenerateNewSong } from "common/hooks/useGenerateNewChordProgression";
+import { useGenerateNewSong } from "common/hooks/useGenerateNewSong";
 import { useAtomValue } from "jotai";
 import { chordProgressionAtom } from "state";
 

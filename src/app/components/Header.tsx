@@ -4,7 +4,7 @@ import { chordProgressionToSequencerEvents } from "audio/sequenceGenerator";
 import classNames from "classnames";
 import { ComboBox } from "common/components/ComboBox";
 import { Button } from "common/components/ui/button";
-import { useGenerateNewSong } from "common/hooks/useGenerateNewChordProgression";
+import { useGenerateNewSong } from "common/hooks/useGenerateNewSong";
 import { saveToFile } from "common/utils/saveToFile";
 import { useAtomValue, useSetAtom } from "jotai";
 import { Download } from "lucide-react";

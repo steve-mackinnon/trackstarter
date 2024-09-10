@@ -1,5 +1,5 @@
-import { useGenerateNewSong } from "common/hooks/useGenerateNewChordProgression";
 import { useGenerateNewMelody } from "common/hooks/useGenerateNewMelody";
+import { useGenerateNewSong } from "common/hooks/useGenerateNewSong";
 import { useRenderAudioGraph } from "common/hooks/useRenderAudioGraph";
 import { useAtom, useAtomValue } from "jotai";
 import { harmonySynthParamsAtom, melodySynthParamsAtom, moodAtom } from "state";
