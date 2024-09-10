@@ -7,7 +7,8 @@ import { Button } from "common/components/ui/button";
 import { useGenerateNewSong } from "common/hooks/useGenerateNewSong";
 import { saveToFile } from "common/utils/saveToFile";
 import { useAtomValue, useSetAtom } from "jotai";
-import { Download } from "lucide-react";
+import { Download, HomeIcon } from "lucide-react";
+import Link from "next/link";
 import { chordProgressionAtom, melodyAtom, moodAtom } from "state";
 
 const iOSDevice =
@@ -37,6 +38,11 @@ export function Header({ className }: { className?: string }) {
 
   return (
     <div className={classNames("flex justify-between", className)}>
+      <Link href={"/"}>
+        <Button variant="link" aria-label="home">
+          <HomeIcon />
+        </Button>
+      </Link>
       <ComboBox
         label="vibe"
         choices={(MOODS as string[]).concat("Any")}
