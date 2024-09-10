@@ -3,6 +3,7 @@ import { cn } from "common/utils";
 import { useAtom } from "jotai";
 import { Dices } from "lucide-react";
 import { useState } from "react";
+import LoadingIndicator from "react-spinners/PuffLoader";
 import { selectedInstrumentAtom } from "state";
 import { OscillatorShapeSelector, OscShape } from "./OscillatorShapeSelector";
 
@@ -13,6 +14,7 @@ export function InstrumentControls({
   onShuffleClicked,
   borderColorActive,
   borderColorInactive,
+  isLoading,
 }: {
   instrument: "harmony" | "melody";
   oscShape: OscShape;
@@ -20,6 +22,7 @@ export function InstrumentControls({
   onShuffleClicked: () => void;
   borderColorActive: string;
   borderColorInactive: string;
+  isLoading: boolean;
 }) {
   const [selectedInstrument, setSelectedInstrument] = useAtom(
     selectedInstrumentAtom,
@@ -30,7 +33,7 @@ export function InstrumentControls({
   return (
     <div
       className={cn(
-        "flex flex-col justify-center items-center gap-y-2 rounded-xl p-2 border-2 select-none",
+        "flex flex-col justify-center items-center gap-y-2 rounded-xl p-2 border-2 select-none relative",
         {
           "bg-primary-foreground": selected,
         },
@@ -47,14 +50,21 @@ export function InstrumentControls({
       <OscillatorShapeSelector
         oscShape={oscShape}
         onChange={onOscShapeChange}
+        disabled={isLoading}
       />
       <Button
         variant="outline"
         className="rounded-full active:bg-slate-500"
         onClick={onShuffleClicked}
+        disabled={isLoading}
       >
         <Dices />
       </Button>
+      {isLoading && (
+        <div className="absolute flex flex-col justify-center items-center w-full h-full bg-black opacity-85 rounded-xl">
+          <LoadingIndicator color="white" />
+        </div>
+      )}
     </div>
   );
 }

@@ -5,17 +5,21 @@ import {
   getRandomNote,
 } from "audio/sequenceGenerator";
 import { useSetAtom } from "jotai";
-import { chordProgressionAtom, isPlayingAtom } from "state";
+import {
+  chordProgressionAtom,
+  chordProgressionLoadingAtom,
+  isPlayingAtom,
+} from "state";
 import { useGenerateNewMelody } from "./useGenerateNewMelody";
-import { useRenderAudioGraph } from "./useRenderAudioGraph";
 
 export function useGenerateNewSong() {
   const setChordProgression = useSetAtom(chordProgressionAtom);
   const setIsPlaying = useSetAtom(isPlayingAtom);
-  const renderAudioGraph = useRenderAudioGraph();
   const generateMelody = useGenerateNewMelody();
+  const setChordProgressionLoading = useSetAtom(chordProgressionLoadingAtom);
 
-  return (mood: Mood | null) => {
+  return async (mood: Mood | null) => {
+    setChordProgressionLoading(true);
     const chordProgression = generateChordProgression({
       rootNote: getRandomNote(),
       mood: mood ?? getRandomMood(),
@@ -23,12 +27,8 @@ export function useGenerateNewSong() {
       octave: 3,
     });
     setChordProgression(chordProgression);
-    renderAudioGraph({
-      progression: chordProgression,
-      restartPlayback: true,
-    });
+    await generateMelody({ chordProgression, restartPlayback: false });
     setIsPlaying(true);
-
-    generateMelody({ chordProgression, restartPlayback: false });
+    setChordProgressionLoading(false);
   };
 }

@@ -7,9 +7,11 @@ export type OscShape = "sine" | "square" | "sawtooth" | "triangle";
 export function OscillatorShapeSelector({
   oscShape,
   onChange,
+  disabled,
 }: {
   oscShape: OscShape;
   onChange: (shape: OscShape) => void;
+  disabled?: boolean;
 }) {
   const [shape, setShape] = useState<OscShape>(oscShape);
   const className = (s: OscShape) =>
@@ -27,6 +29,7 @@ export function OscillatorShapeSelector({
     <div className="flex flex-col">
       <div className="flex">
         <Button
+          disabled={disabled}
           className={className("sine")}
           variant="ghost"
           onClick={() => updateShape("sine")}
@@ -34,6 +37,7 @@ export function OscillatorShapeSelector({
           sine
         </Button>
         <Button
+          disabled={disabled}
           className={className("square")}
           variant="ghost"
           onClick={() => updateShape("square")}
@@ -41,6 +45,7 @@ export function OscillatorShapeSelector({
           sqr
         </Button>
         <Button
+          disabled={disabled}
           className={className("sawtooth")}
           variant="ghost"
           onClick={() => updateShape("sawtooth")}
@@ -48,6 +53,7 @@ export function OscillatorShapeSelector({
           saw
         </Button>
         <Button
+          disabled={disabled}
           className={className("triangle")}
           variant="ghost"
           onClick={() => updateShape("triangle")}

@@ -2,15 +2,16 @@ import { removeFlatChords } from "audio/melodicUtils";
 import { generateMelodyForChordProgression } from "audio/melodyGenerator";
 import { ChordProgression } from "audio/sequenceGenerator";
 import { useAtomValue, useSetAtom } from "jotai";
-import { chordProgressionAtom, melodyAtom } from "state";
+import { chordProgressionAtom, melodyAtom, melodyLoadingAtom } from "state";
 import { useRenderAudioGraph } from "./useRenderAudioGraph";
 
 export function useGenerateNewMelody() {
   const chordProgressionState = useAtomValue(chordProgressionAtom);
   const setMelody = useSetAtom(melodyAtom);
   const renderAudioGraph = useRenderAudioGraph();
+  const setMelodyLoading = useSetAtom(melodyLoadingAtom);
 
-  return ({
+  return async ({
     chordProgression,
     restartPlayback,
   }: {
@@ -23,18 +24,24 @@ export function useGenerateNewMelody() {
     if (!chordProgression) {
       return;
     }
+    setMelodyLoading(true);
     const progressionWithoutFlats = removeFlatChords(chordProgression);
-    generateMelodyForChordProgression(
-      progressionWithoutFlats.chordNames,
-      progressionWithoutFlats.scale,
-      progressionWithoutFlats.rootNote,
-    ).then((seq) => {
-      setMelody(seq ?? null);
+    try {
+      const melodySeq = await generateMelodyForChordProgression(
+        progressionWithoutFlats.chordNames,
+        progressionWithoutFlats.scale,
+        progressionWithoutFlats.rootNote,
+      );
+      setMelody(melodySeq ?? null);
       renderAudioGraph({
         progression: chordProgression,
-        melody: seq,
+        melody: melodySeq,
         restartPlayback,
       });
-    });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setMelodyLoading(false);
+    }
   };
 }

@@ -2,7 +2,13 @@ import { useGenerateNewMelody } from "common/hooks/useGenerateNewMelody";
 import { useGenerateNewSong } from "common/hooks/useGenerateNewSong";
 import { useRenderAudioGraph } from "common/hooks/useRenderAudioGraph";
 import { useAtom, useAtomValue } from "jotai";
-import { harmonySynthParamsAtom, melodySynthParamsAtom, moodAtom } from "state";
+import {
+  chordProgressionLoadingAtom,
+  harmonySynthParamsAtom,
+  melodyLoadingAtom,
+  melodySynthParamsAtom,
+  moodAtom,
+} from "state";
 import { InstrumentControls } from "./InstrumentControls";
 import { OscShape } from "./OscillatorShapeSelector";
 
@@ -13,6 +19,8 @@ export function InstrumentSelectionContainer() {
   const generateNewMelody = useGenerateNewMelody();
   const mood = useAtomValue(moodAtom);
   const renderAudioGraph = useRenderAudioGraph();
+  const melodyIsLoading = useAtomValue(melodyLoadingAtom);
+  const harmonyIsLoading = useAtomValue(chordProgressionLoadingAtom);
 
   return (
     <div className="flex justify-between space-x-4">
@@ -27,6 +35,7 @@ export function InstrumentSelectionContainer() {
         onShuffleClicked={() => generateNewSong(mood)}
         borderColorActive={"var(--harmony-border-active)"}
         borderColorInactive={"var(--harmony-border-inactive)"}
+        isLoading={harmonyIsLoading}
       />
       <InstrumentControls
         instrument="melody"
@@ -39,6 +48,7 @@ export function InstrumentSelectionContainer() {
         onShuffleClicked={() => generateNewMelody({ restartPlayback: false })}
         borderColorActive="var(--melody-border-active)"
         borderColorInactive="var(--melody-border-inactive)"
+        isLoading={melodyIsLoading}
       />
     </div>
   );
