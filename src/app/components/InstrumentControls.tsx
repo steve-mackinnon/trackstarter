@@ -46,7 +46,7 @@ export function InstrumentControls({
       onMouseEnter={() => setMouseOver(true)}
       onMouseLeave={() => setMouseOver(false)}
     >
-      <span>{instrument}</span>
+      <span className="font-bold text-lg">{instrument}</span>
       <OscillatorShapeSelector
         oscShape={oscShape}
         onChange={onOscShapeChange}
