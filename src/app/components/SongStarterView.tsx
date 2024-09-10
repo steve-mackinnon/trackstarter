@@ -1,7 +1,7 @@
 "use client";
 
-import { useSetupHotkeys } from "common/hooks/useSetupHotkeys";
 import { useGenerateSongOnFirstRender } from "hooks/useGenerateSongOnFirstRender";
+import { useSetupHotkeys } from "hooks/useSetupHotkeys";
 import { Footer } from "./Footer";
 import { Header } from "./Header";
 import { InstrumentSelectionContainer } from "./InstrumentSelectionContainer";
