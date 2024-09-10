@@ -8,11 +8,15 @@ const roboto = Roboto_Flex({ subsets: ["latin"] });
 export default function Home() {
   return (
     <main className="flex flex-col justify-center items-center gap-6 p-4 pt-10 text-center">
-      <h1 className="text-4xl font-bold">Track Starter</h1>
+      <h1 className="text-4xl font-bold border-2 border-slate-500 p-3">
+        Trackstarter
+      </h1>
       <article className={cn(roboto.className, "max-w-2xl text-lg")}>
-        Track Starter is an AI-powered music creation tool that generates short
-        melodic ideas that can be downloaded as MIDI. I built this tool to find
-        interesting chord progressions to use when writing music.
+        Trackstarter is an AI-powered tool designed to inspire your music
+        creation process by generating unique, short melodic ideas. Chord
+        progression and melodies can be downloaded as MIDI files and dragged
+        into your DAW, giving you the perfect starting point to build a full
+        track.
       </article>
       <section aria-labelledby="features-heading">
         <h2 className="text-3xl font-bold" id="features-heading">
@@ -37,6 +41,7 @@ export default function Home() {
           <li>
             MIDI file download <i>(unsupported on iOS)</i>
           </li>
+          <li>Vibe selector for fine tuning the mood of the generated song</li>
           <li>Dedicated synthesizers for harmony and melody</li>
           <li>Adjustable amp envelopes, filters, and FX</li>
         </ul>
