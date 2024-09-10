@@ -30,10 +30,10 @@
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
 
-    --harmony-border-active: rgba(16, 166, 186, 1);
-    --harmony-border-inactive: rgba(16, 166, 186, 0.5);
-    --melody-border-active: rgba(196, 92, 189, 1);
-    --melody-border-inactive: rgba(196, 92, 189, 0.5);
+    --harmony-border-active: rgb(25, 228, 255);
+    --harmony-border-inactive: rgba(25, 228, 255, 0.5);
+    --melody-border-active: rgb(237, 33, 98);
+    --melody-border-inactive: rgba(237, 33, 98, 0.5);
   }
 
   .dark {
@@ -185,4 +185,10 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+.app-title {
+  background: linear-gradient(to right, var(--harmony-border-active), var(--melody-border-active));
+  color: transparent;
+  background-clip: text;
 }
