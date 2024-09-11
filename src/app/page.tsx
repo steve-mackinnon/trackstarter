@@ -17,11 +17,12 @@ export default function Home() {
         Trackstarter
       </h1>
       <article className={cn(contentFont.className, "max-w-2xl text-lg")}>
-        Trackstarter is an AI-powered songwriting tool designed to fuel your
+        Trackstarter is an AI-powered songwriting tool designed to inspire your
         creative process by generating unique chord progressions and melodies.
-        Its goal is to help songwriters overcome writer&apos;s block by
-        presenting fresh ideas that that can be easily imported into a DAW or
-        hardware sequencer and transformed into full tracks.
+        Whether you&apos;re facing writer&apos;s block or just looking for new
+        ideas, Trackstarter offers fresh musical concepts that can be easily
+        imported into your DAW or hardware sequencer, ready to be developed into
+        full tracks.
       </article>
       <section aria-labelledby="features-heading">
         <h2 className="text-3xl font-bold" id="features-heading">
