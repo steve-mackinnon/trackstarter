@@ -8,7 +8,7 @@ const roboto = Roboto_Flex({ subsets: ["latin"] });
 export default function Home() {
   return (
     <main className="flex flex-col justify-center items-center p-4 gap-y-12 text-center">
-      <h1 className="text-4xl font-bold pt-8">Trackstarter</h1>
+      <h1 className="text-[2.6rem] font-bold pt-8">Trackstarter</h1>
       <article className={cn(roboto.className, "max-w-2xl text-lg")}>
         Trackstarter is an AI-powered songwriting tool designed to fuel your
         creative process by generating unique melodic sequences. Its goal is to
