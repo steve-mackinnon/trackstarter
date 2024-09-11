@@ -8,6 +8,7 @@ import {
   melodyLoadingAtom,
   melodySynthParamsAtom,
   moodAtom,
+  selectedInstrumentAtom,
 } from "state";
 import { InstrumentControls } from "./InstrumentControls";
 import { OscShape } from "./OscillatorShapeSelector";
@@ -21,6 +22,7 @@ export function InstrumentSelectionContainer() {
   const renderAudioGraph = useRenderAudioGraph();
   const melodyIsLoading = useAtomValue(melodyLoadingAtom);
   const harmonyIsLoading = useAtomValue(chordProgressionLoadingAtom);
+  const selectedInstrument = useAtomValue(selectedInstrumentAtom);
 
   return (
     <div className="flex justify-between space-x-4">
@@ -36,6 +38,9 @@ export function InstrumentSelectionContainer() {
         borderColorActive={"var(--harmony-border-active)"}
         borderColorInactive={"var(--harmony-border-inactive)"}
         isLoading={harmonyIsLoading}
+        glowColor={
+          selectedInstrument === "harmony" ? "var(--harmony-glow)" : undefined
+        }
       />
       <InstrumentControls
         instrument="melody"
@@ -49,6 +54,9 @@ export function InstrumentSelectionContainer() {
         borderColorActive="var(--melody-border-active)"
         borderColorInactive="var(--melody-border-inactive)"
         isLoading={melodyIsLoading}
+        glowColor={
+          selectedInstrument === "melody" ? "var(--melody-glow)" : undefined
+        }
       />
     </div>
   );

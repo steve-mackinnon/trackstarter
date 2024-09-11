@@ -15,6 +15,7 @@ export function InstrumentControls({
   borderColorActive,
   borderColorInactive,
   isLoading,
+  glowColor,
 }: {
   instrument: "harmony" | "melody";
   oscShape: OscShape;
@@ -23,6 +24,7 @@ export function InstrumentControls({
   borderColorActive: string;
   borderColorInactive: string;
   isLoading: boolean;
+  glowColor?: string;
 }) {
   const [selectedInstrument, setSelectedInstrument] = useAtom(
     selectedInstrumentAtom,
@@ -41,6 +43,7 @@ export function InstrumentControls({
       style={{
         borderColor:
           selected || mouseOver ? borderColorActive : borderColorInactive,
+        boxShadow: glowColor ? `0px 0px 10px 10px ${glowColor}` : undefined,
       }}
       onClick={() => setSelectedInstrument(instrument)}
       onMouseEnter={() => setMouseOver(true)}

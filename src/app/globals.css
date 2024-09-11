@@ -32,8 +32,10 @@
 
     --harmony-border-active: rgb(25, 228, 255);
     --harmony-border-inactive: rgba(25, 228, 255, 0.5);
+    --harmony-glow: rgba(25, 228, 255, 0.2);
     --melody-border-active: rgb(237, 33, 98);
     --melody-border-inactive: rgba(237, 33, 98, 0.5);
+    --melody-glow: rgba(237, 33, 98, 0.3);
   }
 
   .dark {
