@@ -30,12 +30,8 @@ export async function generateMelodyForChordProgression(
     const sequence = sequences.sort((a, b) => {
       const aUniqueNotes = new Set(a.notes!.map((n) => n.pitch!)).size;
       const bUniqueNotes = new Set(b.notes!.map((n) => n.pitch!)).size;
-      if (aUniqueNotes < bUniqueNotes) {
-        return -1;
-      } else if (aUniqueNotes === bUniqueNotes) {
-        return 0;
-      }
-      return 1;
+      // Descending sort
+      return bUniqueNotes - aUniqueNotes;
     })[0];
     const mappedSequence: SequencerEvent[] | undefined = sequence.notes?.map(
       (ns) => {
