@@ -7,7 +7,7 @@ const roboto = Roboto_Flex({ subsets: ["latin"] });
 
 export default function Home() {
   return (
-    <main className="flex flex-col justify-center items-center p-4 gap-y-12 text-center">
+    <main className="flex flex-col justify-center items-center p-6 gap-y-12 text-center">
       <h1 className="text-[2.6rem] font-bold pt-8">Trackstarter</h1>
       <article className={cn(roboto.className, "max-w-2xl text-lg")}>
         Trackstarter is an AI-powered songwriting tool designed to fuel your
@@ -46,7 +46,9 @@ export default function Home() {
           <li>
             MIDI file download <i>(iOS currently unsupported)</i>
           </li>
-          <li>Vibe selector to fine tune the mood of the generated song</li>
+          <li>
+            Vibe selector to fine tune the mood of the generated sequences
+          </li>
           <li>Dedicated synthesizers for harmony and melody</li>
           <li>Customizable amp envelopes, filters, and delay effects</li>
         </ul>
