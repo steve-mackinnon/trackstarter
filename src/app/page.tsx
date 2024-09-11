@@ -12,9 +12,9 @@ export default function Home() {
       <article className={cn(roboto.className, "max-w-2xl text-lg")}>
         Trackstarter is an AI-powered songwriting tool designed to fuel your
         creative process by generating unique melodic sequences. Its goal is to
-        songwriters overcome writer's block by presenting fresh ideas that that
-        can be easily imported into a DAW or hardware sequencer and transformed
-        into full tracks.
+        songwriters overcome writer&apos;s block by presenting fresh ideas that
+        that can be easily imported into a DAW or hardware sequencer and
+        transformed into full tracks.
       </article>
       <section aria-labelledby="features-heading">
         <h2 className="text-3xl font-bold" id="features-heading">
