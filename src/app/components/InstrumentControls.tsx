@@ -54,9 +54,10 @@ export function InstrumentControls({
       />
       <Button
         variant="outline"
-        className="rounded-full active:bg-slate-500"
+        className="rounded-full active:bg-slate-500 border-slate-400"
         onClick={onShuffleClicked}
         disabled={isLoading}
+        aria-label={`shuffle ${instrument}`}
       >
         <Dices />
       </Button>
