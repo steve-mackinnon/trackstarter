@@ -1,7 +1,8 @@
 import { Button } from "common/components/ui/button";
+import { Toggle } from "common/components/ui/toggle";
 import { cn } from "common/utils";
 import { useAtom } from "jotai";
-import { Dices } from "lucide-react";
+import { Dices, Volume2Icon, VolumeXIcon } from "lucide-react";
 import { useState } from "react";
 import LoadingIndicator from "react-spinners/PuffLoader";
 import { selectedInstrumentAtom } from "state";
@@ -30,6 +31,7 @@ export function InstrumentControls({
     selectedInstrumentAtom,
   );
   const [mouseOver, setMouseOver] = useState(false);
+  const [muted, setMuted] = useState(false);
 
   const selected = selectedInstrument === instrument;
   return (
@@ -55,15 +57,24 @@ export function InstrumentControls({
         onChange={onOscShapeChange}
         disabled={isLoading}
       />
-      <Button
-        variant="outline"
-        className="rounded-full active:bg-slate-500 border-slate-400"
-        onClick={onShuffleClicked}
-        disabled={isLoading}
-        aria-label={`shuffle ${instrument}`}
-      >
-        <Dices />
-      </Button>
+      <div className="flex justify-between space-x-4">
+        <Button
+          variant="outline"
+          className="rounded-full active:bg-slate-500 border-slate-400"
+          onClick={onShuffleClicked}
+          disabled={isLoading}
+          aria-label={`shuffle ${instrument}`}
+        >
+          <Dices />
+        </Button>
+        <Toggle
+          className="hover:bg-none data-[state=on]:bg-none"
+          onClick={() => setMuted(!muted)}
+        >
+          {muted && <Volume2Icon />}
+          {!muted && <VolumeXIcon />}
+        </Toggle>
+      </div>
       {isLoading && (
         <div className="absolute flex flex-col justify-center items-center w-full h-full bg-black opacity-85 rounded-xl">
           <LoadingIndicator color="white" />
