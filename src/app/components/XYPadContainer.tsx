@@ -43,6 +43,7 @@ function buildParamMap(
           updateSynthParams((prev) => ({ ...prev, filterFrequency: freq }));
           setProperty(`${instrumentKey}-filter`, "filter", "frequency", freq);
         },
+        label: "frequency",
       },
       yParam: {
         min: 0.1,
@@ -53,6 +54,7 @@ function buildParamMap(
           updateSynthParams((prev) => ({ ...prev, filterQ: q }));
           setProperty(`${instrumentKey}-filter`, "filter", "q", q);
         },
+        label: "resonance",
       },
     },
     amp: {
@@ -65,6 +67,7 @@ function buildParamMap(
           updateSynthParams((prev) => ({ ...prev, attack: attack }));
           setProperty(`${instrumentKey}-amp-env`, "adsr", "attack", attack);
         },
+        label: "attack",
       },
       yParam: {
         min: 0.05,
@@ -81,6 +84,7 @@ function buildParamMap(
           setProperty(`${instrumentKey}-amp-env`, "adsr", "decay", decay);
           setProperty(`${instrumentKey}-amp-env`, "adsr", "sustain", sustain);
         },
+        label: "decay",
       },
     },
     delay: {
@@ -96,12 +100,14 @@ function buildParamMap(
           });
           setProperty(`${instrumentKey}-delay`, "delay", "time", time);
         },
+        label: "time",
       },
       yParam: {
         min: 0,
         max: 1,
         scaling: 1,
         value: synthParams.delayParams.sendAmount,
+        label: "amount",
         onChange: (sendAmount: number) => {
           const feedback = sendAmount * 0.8;
           const lpfFrequency = linearMap(sendAmount, 0, 1, 800, 2000);
@@ -220,6 +226,8 @@ export function XYPadContainer() {
           borderColor={borderColor}
           xParam={params.xParam}
           yParam={params.yParam}
+          xLabel={params.xParam.label}
+          yLabel={params.yParam.label}
         />
       </div>
     </div>

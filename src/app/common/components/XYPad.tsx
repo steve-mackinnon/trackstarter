@@ -12,6 +12,8 @@ interface XYPadProps {
   y?: number;
   onChange?: (position: { x: number; y: number }) => void;
   borderColor: string;
+  xLabel: string;
+  yLabel: string;
 }
 
 const NODE_DIAMETER = 22;
@@ -23,6 +25,8 @@ export function XYPad({
   x = 0.5,
   y = 0.5,
   borderColor,
+  xLabel,
+  yLabel,
 }: XYPadProps) {
   const [position, setPosition] = useState<Position>({
     x,
@@ -178,6 +182,12 @@ export function XYPad({
         setDragOriginOffset({ x: NODE_DIAMETER / 2, y: NODE_DIAMETER / 2 });
       }}
     >
+      <span className="text-xs absolute bottom-0 h-3 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+        {xLabel}
+      </span>
+      <span className="text-xs absolute h-3 p-1 top-1/2 left-0 transform -translate-y-1/2 rotate-90">
+        {yLabel}
+      </span>
       <div
         ref={nodeRef}
         className="absolute hover:bg-slate-700 active:bg-primary border-primary border-2 rounded-full"
