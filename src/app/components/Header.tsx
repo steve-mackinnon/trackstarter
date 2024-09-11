@@ -45,7 +45,7 @@ export function Header({ className }: { className?: string }) {
       </Link>
       <ComboBox
         label="vibe"
-        choices={(MOODS as string[]).concat("Any")}
+        choices={["Any", ...(MOODS as string[])]}
         onChange={(newMood: string | null) => {
           if (newMood === "Any") {
             newMood = null;
