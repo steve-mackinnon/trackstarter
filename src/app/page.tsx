@@ -1,20 +1,25 @@
 import { Button } from "common/components/ui/button";
 import { cn } from "common/utils";
-import { Roboto_Flex } from "next/font/google";
+import { Titillium_Web } from "next/font/google";
 import Link from "next/link";
 
-const roboto = Roboto_Flex({ subsets: ["latin"] });
+const contentFont = Titillium_Web({ subsets: ["latin"], weight: "400" });
 
 export default function Home() {
   return (
     <main className="flex flex-col justify-center items-center p-6 gap-y-12 text-center">
-      <h1 className="text-[2.6rem] font-bold pt-8">Trackstarter</h1>
-      <article className={cn(roboto.className, "max-w-2xl text-lg")}>
+      <h1
+        className="text-[2.6rem] font-bold pt-8"
+        style={{ textShadow: "var(--harmony-border-active) 1px 0 50px" }}
+      >
+        Trackstarter
+      </h1>
+      <article className={cn(contentFont.className, "max-w-2xl text-lg")}>
         Trackstarter is an AI-powered songwriting tool designed to fuel your
-        creative process by generating unique melodic sequences. Its goal is to
-        songwriters overcome writer&apos;s block by presenting fresh ideas that
-        that can be easily imported into a DAW or hardware sequencer and
-        transformed into full tracks.
+        creative process by generating unique chord progressions and melodies.
+        Its goal is to songwriters overcome writer&apos;s block by presenting
+        fresh ideas that that can be easily imported into a DAW or hardware
+        sequencer and transformed into full tracks.
       </article>
       <section aria-labelledby="features-heading">
         <h2 className="text-3xl font-bold" id="features-heading">
@@ -22,7 +27,7 @@ export default function Home() {
         </h2>
         <ul
           className={cn(
-            `${roboto.className} antialiased`,
+            `${contentFont.className} antialiased`,
             "list-disc text-left pl-8 pt-4 text-lg",
           )}
         >
@@ -54,12 +59,13 @@ export default function Home() {
         </ul>
       </section>
 
-      <Link href={"/workstation"} className="mb-6">
+      <Link href={"/workstation"} className="mb-6 pt-6">
         <Button
           variant={"outline"}
           className="bg-slate-900 border-2 text-2xl w-48 h-16 rounded-xl"
           style={{
             borderColor: "var(--harmony-border-active)",
+            boxShadow: "2px 2px 20px 20px rgb(25, 228, 255, 0.1)",
           }}
         >
           Get Started
