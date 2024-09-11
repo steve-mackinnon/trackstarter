@@ -41,7 +41,7 @@ export default function Home() {
               href="https://magenta.tensorflow.org/js-announce"
               className="text-blue-400"
             >
-              Majenta.js
+              Magenta.js
             </a>
             <span> and </span>
             <a
