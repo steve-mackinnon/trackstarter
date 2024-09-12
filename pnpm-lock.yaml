@@ -71,9 +71,6 @@ importers:
       react-spinners:
         specifier: ^0.14.1
         version: 0.14.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      standardized-audio-context:
-        specifier: ^25.3.77
-        version: 25.3.77
       tailwind-merge:
         specifier: ^2.5.2
         version: 2.5.2
@@ -223,10 +220,6 @@ packages:
 
   '@babel/runtime@7.25.0':
     resolution: {integrity: sha512-7dRy4DwXwtzBrPbZflqxnvfxLF8kdZXPkhymtDeFoFqE6ldzjQFgYTtYIFARcLEYDrqfBfYcZt1WqFxRoyC9Rw==}
-    engines: {node: '>=6.9.0'}
-
-  '@babel/runtime@7.25.6':
-    resolution: {integrity: sha512-VBj9MYyDb9tuLq7yzqjgzt6Q+IBQLrGZfdjOekyEirZPHxXWoTSGUTMrpsfi58Up73d13NfYLv8HT9vmznjzhQ==}
     engines: {node: '>=6.9.0'}
 
   '@babel/template@7.25.0':
@@ -1303,8 +1296,8 @@ packages:
   asynckit@0.4.0:
     resolution: {integrity: sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==}
 
-  automation-events@7.0.9:
-    resolution: {integrity: sha512-BvN5ynKILdG5UoONshTQu+9W1LXXtBR//OHvAjOe1XfQ1Y4muFyApjcG71alVIyVwsJLBjbh1jqbTrU22FuZEA==}
+  automation-events@7.0.7:
+    resolution: {integrity: sha512-eg7aK2P0jrq4QqnZRWXOQJDYs6lxZXK/erfZ/WPTVPP/YQlgt+J0KvIzTo86zYszkru2J/QCW1FFJYgJVd7TgA==}
     engines: {node: '>=18.2.0'}
 
   available-typed-arrays@1.0.7:
@@ -2876,8 +2869,8 @@ packages:
   staffrender@0.2.1:
     resolution: {integrity: sha512-qg7aaR7YX8TwFYf4p1pjvm3tT8SYLZDe/J2eF2+z2WmYC/PyldnJlsaPKi1qRm0xqQ8nCLziooGXvYRcl5LNew==}
 
-  standardized-audio-context@25.3.77:
-    resolution: {integrity: sha512-Ki9zNz6pKcC5Pi+QPjPyVsD9GwJIJWgryji0XL9cAJXMGyn+dPOf6Qik1AHei0+UNVcc4BOCa0hWLBzlwqsW/A==}
+  standardized-audio-context@25.3.75:
+    resolution: {integrity: sha512-N7/Si1d0kuo1umRnWOsQESqxJlkMxBZfdfNRo5HeE7pA0lmo6PNrMkOSiM0NutFxpwA+KcPexo5JkTWWAAUaNQ==}
 
   static-eval@0.2.4:
     resolution: {integrity: sha512-6dWWPfa/0+1zULdQi7ssT5EQZHsGK8LygBzhE/HdafNCo4e/Ibt7vLPfxBw9VcdVV+t0ARtN4ZAJKtApVc0A5Q==}
@@ -3104,9 +3097,6 @@ packages:
 
   tslib@2.6.3:
     resolution: {integrity: sha512-xNvxJEOUiWPGhUuUdQgAJPKOOJfGnIyKySOc09XkKsgdUV/3E2zvwZYdejjmRgPCgcym1juLH3226yA7sEFJKQ==}
-
-  tslib@2.7.0:
-    resolution: {integrity: sha512-gLXCKdN1/j47AiHiOkJN69hJmcbGTHI0ImLmbYLHykhgeN0jVGola9yVjFgzCUklsZQMW55o+dW7IXv3RCXDzA==}
 
   type-check@0.4.0:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}
@@ -3494,10 +3484,6 @@ snapshots:
       '@babel/helper-plugin-utils': 7.24.8
 
   '@babel/runtime@7.25.0':
-    dependencies:
-      regenerator-runtime: 0.14.1
-
-  '@babel/runtime@7.25.6':
     dependencies:
       regenerator-runtime: 0.14.1
 
@@ -4593,10 +4579,10 @@ snapshots:
 
   asynckit@0.4.0: {}
 
-  automation-events@7.0.9:
+  automation-events@7.0.7:
     dependencies:
-      '@babel/runtime': 7.25.6
-      tslib: 2.7.0
+      '@babel/runtime': 7.25.0
+      tslib: 2.6.3
 
   available-typed-arrays@1.0.7:
     dependencies:
@@ -6365,11 +6351,11 @@ snapshots:
 
   staffrender@0.2.1: {}
 
-  standardized-audio-context@25.3.77:
+  standardized-audio-context@25.3.75:
     dependencies:
-      '@babel/runtime': 7.25.6
-      automation-events: 7.0.9
-      tslib: 2.7.0
+      '@babel/runtime': 7.25.0
+      automation-events: 7.0.7
+      tslib: 2.6.3
 
   static-eval@0.2.4:
     dependencies:
@@ -6655,12 +6641,12 @@ snapshots:
 
   tone@14.9.17:
     dependencies:
-      standardized-audio-context: 25.3.77
+      standardized-audio-context: 25.3.75
       tslib: 2.6.3
 
   tone@15.0.4:
     dependencies:
-      standardized-audio-context: 25.3.77
+      standardized-audio-context: 25.3.75
       tslib: 2.6.3
 
   tough-cookie@4.1.4:
@@ -6690,8 +6676,6 @@ snapshots:
       strip-bom: 3.0.0
 
   tslib@2.6.3: {}
-
-  tslib@2.7.0: {}
 
   type-check@0.4.0:
     dependencies:
