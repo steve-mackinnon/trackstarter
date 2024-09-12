@@ -137,16 +137,20 @@ export function useRenderAudioGraph() {
               q: harmonyParams.filterQ,
             },
             [
-              mul({ multiplier: 0.1 }, [
-                osc(
-                  {
-                    ...harmonyParams,
-                    modSources: { gain: ["harmony-amp-env"] },
-                  },
-                  [],
-                  "harmony-osc",
-                ),
-              ]),
+              mul(
+                { multiplier: harmonyParams.gain },
+                [
+                  osc(
+                    {
+                      ...harmonyParams,
+                      modSources: { gain: ["harmony-amp-env"] },
+                    },
+                    [],
+                    "harmony-osc",
+                  ),
+                ],
+                "harmony-gain",
+              ),
             ],
             ["harmony-delay-input"],
             "harmony-filter",
@@ -158,17 +162,21 @@ export function useRenderAudioGraph() {
               q: melodyParams.filterQ,
             },
             [
-              mul({ multiplier: 0.25 }, [
-                osc(
-                  {
-                    type: melodyParams.type,
-                    detune: 0,
-                    modSources: { gain: ["melody-amp-env"] },
-                  },
-                  [],
-                  "melody-osc",
-                ),
-              ]),
+              mul(
+                { multiplier: melodyParams.gain },
+                [
+                  osc(
+                    {
+                      type: melodyParams.type,
+                      detune: 0,
+                      modSources: { gain: ["melody-amp-env"] },
+                    },
+                    [],
+                    "melody-osc",
+                  ),
+                ],
+                "melody-gain",
+              ),
             ],
             ["melody-delay-input"],
             "melody-filter",
