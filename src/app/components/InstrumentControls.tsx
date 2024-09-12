@@ -1,8 +1,7 @@
 import { Button } from "common/components/ui/button";
-import { Toggle } from "common/components/ui/toggle";
 import { cn } from "common/utils";
 import { useAtom } from "jotai";
-import { Dices, Volume2Icon, VolumeXIcon } from "lucide-react";
+import { Dices } from "lucide-react";
 import { useState } from "react";
 import LoadingIndicator from "react-spinners/PuffLoader";
 import { selectedInstrumentAtom } from "state";
@@ -67,13 +66,6 @@ export function InstrumentControls({
         >
           <Dices />
         </Button>
-        <Toggle
-          className="hover:bg-none data-[state=on]:bg-none"
-          onClick={() => setMuted(!muted)}
-        >
-          {muted && <Volume2Icon />}
-          {!muted && <VolumeXIcon />}
-        </Toggle>
       </div>
       {isLoading && (
         <div className="absolute flex flex-col justify-center items-center w-full h-full bg-black opacity-85 rounded-xl">
