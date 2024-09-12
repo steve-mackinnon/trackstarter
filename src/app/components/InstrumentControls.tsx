@@ -73,6 +73,7 @@ export function InstrumentControls({
           </Button>
         </div>
         <Toggle
+          aria-label={`mute ${instrument}`}
           onClick={() => {
             onMuteChange(!muted);
           }}
