@@ -1,3 +1,5 @@
+import { BaseContext } from "tone";
+
 export interface ADSRProps {
   attack: number;
   decay: number;
@@ -5,31 +7,46 @@ export interface ADSRProps {
   release: number;
 }
 
-export class ADSR extends ConstantSourceNode {
-  constructor(audioContext: AudioContext, private props: ADSRProps) {
-    super(audioContext, { offset: 0 });
-    this.offset.value = 0;
-    this.start();
+export class ADSR {
+  constructor(audioContext: BaseContext, private props: ADSRProps) {
+    this.constantSource = audioContext.createConstantSource();
+    this.constantSource.offset.value = 0;
+    this.constantSource.start();
   }
+
+  private constantSource: ConstantSourceNode;
 
   update(props: ADSRProps) {
     this.props = props;
   }
 
+  connect(node: AudioParam) {
+    this.constantSource.connect(node);
+  }
+
   trigger(startTime: number, stopTime: number) {
-    this.offset.cancelScheduledValues(startTime);
-    this.offset.setValueAtTime(0, startTime);
+    this.constantSource.offset.cancelScheduledValues(startTime);
+    this.constantSource.offset.setValueAtTime(0, startTime);
     // Attack
-    this.offset.linearRampToValueAtTime(1, startTime + this.props.attack);
+    this.constantSource.offset.linearRampToValueAtTime(
+      1,
+      startTime + this.props.attack,
+    );
     const reachedSustainTime = Math.min(
       stopTime,
       startTime + this.props.attack + this.props.decay,
     );
     // Decay
-    this.offset.linearRampToValueAtTime(this.props.sustain, reachedSustainTime);
+    this.constantSource.offset.linearRampToValueAtTime(
+      this.props.sustain,
+      reachedSustainTime,
+    );
     // Sustain
-    this.offset.setValueAtTime(this.props.sustain, stopTime);
+    this.constantSource.offset.setValueAtTime(this.props.sustain, stopTime);
     // Release
-    this.offset.linearRampToValueAtTime(0, stopTime + this.props.release);
+    this.constantSource.offset.linearRampToValueAtTime(
+      0,
+      stopTime + this.props.release,
+    );
   }
 }

@@ -6,19 +6,24 @@ import { FeedbackDelayProps } from "./feedbackDelay";
 import { Sequencer } from "./sequencer";
 import { unmute } from "./unmute";
 
-const context = new AudioContext();
+const context = Tone.getContext().rawContext;
 unmute(context, false, false);
-Tone.setContext(context);
 
+let createdWorklets = false;
 async function addWorklets() {
   try {
-    await context.audioWorklet.addModule("/audio/feedbackDelayProcessor.js");
-    await context.audioWorklet.addModule("/audio/masterClipper.js");
+    await Tone.getContext().rawContext.audioWorklet.addModule(
+      "/audio/feedbackDelayProcessor.js",
+    );
+    await Tone.getContext().rawContext.audioWorklet.addModule(
+      "/audio/masterClipper.js",
+    );
   } catch (e) {
     console.error(e);
   }
+  createdWorklets = true;
 }
-addWorklets();
+// addWorklets();
 
 // Disable auto freezing in immer so we can mutate the current state when
 // setting props
@@ -157,7 +162,10 @@ function isConnectable(obj: any): obj is Connectable {
 
 /// Renders the tree rooted in `newRoot` by comparing it to the current tree and applying
 /// the minimum number of WebAudio node operations to fulfill the requested state.
-export function render(newRoot: Node) {
+export async function render(newRoot: Node) {
+  if (!createdWorklets) {
+    await addWorklets();
+  }
   newRoot = buildAudioGraph({
     newNode: newRoot,
     currentNode: currentRoot,
@@ -196,6 +204,9 @@ export async function start(startStep?: number) {
 }
 
 export function stop() {
+  if (!playing) {
+    return;
+  }
   playing = false;
   Tone.getTransport().pause();
   stepIndex = 0;
@@ -255,26 +266,32 @@ export function findNodeWithKey(root: Node | null, key: string): Node | null {
   return null;
 }
 
-function buildBackingNode(node: Node): Connectable | Sequencer | null {
+function buildBackingNode(
+  node: Node,
+): Connectable | Sequencer | Tone.ToneAudioNode | null {
   switch (node.type) {
     case "osc": {
       // Osc nodes are created dynamically when they are triggered by a sequence
       return null;
     }
     case "filter": {
-      return new BiquadFilterNode(context);
+      return Tone.getContext().createBiquadFilter();
     }
     case "destination":
-      return context.destination;
+      return Tone.getContext().rawContext.destination;
     case "mul":
-      return new GainNode(context);
+      return Tone.getContext().createGain();
     case "adsr":
       // ADSR nodes are built on the fly when triggered
       return null;
     case "delay":
-      return new AudioWorkletNode(context, "feedback-delay-processor");
+      return Tone.getContext().createAudioWorkletNode(
+        "feedback-delay-processor",
+      );
     case "master-clipper":
-      return new AudioWorkletNode(context, "master-clipper-processor");
+      return Tone.getContext().createAudioWorkletNode(
+        "master-clipper-processor",
+      );
     case "sequencer": {
       return new Sequencer(
         node,
@@ -282,7 +299,7 @@ function buildBackingNode(node: Node): Connectable | Sequencer | null {
         (node, freq, startTime, endTime) => {
           if (node.type === "osc") {
             return buildOscNode(
-              context,
+              Tone.getContext(),
               node,
               freq,
               startTime,
@@ -405,14 +422,15 @@ function buildAudioGraph({
       node.backingNode = buildBackingNode(newNode) as any;
     });
     if (
-      (parent?.backingNode instanceof AudioNode ||
-        isNodeWithInput(parent?.backingNode)) &&
+      parent?.backingNode &&
+      // (parent?.backingNode instanceof AudioNode ||
+      // isNodeWithInput(parent?.backingNode)) &&
       isConnectable(newNode.backingNode)
     ) {
       if (isNodeWithInput(parent.backingNode)) {
         newNode.backingNode.connect(parent.backingNode.input);
       } else {
-        newNode.backingNode.connect(parent.backingNode);
+        newNode.backingNode.connect(parent.backingNode as AudioNode);
       }
     }
   } else {
@@ -441,16 +459,12 @@ function setupAuxConnections(node: Node) {
   if (node.auxConnections) {
     node.auxConnections.forEach((key) => {
       const auxNode = findNodeWithKey(currentRoot, key);
-      if (
-        auxNode &&
-        (isNodeWithInput(auxNode.backingNode) ||
-          auxNode.backingNode instanceof AudioNode) &&
-        isConnectable(node.backingNode)
-      ) {
+      // const isAudioNode = auxNode && auxNode.backingNode instanceof AudioNode;
+      if (auxNode && auxNode.backingNode && isConnectable(node.backingNode)) {
         if (isNodeWithInput(auxNode.backingNode)) {
           node.backingNode.connect(auxNode.backingNode.input);
         } else {
-          node.backingNode.connect(auxNode.backingNode);
+          node.backingNode.connect(auxNode.backingNode as AudioNode);
         }
       } else {
         throw new Error(
