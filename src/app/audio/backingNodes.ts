@@ -1,28 +1,29 @@
+import { BaseContext } from "tone";
 import { ADSR } from "./adsr";
 import { ADSRNode, findNodeWithKey, Node, OscNode } from "./audioGraph";
 
 export function buildOscNode(
-  context: AudioContext,
+  context: BaseContext,
   node: OscNode,
   freq: number,
   startTime: number,
   endTime: number,
   root: Node,
 ): OscillatorNode {
-  const oscNode = new OscillatorNode(context);
+  const oscNode = context.createOscillator();
   const oscType = node.props.type;
   oscNode.type = oscType;
   oscNode.frequency.value = freq;
   oscNode.start(startTime);
   let oscStopTime = endTime;
 
-  const oscGain = new GainNode(context);
+  const oscGain = context.createGain();
   oscNode.connect(oscGain);
   if (
-    node.parent?.backingNode &&
-    node.parent.backingNode instanceof AudioNode
+    node.parent?.backingNode
+    // node.parent.backingNode instanceof AudioNode
   ) {
-    oscGain.connect(node.parent.backingNode);
+    oscGain.connect(node.parent.backingNode as AudioNode);
   }
 
   if (node.props.modSources?.gain && node.props.modSources.gain.length > 0) {
@@ -48,7 +49,7 @@ export function buildOscNode(
 }
 
 function buildADSRNode(
-  context: AudioContext,
+  context: BaseContext,
   node: ADSRNode,
   startTime: number,
   endTime: number,
