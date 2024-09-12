@@ -41,6 +41,12 @@ export function InstrumentSelectionContainer() {
         glowColor={
           selectedInstrument === "harmony" ? "var(--harmony-glow)" : undefined
         }
+        muted={harmonyParams.gain === 0}
+        onMuteChange={(muted) => {
+          const params = { ...harmonyParams, gain: muted ? 0 : 0.1 };
+          setHarmonyParams(params);
+          renderAudioGraph({ harmonySynthParams: params });
+        }}
       />
       <InstrumentControls
         instrument="melody"
@@ -57,6 +63,12 @@ export function InstrumentSelectionContainer() {
         glowColor={
           selectedInstrument === "melody" ? "var(--melody-glow)" : undefined
         }
+        muted={melodyParams.gain === 0}
+        onMuteChange={(muted) => {
+          const params = { ...melodyParams, gain: muted ? 0 : 0.25 };
+          setMelodyParams(params);
+          renderAudioGraph({ melodySynthParams: params });
+        }}
       />
     </div>
   );
