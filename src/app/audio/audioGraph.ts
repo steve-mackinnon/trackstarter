@@ -252,9 +252,7 @@ export function findNodeWithKey(root: Node | null, key: string): Node | null {
   return null;
 }
 
-function buildBackingNode(
-  node: Node,
-): AudioNode | Sequencer | Tone.ToneAudioNode | null {
+function buildBackingNode(node: Node): AudioNode | Sequencer | null {
   switch (node.type) {
     case "osc": {
       // Osc nodes are created dynamically when they are triggered by a sequence
