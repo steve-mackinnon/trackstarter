@@ -23,7 +23,6 @@ async function addWorklets() {
   }
   createdWorklets = true;
 }
-// addWorklets();
 
 // Disable auto freezing in immer so we can mutate the current state when
 // setting props
@@ -147,19 +146,6 @@ export type Node =
   | FeedbackDelayNode
   | MasterClipperNode;
 
-interface Connectable {
-  connect(destination: AudioNode): AudioNode;
-  disconnect(): void;
-}
-
-function isConnectable(obj: any): obj is Connectable {
-  return (
-    obj &&
-    typeof obj.connect === "function" &&
-    typeof obj.disconnect === "function"
-  );
-}
-
 /// Renders the tree rooted in `newRoot` by comparing it to the current tree and applying
 /// the minimum number of WebAudio node operations to fulfill the requested state.
 export async function render(newRoot: Node) {
@@ -268,7 +254,7 @@ export function findNodeWithKey(root: Node | null, key: string): Node | null {
 
 function buildBackingNode(
   node: Node,
-): Connectable | Sequencer | Tone.ToneAudioNode | null {
+): AudioNode | Sequencer | Tone.ToneAudioNode | null {
   switch (node.type) {
     case "osc": {
       // Osc nodes are created dynamically when they are triggered by a sequence
@@ -318,7 +304,7 @@ function deleteNode(node: Node) {
   if (node.children) {
     node.children.forEach((n) => deleteNode(n));
   }
-  if (isConnectable(node.backingNode)) {
+  if (isAudioNode(node.backingNode)) {
     node.backingNode.disconnect();
   }
 }
@@ -423,14 +409,14 @@ function buildAudioGraph({
     });
     if (
       parent?.backingNode &&
-      // (parent?.backingNode instanceof AudioNode ||
-      // isNodeWithInput(parent?.backingNode)) &&
-      isConnectable(newNode.backingNode)
+      (isAudioNode(parent.backingNode) ||
+        isNodeWithInput(parent.backingNode)) &&
+      isAudioNode(newNode.backingNode)
     ) {
       if (isNodeWithInput(parent.backingNode)) {
         newNode.backingNode.connect(parent.backingNode.input);
       } else {
-        newNode.backingNode.connect(parent.backingNode as AudioNode);
+        newNode.backingNode.connect(parent.backingNode);
       }
     }
   } else {
@@ -455,16 +441,28 @@ function isNodeWithInput(obj: any): obj is HasInputNode {
   return obj && obj["input"] && obj["input"] instanceof AudioNode;
 }
 
+function isAudioNode(obj: any): obj is AudioNode {
+  return (
+    obj &&
+    typeof obj.connect === "function" &&
+    typeof obj.disconnect === "function"
+  );
+}
+
 function setupAuxConnections(node: Node) {
   if (node.auxConnections) {
     node.auxConnections.forEach((key) => {
       const auxNode = findNodeWithKey(currentRoot, key);
-      // const isAudioNode = auxNode && auxNode.backingNode instanceof AudioNode;
-      if (auxNode && auxNode.backingNode && isConnectable(node.backingNode)) {
+      if (
+        auxNode &&
+        (isNodeWithInput(auxNode.backingNode) ||
+          isAudioNode(auxNode.backingNode)) &&
+        isAudioNode(node.backingNode)
+      ) {
         if (isNodeWithInput(auxNode.backingNode)) {
           node.backingNode.connect(auxNode.backingNode.input);
         } else {
-          node.backingNode.connect(auxNode.backingNode as AudioNode);
+          node.backingNode.connect(auxNode.backingNode);
         }
       } else {
         throw new Error(
