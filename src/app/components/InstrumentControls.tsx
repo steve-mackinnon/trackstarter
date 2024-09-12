@@ -30,6 +30,7 @@ export function InstrumentControls({
     selectedInstrumentAtom,
   );
   const [mouseOver, setMouseOver] = useState(false);
+  const [muted, setMuted] = useState(false);
 
   const selected = selectedInstrument === instrument;
   return (
@@ -55,15 +56,17 @@ export function InstrumentControls({
         onChange={onOscShapeChange}
         disabled={isLoading}
       />
-      <Button
-        variant="outline"
-        className="rounded-full active:bg-slate-500 border-slate-400"
-        onClick={onShuffleClicked}
-        disabled={isLoading}
-        aria-label={`shuffle ${instrument}`}
-      >
-        <Dices />
-      </Button>
+      <div className="flex justify-between space-x-4">
+        <Button
+          variant="outline"
+          className="rounded-full active:bg-slate-500 border-slate-400"
+          onClick={onShuffleClicked}
+          disabled={isLoading}
+          aria-label={`shuffle ${instrument}`}
+        >
+          <Dices />
+        </Button>
+      </div>
       {isLoading && (
         <div className="absolute flex flex-col justify-center items-center w-full h-full bg-black opacity-85 rounded-xl">
           <LoadingIndicator color="white" />

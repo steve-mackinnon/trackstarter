@@ -8,8 +8,8 @@ import "./globals.css";
 const orbitron = Orbitron({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Track Starter",
-  applicationName: "Track Starter",
+  title: "Trackstarter",
+  applicationName: "Trackstarter",
   description:
     "Music creation tool that generates short melodic ideas you can download as MIDI to inspire your next song.",
   keywords: [
