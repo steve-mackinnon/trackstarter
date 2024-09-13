@@ -392,7 +392,8 @@ function buildAudioGraph({
   currentNode: Node | null;
   parent: Node | null;
 }): Node {
-  const keyMatch = newNode.key && newNode.key === currentNode?.key;
+  const keyMatch =
+    newNode.key !== undefined && newNode.key === currentNode?.key;
   const addNode =
     !keyMatch && (!currentNode || newNode.type !== currentNode.type);
   if (addNode) {
