@@ -1,4 +1,4 @@
-import { Chord, NoteWithOctave, Scale } from "tonal";
+import { Chord, Scale } from "tonal";
 import { SequencerEvent } from "./audioGraph";
 import {
   Mood,
@@ -20,7 +20,7 @@ export function getRandomMood(): Mood {
   return getRandomValue(MOODS);
 }
 
-export type Note =
+type Note =
   | "C"
   | "C#"
   | "D"
@@ -50,22 +50,6 @@ export const NOTES: readonly Note[] = [
 ];
 export function getRandomNote(): Note {
   return getRandomValue(NOTES);
-}
-
-export function generateSequence(
-  mood: Mood,
-  length: number,
-  root: Note,
-  octave: number,
-): NoteWithOctave[] {
-  const scale = MOOD_TO_SCALE[mood];
-  const notes = Scale.get(`${root}${octave} ${scale}`).notes;
-  return Array.from({ length }).map(
-    () =>
-      notes[
-        Math.floor(Math.random() * (notes.length - 1)) % (notes.length - 1)
-      ] as Note,
-  );
 }
 
 export interface ChordProgression {

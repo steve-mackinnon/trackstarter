@@ -2,6 +2,7 @@ import { ADSRProps } from "./adsr";
 import {
   ADSRNode,
   FeedbackDelayNode,
+  FeedbackDelayProps,
   FilterNode,
   FilterProps,
   MasterClipperNode,
@@ -14,7 +15,6 @@ import {
   SequencerNode,
   SequencerProps,
 } from "./audioGraph";
-import { FeedbackDelayProps } from "./feedbackDelay";
 
 export function output(props: any, children: Node[]): Node {
   return {
@@ -96,27 +96,14 @@ export function delay(
   };
 }
 
-export function canNodesConnect(sourceType: NodeType, destType: NodeType) {
-  switch (destType) {
-    case "destination":
-    case "filter":
-      return true;
-    case "osc": {
-      return sourceType === "sequencer";
-    }
-    case "sequencer":
-      return false;
-  }
-}
-
-export function defaultOscProps(): OscProps {
+function defaultOscProps(): OscProps {
   return {
     type: "sawtooth",
     detune: 0,
   };
 }
 
-export function defaultFilterProps(): FilterProps {
+function defaultFilterProps(): FilterProps {
   return {
     type: "lowpass",
     frequency: 900,

@@ -2,7 +2,6 @@ import { produce, setAutoFreeze } from "immer";
 import * as Tone from "tone";
 import { ADSR, ADSRProps } from "./adsr";
 import { buildOscNode } from "./backingNodes";
-import { FeedbackDelayProps } from "./feedbackDelay";
 import { Sequencer } from "./sequencer";
 import { unmute } from "./unmute";
 
@@ -87,7 +86,10 @@ export interface ADSRNode extends BaseNode {
   props: ADSRProps;
   backingNode?: ADSR;
 }
-
+export interface FeedbackDelayProps {
+  feedback: number;
+  time: number;
+}
 export interface FeedbackDelayNode extends BaseNode {
   type: "delay";
   props: FeedbackDelayProps;
@@ -100,7 +102,7 @@ export interface MasterClipperNode extends BaseNode {
   backingNode?: AudioNode;
 }
 
-export interface DestinationNode extends BaseNode {
+interface DestinationNode extends BaseNode {
   type: "destination";
   props: any;
   backingNode?: never;
@@ -221,11 +223,7 @@ export function setProperty<
   }
 }
 
-export function getCurrentStep(): number {
-  return stepIndex;
-}
-
-export let currentRoot: DestinationNode | null = null;
+let currentRoot: DestinationNode | null = null;
 
 export function findNodeWithKey(root: Node | null, key: string): Node | null {
   if (!root) {
