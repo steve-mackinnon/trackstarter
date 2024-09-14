@@ -1,6 +1,6 @@
 import * as AudioGraph from "audio/audioGraph";
 import {
-  adsr,
+  adsr as adsrNode,
   defaultSequencerProps,
   delay,
   filter,
@@ -45,6 +45,52 @@ function filterDelay({
     ],
     [],
     `${prefix}-delay-filter`,
+  );
+}
+
+function synthVoice({
+  params,
+  prefix,
+}: {
+  params: SynthParams;
+  prefix: string;
+}) {
+  return filter(
+    {
+      type: "lowpass",
+      frequency: params.filterFrequency,
+      q: params.filterQ,
+    },
+    [
+      mul(
+        { multiplier: params.gain },
+        [
+          osc(
+            {
+              ...params,
+              modSources: { gain: [`${prefix}-amp-env`] },
+            },
+            [],
+            `${prefix}-osc`,
+          ),
+        ],
+        `${prefix}-gain`,
+      ),
+    ],
+    [`${prefix}-delay-input`],
+    `${prefix}-filter`,
+  );
+}
+
+function adsr(params: SynthParams, key: string) {
+  return adsrNode(
+    {
+      attack: params.attack,
+      decay: params.decay,
+      sustain: params.sustain,
+      release: 0.1,
+    },
+    key,
   );
 }
 
@@ -100,24 +146,8 @@ export function useRenderAudioGraph() {
       output(undefined, [
         ...sequencers,
         masterClipper([
-          adsr(
-            {
-              attack: harmonyParams.attack,
-              decay: harmonyParams.decay,
-              sustain: harmonyParams.sustain,
-              release: 0.1,
-            },
-            "harmony-amp-env",
-          ),
-          adsr(
-            {
-              attack: melodyParams.attack,
-              decay: melodyParams.decay,
-              sustain: melodyParams.sustain,
-              release: 0.1,
-            },
-            "melody-amp-env",
-          ),
+          adsr(harmonyParams, "harmony-amp-env"),
+          adsr(melodyParams, "melody-amp-env"),
           filterDelay({
             prefix: "melody",
             sendAmount: melodyParams.delayParams.sendAmount,
@@ -130,57 +160,8 @@ export function useRenderAudioGraph() {
             time: harmonyParams.delayParams.time,
             feedback: harmonyParams.delayParams.feedback,
           }),
-          filter(
-            {
-              type: "lowpass",
-              frequency: harmonyParams.filterFrequency,
-              q: harmonyParams.filterQ,
-            },
-            [
-              mul(
-                { multiplier: harmonyParams.gain },
-                [
-                  osc(
-                    {
-                      ...harmonyParams,
-                      modSources: { gain: ["harmony-amp-env"] },
-                    },
-                    [],
-                    "harmony-osc",
-                  ),
-                ],
-                "harmony-gain",
-              ),
-            ],
-            ["harmony-delay-input"],
-            "harmony-filter",
-          ),
-          filter(
-            {
-              type: "lowpass",
-              frequency: melodyParams.filterFrequency,
-              q: melodyParams.filterQ,
-            },
-            [
-              mul(
-                { multiplier: melodyParams.gain },
-                [
-                  osc(
-                    {
-                      type: melodyParams.type,
-                      detune: 0,
-                      modSources: { gain: ["melody-amp-env"] },
-                    },
-                    [],
-                    "melody-osc",
-                  ),
-                ],
-                "melody-gain",
-              ),
-            ],
-            ["melody-delay-input"],
-            "melody-filter",
-          ),
+          synthVoice({ params: harmonyParams, prefix: "harmony" }),
+          synthVoice({ params: melodyParams, prefix: "melody" }),
         ]),
       ]),
     );
