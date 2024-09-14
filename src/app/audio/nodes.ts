@@ -126,14 +126,9 @@ export function defaultFilterProps(): FilterProps {
 
 export function defaultSequencerProps(): SequencerProps {
   return {
-    rate: "16n",
-    transposition: 0,
     destinationNodes: [],
-    steps: 3,
     length: 16,
-    octave: 3,
-    probability: 1,
-    notes: ["D2", "D#2", "F1", "G3", "F2", "F2", "D#1", "C#2"],
+    notes: [],
   };
 }
 

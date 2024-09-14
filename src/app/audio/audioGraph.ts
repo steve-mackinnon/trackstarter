@@ -115,19 +115,12 @@ export interface SequencerEvent {
 export interface SequencerProps {
   /// Uses Tone's time notation described here:
   /// https://github.com/Tonejs/Tone.js/wiki/Time
-  rate: string;
-  transposition: number;
   destinationNodes: string[];
   length: number;
-  steps: number;
-  // rootNote: Note;
-  octave: number;
-  /// must be [0, 1]
-  probability: number;
   // Ordered list of notes to play in the sequence. If notes.length()
   // is smaller than length, the sequence will wrap until the sequence
   // restarts.
-  notes: string[] | SequencerEvent[];
+  notes: SequencerEvent[];
 }
 
 export interface SequencerNode extends BaseNode {

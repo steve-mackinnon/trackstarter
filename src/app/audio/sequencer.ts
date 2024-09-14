@@ -32,17 +32,38 @@ export class Sequencer {
     this.activeNodes.delete(stepIndex);
 
     stepIndex = stepIndex % this.node.props.length;
-    // TODO: proper type guard for SequencerEvent[]
-    if (
-      this.node.props.notes.length &&
-      (this.node.props.notes[0] as SequencerEvent).note !== undefined
-    ) {
-      this.playSequencerEvents(
-        stepIndex,
-        time,
-        this.node.props.notes as SequencerEvent[],
-      );
+    const events = this.node.props.notes.filter(
+      (e) => e.startStep === stepIndex,
+    );
+    if (events.length === 0) {
       return;
+    }
+    const stepDuration = lengthOf16thNoteInSeconds(
+      Tone.getTransport().bpm.value,
+    );
+    for (const nodeKey of this.node.props.destinationNodes) {
+      const node = this.findNode(nodeKey);
+      if (!node) {
+        throw new Error(
+          `Unable to connect sequencer to node with key: ${nodeKey}`,
+        );
+      }
+      for (const event of events) {
+        const freq = Note.freq(event.note);
+        if (freq === null) {
+          throw new Error("Failed to convert note to frequency");
+        }
+        const eventDuration = (event.endStep - event.startStep) * stepDuration;
+        const destNode = this.triggerAudioNode(
+          node,
+          freq,
+          time,
+          time + eventDuration,
+        );
+        if (destNode) {
+          this.addToNodeMap(destNode, event.endStep);
+        }
+      }
     }
   }
 
