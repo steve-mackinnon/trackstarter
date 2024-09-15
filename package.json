@@ -38,6 +38,7 @@
     "tone": "^15.0.4"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^14.2.11",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.0.0",
     "@types/audioworklet": "^0.0.60",
