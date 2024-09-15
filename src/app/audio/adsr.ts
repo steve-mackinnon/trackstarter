@@ -1,4 +1,8 @@
-import { BaseContext } from "tone";
+import {
+  AudioContext,
+  ConstantSourceNode,
+  IAudioParam,
+} from "standardized-audio-context";
 
 export interface ADSRProps {
   attack: number;
@@ -8,19 +12,19 @@ export interface ADSRProps {
 }
 
 export class ADSR {
-  constructor(audioContext: BaseContext, private props: ADSRProps) {
+  constructor(audioContext: AudioContext, private props: ADSRProps) {
     this.constantSource = audioContext.createConstantSource();
     this.constantSource.offset.value = 0;
     this.constantSource.start();
   }
 
-  private constantSource: ConstantSourceNode;
+  private constantSource: ConstantSourceNode<AudioContext>;
 
   update(props: ADSRProps) {
     this.props = props;
   }
 
-  connect(node: AudioParam) {
+  connect(node: IAudioParam) {
     this.constantSource.connect(node);
   }
 

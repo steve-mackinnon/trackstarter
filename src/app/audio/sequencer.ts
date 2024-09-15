@@ -1,6 +1,8 @@
+import { AudioContext, IAudioNode } from "standardized-audio-context";
 import { Note } from "tonal";
-import * as Tone from "tone";
 import { Node, SequencerEvent, SequencerNode } from "./audioGraph";
+
+type AudioNode = IAudioNode<AudioContext>;
 
 function lengthOf16thNoteInSeconds(bpm: number): number {
   const secondsPerBeat = 60 / bpm;
@@ -18,6 +20,7 @@ export class Sequencer {
       startTime: number,
       endTime: number,
     ) => AudioNode | undefined,
+    public bpm: number,
   ) {}
 
   // Map from step index when osc stops to osc nodes
@@ -38,9 +41,7 @@ export class Sequencer {
     if (events.length === 0) {
       return;
     }
-    const stepDuration = lengthOf16thNoteInSeconds(
-      Tone.getTransport().bpm.value,
-    );
+    const stepDuration = lengthOf16thNoteInSeconds(this.bpm);
     for (const nodeKey of this.node.props.destinationNodes) {
       const node = this.findNode(nodeKey);
       if (!node) {
@@ -87,9 +88,7 @@ export class Sequencer {
     if (events.length === 0) {
       return;
     }
-    const stepDuration = lengthOf16thNoteInSeconds(
-      Tone.getTransport().bpm.value,
-    );
+    const stepDuration = lengthOf16thNoteInSeconds(this.bpm);
     for (const nodeKey of this.node.props.destinationNodes) {
       const node = this.findNode(nodeKey);
       if (!node) {

@@ -1,22 +1,26 @@
 import { produce, setAutoFreeze } from "immer";
-import * as Tone from "tone";
+import {
+  AudioContext,
+  AudioWorkletNode,
+  IAudioNode,
+  OscillatorNode,
+} from "standardized-audio-context";
 import { ADSR, ADSRProps } from "./adsr";
 import { buildOscNode } from "./backingNodes";
+import { Scheduler } from "./scheduler";
 import { Sequencer } from "./sequencer";
 import { unmute } from "./unmute";
 
-const context = Tone.getContext().rawContext;
+type AudioNode = IAudioNode<AudioContext>;
+
+const context = new AudioContext();
 unmute(context, false, false);
 
 let createdWorklets = false;
 async function addWorklets() {
   try {
-    await Tone.getContext().rawContext.audioWorklet.addModule(
-      "/audio/feedbackDelayProcessor.js",
-    );
-    await Tone.getContext().rawContext.audioWorklet.addModule(
-      "/audio/masterClipper.js",
-    );
+    await context.audioWorklet?.addModule("/audio/feedbackDelayProcessor.js");
+    await context.audioWorklet?.addModule("/audio/masterClipper.js");
   } catch (e) {
     console.error(e);
   }
@@ -57,7 +61,7 @@ export interface OscProps {
 export interface OscNode extends BaseNode {
   type: "osc";
   props: OscProps;
-  backingNode?: OscillatorNode;
+  backingNode?: OscillatorNode<AudioContext>;
 }
 
 export interface FilterProps {
@@ -115,8 +119,6 @@ export interface SequencerEvent {
 }
 
 export interface SequencerProps {
-  /// Uses Tone's time notation described here:
-  /// https://github.com/Tonejs/Tone.js/wiki/Time
   destinationNodes: string[];
   length: number;
   // Ordered list of notes to play in the sequence. If notes.length()
@@ -156,32 +158,30 @@ export async function render(newRoot: Node) {
   setupAuxConnections(currentRoot!);
 }
 
-let hasStarted = false;
 let stepIndex = 0;
 let playing = false;
+let hasStarted = false;
 const SEQUENCE_LENGTH = 1024;
 
-export async function start(startStep?: number) {
-  Tone.getTransport().bpm.value = 160;
-  Tone.getTransport().loop = true;
-  Tone.getTransport().setLoopPoints("1:1:1", "17:1:1");
-
-  stepIndex = startStep ?? 0;
-  Tone.getTransport().start();
-  playing = true;
-  if (hasStarted) {
+let scheduler = new Scheduler(context, (t) => {
+  if (!playing || !currentRoot || !currentRoot.children) {
     return;
   }
-  Tone.getTransport().scheduleRepeat((t) => {
-    if (!playing || !currentRoot || !currentRoot.children) {
-      return;
-    }
-    applyToSequencers(currentRoot, (seq) =>
-      seq.backingNode?.playStep(stepIndex, t),
-    );
-    stepIndex = (stepIndex + 1) % SEQUENCE_LENGTH;
-  }, "16n");
-  hasStarted = true;
+  applyToSequencers(currentRoot, (seq) =>
+    seq.backingNode?.playStep(stepIndex, t),
+  );
+  stepIndex = (stepIndex + 1) % SEQUENCE_LENGTH;
+});
+
+const BPM = 160;
+export async function start(startStep?: number) {
+  if (!hasStarted) {
+    context.resume();
+  }
+  scheduler.tempo = BPM;
+  scheduler.start();
+  stepIndex = startStep ?? 0;
+  playing = true;
 }
 
 export function stop() {
@@ -189,7 +189,7 @@ export function stop() {
     return;
   }
   playing = false;
-  Tone.getTransport().pause();
+  scheduler.stop();
   stepIndex = 0;
   if (currentRoot) {
     applyToSequencers(currentRoot, (seq) => seq.backingNode?.stop());
@@ -250,23 +250,27 @@ function buildBackingNode(node: Node): AudioNode | Sequencer | null {
       return null;
     }
     case "filter": {
-      return Tone.getContext().createBiquadFilter();
+      return context.createBiquadFilter();
     }
     case "destination":
-      return Tone.getContext().rawContext.destination;
+      return context.destination;
     case "mul":
-      return Tone.getContext().createGain();
+      return context.createGain();
     case "adsr":
       // ADSR nodes are built on the fly when triggered
       return null;
-    case "delay":
-      return Tone.getContext().createAudioWorkletNode(
-        "feedback-delay-processor",
-      );
-    case "master-clipper":
-      return Tone.getContext().createAudioWorkletNode(
-        "master-clipper-processor",
-      );
+    case "delay": {
+      if (AudioWorkletNode) {
+        return new AudioWorkletNode(context, "feedback-delay-processor");
+      }
+      return null;
+    }
+    case "master-clipper": {
+      if (AudioWorkletNode) {
+        return new AudioWorkletNode(context, "master-clipper-processor");
+      }
+      return null;
+    }
     case "sequencer": {
       return new Sequencer(
         node,
@@ -274,7 +278,7 @@ function buildBackingNode(node: Node): AudioNode | Sequencer | null {
         (node, freq, startTime, endTime) => {
           if (node.type === "osc") {
             return buildOscNode(
-              Tone.getContext(),
+              context,
               node,
               freq,
               startTime,
@@ -283,6 +287,7 @@ function buildBackingNode(node: Node): AudioNode | Sequencer | null {
             );
           }
         },
+        BPM,
       );
     }
   }
