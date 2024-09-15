@@ -3,7 +3,7 @@ import { SequencerEvent } from "./audioGraph";
 
 function stepToTick(step: number): number {
   // 128 ticks per beat, and one step per 16th note
-  return (step / 4) * 128;
+  return (step / 8) * 128;
 }
 
 export function sequenceToMidiData(
