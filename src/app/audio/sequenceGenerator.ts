@@ -13,7 +13,11 @@ import {
 } from "./melodicUtils";
 
 function getRandomValue<T>(array: readonly T[]): T {
-  return array[Math.floor(Math.random() * (array.length - 1))];
+  const index = Math.min(
+    array.length - 1,
+    Math.floor(Math.random() * array.length),
+  );
+  return array[index];
 }
 
 export function getRandomMood(): Mood {
