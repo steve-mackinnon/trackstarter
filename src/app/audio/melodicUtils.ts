@@ -20,9 +20,9 @@ export function chordsForProgression({
   notesPerChord: number;
 }): ChordProgressionInfo {
   const chordDegrees = parseChordProgression(progression);
-  const notes = Scale.get(`${rootNote}${octave} ${scaleName}`);
+  const scale = Scale.get(`${rootNote}${octave} ${scaleName}`);
   const chordNotes = chordDegrees.map((degree) =>
-    chordForScale(notes, degree, notesPerChord),
+    chordForScale(scale.notes, degree, notesPerChord),
   );
   return {
     chordNotes,
@@ -59,30 +59,39 @@ export function parseChordProgression(progression: string): ScaleDegree[] {
   });
 }
 
+function applyRandomOctaveShift(note: string): string {
+  const freq = Note.get(note).freq ?? 500;
+  if (Math.random() < 0.3 && freq < 700) {
+    // Shift up an octave
+    return Note.transpose(note, "8P");
+  } else if (Math.random() < 0.3 && freq > 100) {
+    // Shift down an octave
+    return Note.transpose(note, "-8P");
+  }
+  return note;
+}
+
 export function chordForScale(
-  scale: Scale.Scale,
+  scale: string[],
   rootDegree: ScaleDegree,
-  numNotesInChord: number,
+  chordLength: number,
 ): string[] {
-  return Array.from({ length: numNotesInChord }).map((_, i) => {
-    let note = scale.notes[(rootDegree.index + i * 2) % scale.notes.length];
-    if (rootDegree.alteration && i === 0) {
-      // Sharpen or flatten the root if requested
-      const shiftAmount = rootDegree.alteration === "flat" ? -1 : 1;
-      note = Note.transpose(note, Interval.fromSemitones(shiftAmount));
-    }
-    const freq = Note.get(note).freq ?? 500;
-    if (Math.random() < 0.3 && freq < 700) {
-      // Shift up an octave
-      note = Note.transpose(note, "8P");
-    } else if (Math.random() < 0.3 && freq > 100) {
-      // Shift down an octave
-      note = Note.transpose(note, "-8P");
-    }
-    if (note === "") {
-      throw new Error("Failed to generate note in chordForScale()");
-    }
-    return note;
+  return Array.from({ length: chordLength }).map((_, i) => {
+    const noteIndex = rootDegree.index + i * 2;
+    let note = scale[noteIndex % scale.length];
+    const octaveShift = Math.floor(noteIndex / scale.length) * 12;
+    const alterationShift = (() => {
+      if (rootDegree.alteration && i === 0) {
+        return rootDegree.alteration === "flat" ? -1 : 1;
+      }
+      return 0;
+    })();
+    return applyRandomOctaveShift(
+      Note.transpose(
+        note,
+        Interval.fromSemitones(octaveShift + alterationShift),
+      ),
+    );
   });
 }
 

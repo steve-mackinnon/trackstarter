@@ -122,7 +122,11 @@ export function regenerateChordAtIndex(
   const scale = Scale.get(
     `${chordProgression.rootNote}${chordProgression.octave} ${chordProgression.scale}`,
   );
-  const refreshedChord = chordForScale(scale, degrees[index], numNotesInChord);
+  const refreshedChord = chordForScale(
+    scale.notes,
+    degrees[index],
+    numNotesInChord,
+  );
   const chordNotes = [...chordProgression.chordNotes];
   chordNotes[index] = refreshedChord;
   return { ...chordProgression, chordNotes };
