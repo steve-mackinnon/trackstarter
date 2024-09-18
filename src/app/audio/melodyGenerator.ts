@@ -7,6 +7,7 @@ const CHECKPOINT_URL =
 
 const mvae = new mm.MusicVAE(CHECKPOINT_URL);
 let initialized = false;
+
 export async function generateMelodyForChordProgression(
   chordProgression: string[],
   scaleName: string,
@@ -26,14 +27,15 @@ export async function generateMelodyForChordProgression(
     const sequences = await mvae.sample(NUM_SAMPLES, TEMP, {
       chordProgression,
     });
-    const scale = Scale.get(`${rootNote}${octave} ${scaleName}`).notes;
-    // Choose the melodity with the largest variety of notes
+    // Choose the melody with the largest variety of notes
     const sequence = sequences.sort((a, b) => {
       const aUniqueNotes = new Set(a.notes!.map((n) => n.pitch!)).size;
       const bUniqueNotes = new Set(b.notes!.map((n) => n.pitch!)).size;
       // Descending sort
       return bUniqueNotes - aUniqueNotes;
     })[0];
+
+    const scale = Scale.get(`${rootNote}${octave} ${scaleName}`).notes;
     const mappedSequence: SequencerEvent[] | undefined = sequence.notes?.map(
       (note) => ({
         note: snapNoteToScale(note.pitch!, scale),
