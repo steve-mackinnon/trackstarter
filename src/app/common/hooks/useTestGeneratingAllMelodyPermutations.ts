@@ -30,6 +30,7 @@ export function useTestGeneratingAllMelodyPermutations() {
               chordNames,
               scaleName,
               rootNote,
+              3,
             );
             if (!melody) {
               throw new Error(

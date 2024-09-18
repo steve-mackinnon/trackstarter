@@ -11,6 +11,7 @@ export async function generateMelodyForChordProgression(
   chordProgression: string[],
   scaleName: string,
   rootNote: string,
+  octave: number,
 ): Promise<SequencerEvent[] | undefined> {
   try {
     if (!initialized) {
@@ -25,7 +26,7 @@ export async function generateMelodyForChordProgression(
     const sequences = await mvae.sample(NUM_SAMPLES, TEMP, {
       chordProgression,
     });
-    const scale = Scale.get(`${rootNote} ${scaleName}`).notes;
+    const scale = Scale.get(`${rootNote}${octave} ${scaleName}`).notes;
     // Choose the melodity with the largest variety of notes
     const sequence = sequences.sort((a, b) => {
       const aUniqueNotes = new Set(a.notes!.map((n) => n.pitch!)).size;
@@ -34,28 +35,27 @@ export async function generateMelodyForChordProgression(
       return bUniqueNotes - aUniqueNotes;
     })[0];
     const mappedSequence: SequencerEvent[] | undefined = sequence.notes?.map(
-      (ns) => {
-        const note = Midi.midiToNoteName(ns.pitch as number);
-        const octave = note[note.length - 1];
-        const noteSnappedToScale = scale
-          .map((scaleNote) => ({
-            note: scaleNote + octave,
-            distance: Math.abs(
-              Interval.semitones(Note.distance(scaleNote, note)),
-            ),
-          }))
-          .reduce((prev, current) =>
-            current.distance < prev.distance ? current : prev,
-          ).note;
-        return {
-          note: noteSnappedToScale,
-          startStep: (ns.quantizedStartStep as number) * 2,
-          endStep: (ns.quantizedEndStep as number) * 2,
-        };
-      },
+      (note) => ({
+        note: snapNoteToScale(note.pitch!, scale),
+        startStep: (note.quantizedStartStep as number) * 2,
+        endStep: (note.quantizedEndStep as number) * 2,
+      }),
     );
     return mappedSequence;
   } catch (e) {
     console.error(e);
   }
+}
+
+function snapNoteToScale(midiNote: number, scale: string[]): string {
+  const note = Midi.midiToNoteName(midiNote);
+  // Map/reduce over the scale to find the closest note
+  return scale
+    .map((scaleNote) => ({
+      note: scaleNote,
+      distance: Math.abs(Interval.semitones(Note.distance(scaleNote, note))),
+    }))
+    .reduce((prev, current) =>
+      current.distance < prev.distance ? current : prev,
+    ).note;
 }
