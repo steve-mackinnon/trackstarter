@@ -1,4 +1,3 @@
-import { AudioGraph } from "audio/graph";
 import {
   adsr as adsrNode,
   defaultSequencerProps,
@@ -14,8 +13,8 @@ import {
   ChordProgression,
   chordProgressionToSequencerEvents,
 } from "audio/sequenceGenerator";
-import { WebAudioDelegate } from "audio/webAudioDelegate";
 import { SequencerEvent } from "audio/webAudioNodes";
+import { audioGraph } from "common/audio";
 import { useAtomValue } from "jotai";
 import {
   chordProgressionAtom,
@@ -96,8 +95,6 @@ function adsr(params: SynthParams, key: string) {
   );
 }
 
-const graph = new AudioGraph(new WebAudioDelegate());
-
 export function useRenderAudioGraph() {
   const progressionState = useAtomValue(chordProgressionAtom);
   const harmonySynthParamsState = useAtomValue(harmonySynthParamsAtom);
@@ -152,7 +149,7 @@ export function useRenderAudioGraph() {
         ),
       );
     }
-    graph.render(
+    audioGraph.render(
       output(undefined, [
         ...sequencers,
         masterClipper([
@@ -178,9 +175,12 @@ export function useRenderAudioGraph() {
     // Re-trigger playback when a new progression is rendered OR when a new
     // melody is rendered and playback is stopped (to prevent restarting active
     // playback when only the melody changes)
-    if (restartPlayback || ((progression || melody) && !graph.isPlaying())) {
-      graph.stop();
-      graph.start(startStep);
+    if (
+      restartPlayback ||
+      ((progression || melody) && !audioGraph.isPlaying())
+    ) {
+      audioGraph.stop();
+      audioGraph.start(startStep);
     }
   };
 }

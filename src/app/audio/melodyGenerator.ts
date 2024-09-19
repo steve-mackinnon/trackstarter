@@ -1,6 +1,6 @@
 import * as mm from "@magenta/music";
 import { Interval, Midi, Note, Scale } from "tonal";
-import { SequencerEvent } from "./audioGraph";
+import { SequencerEvent } from "./webAudioNodes";
 
 const CHECKPOINT_URL =
   "https://storage.googleapis.com/magentadata/js/checkpoints/music_vae/mel_chords";

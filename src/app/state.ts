@@ -1,6 +1,6 @@
-import { OscProps, SequencerEvent } from "audio/audioGraph";
 import { Mood } from "audio/melodicConstants";
 import { ChordProgression } from "audio/sequenceGenerator";
+import { OscProps, SequencerEvent } from "audio/webAudioNodes";
 import { atom } from "jotai";
 
 export const isPlayingAtom = atom(false);

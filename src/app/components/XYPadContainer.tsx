@@ -1,4 +1,4 @@
-import { setProperty } from "audio/audioGraph";
+import { audioGraph } from "common/audio";
 import {
   ParameterXYPad,
   ParamInfo as XYPadParamInfo,
@@ -41,7 +41,12 @@ function buildParamMap(
         value: synthParams.filterFrequency,
         onChange: (freq: number) => {
           updateSynthParams((prev) => ({ ...prev, filterFrequency: freq }));
-          setProperty(`${instrumentKey}-filter`, "filter", "frequency", freq);
+          audioGraph.setProperty(
+            `${instrumentKey}-filter`,
+            "filter",
+            "frequency",
+            freq,
+          );
         },
       },
       yParam: {
@@ -51,7 +56,7 @@ function buildParamMap(
         value: synthParams.filterQ,
         onChange: (q: number) => {
           updateSynthParams((prev) => ({ ...prev, filterQ: q }));
-          setProperty(`${instrumentKey}-filter`, "filter", "q", q);
+          audioGraph.setProperty(`${instrumentKey}-filter`, "filter", "q", q);
         },
       },
     },
@@ -63,7 +68,12 @@ function buildParamMap(
         value: synthParams.attack,
         onChange: (attack: number) => {
           updateSynthParams((prev) => ({ ...prev, attack: attack }));
-          setProperty(`${instrumentKey}-amp-env`, "adsr", "attack", attack);
+          audioGraph.setProperty(
+            `${instrumentKey}-amp-env`,
+            "adsr",
+            "attack",
+            attack,
+          );
         },
       },
       yParam: {
@@ -78,8 +88,18 @@ function buildParamMap(
             decay: decay,
             sustain: sustain,
           }));
-          setProperty(`${instrumentKey}-amp-env`, "adsr", "decay", decay);
-          setProperty(`${instrumentKey}-amp-env`, "adsr", "sustain", sustain);
+          audioGraph.setProperty(
+            `${instrumentKey}-amp-env`,
+            "adsr",
+            "decay",
+            decay,
+          );
+          audioGraph.setProperty(
+            `${instrumentKey}-amp-env`,
+            "adsr",
+            "sustain",
+            sustain,
+          );
         },
       },
     },
@@ -94,7 +114,12 @@ function buildParamMap(
             const prevDelay = { ...prev.delayParams };
             return { ...prev, delayParams: { ...prevDelay, time } };
           });
-          setProperty(`${instrumentKey}-delay`, "delay", "time", time);
+          audioGraph.setProperty(
+            `${instrumentKey}-delay`,
+            "delay",
+            "time",
+            time,
+          );
         },
       },
       yParam: {
@@ -117,14 +142,19 @@ function buildParamMap(
               },
             };
           });
-          setProperty(
+          audioGraph.setProperty(
             `${instrumentKey}-delay-input`,
             "mul",
             "multiplier",
             sendAmount,
           );
-          setProperty(`${instrumentKey}-delay`, "delay", "feedback", feedback);
-          setProperty(
+          audioGraph.setProperty(
+            `${instrumentKey}-delay`,
+            "delay",
+            "feedback",
+            feedback,
+          );
+          audioGraph.setProperty(
             `${instrumentKey}-delay-filter`,
             "filter",
             "frequency",

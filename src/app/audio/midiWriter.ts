@@ -1,5 +1,5 @@
 import MidiWriter from "midi-writer-js";
-import { SequencerEvent } from "./audioGraph";
+import { SequencerEvent } from "./webAudioNodes";
 
 function stepToTick(step: number): number {
   // 128 ticks per beat, and one step per 16th note

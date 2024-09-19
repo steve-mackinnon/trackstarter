@@ -1,4 +1,4 @@
-import { produce } from "immer";
+import { produce, setAutoFreeze } from "immer";
 import { Node } from "./webAudioNodes";
 
 export interface BaseNode {
@@ -28,6 +28,10 @@ type NodeProps<T extends BaseNode["type"]> = Extract<
   Node,
   { type: T }
 >["props"];
+
+// Disable auto freezing in immer so we can mutate the current state when
+// setting props
+setAutoFreeze(false);
 
 export class AudioGraph {
   constructor(private delegate: AudioGraphDelegate) {}
@@ -205,5 +209,6 @@ export class AudioGraph {
         );
       });
     }
+    node.children?.forEach((child) => this.setupAuxConnections(child));
   }
 }

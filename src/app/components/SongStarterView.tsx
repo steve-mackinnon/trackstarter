@@ -1,6 +1,6 @@
 "use client";
 
-import { stop } from "audio/audioGraph";
+import { audioGraph } from "common/audio";
 import { useGenerateSongOnFirstRender } from "hooks/useGenerateSongOnFirstRender";
 import { useSetupHotkeys } from "hooks/useSetupHotkeys";
 import { useEffect } from "react";
@@ -15,7 +15,7 @@ export default function SongStarterView() {
 
   // Stop audio when this top-level component is unmounted
   useEffect(() => {
-    return () => stop();
+    return () => audioGraph.stop();
   }, []);
 
   return (

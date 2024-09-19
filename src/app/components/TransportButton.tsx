@@ -1,4 +1,4 @@
-import { start, stop } from "audio/audioGraph";
+import { audioGraph } from "common/audio";
 import { useAtom } from "jotai";
 import { Pause, Play } from "lucide-react";
 import { isPlayingAtom } from "state";
@@ -13,9 +13,9 @@ export function TransportButton() {
         const play = !playing;
         setPlaying(play);
         if (play) {
-          start();
+          audioGraph.start();
         } else {
-          stop();
+          audioGraph.stop();
         }
       }}
     >

@@ -1,4 +1,4 @@
-import { start, stop } from "audio/audioGraph";
+import { audioGraph } from "common/audio";
 import { useAtom } from "jotai";
 import { useEffect } from "react";
 import { isPlayingAtom } from "state";
@@ -14,9 +14,9 @@ export function useSetupHotkeys() {
           const playing = !isPlaying;
           setIsPlaying(playing);
           if (playing) {
-            start();
+            audioGraph.start();
           } else {
-            stop();
+            audioGraph.stop();
           }
           break;
         }

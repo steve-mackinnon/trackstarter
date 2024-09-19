@@ -1,5 +1,4 @@
 import { Chord, Scale } from "tonal";
-import { SequencerEvent } from "./audioGraph";
 import {
   Mood,
   MOOD_TO_PROGRESSIONS,
@@ -11,6 +10,7 @@ import {
   chordsForProgression,
   parseChordProgression,
 } from "./melodicUtils";
+import { SequencerEvent } from "./webAudioNodes";
 
 function getRandomValue<T>(array: readonly T[]): T {
   const index = Math.min(
