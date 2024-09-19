@@ -1,9 +1,8 @@
 import {
   adsr as adsrNode,
-  defaultSequencerProps,
+  clipper,
   delay,
   filter,
-  masterClipper,
   mul,
   osc,
   output,
@@ -36,16 +35,12 @@ function filterDelay({
   feedback: number;
 }) {
   return filter(
-    { type: "lowpass", frequency: 700, q: 10 },
+    { type: "lowpass", frequency: 700, q: 10, key: `${prefix}-delay-filter` },
     [
-      delay(
-        { time, feedback },
-        [mul({ multiplier: sendAmount }, [], `${prefix}-delay-input`)],
-        `${prefix}-delay`,
-      ),
+      delay({ time, feedback, key: `${prefix}-delay` }, [
+        mul({ multiplier: sendAmount, key: `${prefix}-delay-input` }, []),
+      ]),
     ],
-    [],
-    `${prefix}-delay-filter`,
   );
 }
 
@@ -61,38 +56,28 @@ function synthVoice({
       type: "lowpass",
       frequency: params.filterFrequency,
       q: params.filterQ,
+      auxOutputs: [`${prefix}-delay-input`],
+      key: `${prefix}-filter`,
     },
     [
-      mul(
-        { multiplier: params.gain },
-        [
-          osc(
-            {
-              ...params,
-              modSources: { gain: [`${prefix}-amp-env`] },
-            },
-            [],
-            `${prefix}-osc`,
-          ),
-        ],
-        `${prefix}-gain`,
-      ),
+      mul({ multiplier: params.gain, key: `${prefix}-gain` }, [
+        osc({
+          ...params,
+          modSources: { gain: [`${prefix}-amp-env`] },
+          key: `${prefix}-osc`,
+        }),
+      ]),
     ],
-    [`${prefix}-delay-input`],
-    `${prefix}-filter`,
   );
 }
-
 function adsr(params: SynthParams, key: string) {
-  return adsrNode(
-    {
-      attack: params.attack,
-      decay: params.decay,
-      sustain: params.sustain,
-      release: 0.1,
-    },
+  return adsrNode({
+    attack: params.attack,
+    decay: params.decay,
+    sustain: params.sustain,
+    release: 0.1,
     key,
-  );
+  });
 }
 
 export function useRenderAudioGraph() {
@@ -126,33 +111,27 @@ export function useRenderAudioGraph() {
 
     const sequence = chordProgressionToSequencerEvents(prog.chordNotes);
     const sequencers = [
-      sequencer(
-        {
-          ...defaultSequencerProps(),
-          destinationNodes: ["harmony-osc"],
-          notes: sequence,
-          length: 64,
-        },
-        "harmony-seq",
-      ),
+      sequencer({
+        destinationNodes: ["harmony-osc"],
+        notes: sequence,
+        length: 64,
+        key: "harmony-seq",
+      }),
     ];
     if (melodySequence) {
       sequencers.push(
-        sequencer(
-          {
-            ...defaultSequencerProps(),
-            destinationNodes: ["melody-osc"],
-            notes: melodySequence,
-            length: 64,
-          },
-          "melody-seq",
-        ),
+        sequencer({
+          destinationNodes: ["melody-osc"],
+          notes: melodySequence,
+          length: 64,
+          key: "melody-seq",
+        }),
       );
     }
     audioGraph.render(
-      output(undefined, [
+      output([
         ...sequencers,
-        masterClipper([
+        clipper({}, [
           adsr(harmonyParams, "harmony-amp-env"),
           adsr(melodyParams, "melody-amp-env"),
           filterDelay({
