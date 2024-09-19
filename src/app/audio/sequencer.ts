@@ -1,6 +1,6 @@
 import { AudioContext, IAudioNode } from "standardized-audio-context";
 import { Note } from "tonal";
-import { Node, SequencerEvent, SequencerNode } from "./audioGraph";
+import { Node, SequencerProps } from "./webAudioNodes";
 
 type AudioNode = IAudioNode<AudioContext>;
 
@@ -12,7 +12,6 @@ function lengthOf16thNoteInSeconds(bpm: number): number {
 
 export class Sequencer {
   constructor(
-    private node: SequencerNode,
     private findNode: (key: string) => Node | null,
     private triggerAudioNode: (
       node: Node,
@@ -23,26 +22,30 @@ export class Sequencer {
     public bpm: number,
   ) {}
 
+  private props: SequencerProps = {
+    destinationNodes: [],
+    length: 16,
+    notes: [],
+  };
+
+  public update(props: SequencerProps) {
+    this.props = props;
+  }
+
   // Map from step index when osc stops to osc nodes
   private activeNodes: Map<number, AudioNode[]> = new Map();
-
-  public setNode(node: SequencerNode) {
-    this.node = node;
-  }
 
   public playStep(stepIndex: number, time: number) {
     // All active oscs at stepIndex are now stopped, so drop those refs
     this.activeNodes.delete(stepIndex);
 
-    stepIndex = stepIndex % this.node.props.length;
-    const events = this.node.props.notes.filter(
-      (e) => e.startStep === stepIndex,
-    );
+    stepIndex = stepIndex % this.props.length;
+    const events = this.props.notes.filter((e) => e.startStep === stepIndex);
     if (events.length === 0) {
       return;
     }
     const stepDuration = lengthOf16thNoteInSeconds(this.bpm);
-    for (const nodeKey of this.node.props.destinationNodes) {
+    for (const nodeKey of this.props.destinationNodes) {
       const node = this.findNode(nodeKey);
       if (!node) {
         throw new Error(
@@ -79,44 +82,8 @@ export class Sequencer {
     this.activeNodes.clear();
   }
 
-  private playSequencerEvents(
-    stepIndex: number,
-    time: number,
-    events: SequencerEvent[],
-  ) {
-    events = events.filter((e) => e.startStep === stepIndex);
-    if (events.length === 0) {
-      return;
-    }
-    const stepDuration = lengthOf16thNoteInSeconds(this.bpm);
-    for (const nodeKey of this.node.props.destinationNodes) {
-      const node = this.findNode(nodeKey);
-      if (!node) {
-        throw new Error(
-          `Unable to connect sequencer to node with key: ${nodeKey}`,
-        );
-      }
-      for (const event of events) {
-        const freq = Note.freq(event.note);
-        if (freq === null) {
-          throw new Error("Failed to convert note to frequency");
-        }
-        const eventDuration = (event.endStep - event.startStep) * stepDuration;
-        const destNode = this.triggerAudioNode(
-          node,
-          freq,
-          time,
-          time + eventDuration,
-        );
-        if (destNode) {
-          this.addToNodeMap(destNode, event.endStep);
-        }
-      }
-    }
-  }
-
   private addToNodeMap(node: AudioNode, endStep: number) {
-    const cleanupIndex = (endStep + 1) % this.node.props.length;
+    const cleanupIndex = (endStep + 1) % this.props.length;
     const existingNodes = this.activeNodes.get(cleanupIndex);
     if (existingNodes) {
       existingNodes.push(node);
