@@ -31,7 +31,6 @@ export function useGenerateNewMelody() {
         progressionWithoutFlats.chordNames,
         progressionWithoutFlats.scale,
         progressionWithoutFlats.rootNote,
-        3,
       );
       setMelody(melodySeq ?? null);
       renderAudioGraph({

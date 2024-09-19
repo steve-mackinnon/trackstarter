@@ -12,7 +12,6 @@ export async function generateMelodyForChordProgression(
   chordProgression: string[],
   scaleName: string,
   rootNote: string,
-  octave: number,
 ): Promise<SequencerEvent[] | undefined> {
   try {
     if (!initialized) {
@@ -35,7 +34,7 @@ export async function generateMelodyForChordProgression(
       return bUniqueNotes - aUniqueNotes;
     })[0];
 
-    const scale = Scale.get(`${rootNote}${octave} ${scaleName}`).notes;
+    const scale = Scale.get(`${rootNote} ${scaleName}`).notes;
     const mappedSequence: SequencerEvent[] | undefined = sequence.notes?.map(
       (note) => ({
         note: snapNoteToScale(note.pitch!, scale),
@@ -52,9 +51,10 @@ export async function generateMelodyForChordProgression(
 function snapNoteToScale(midiNote: number, scale: string[]): string {
   const note = Midi.midiToNoteName(midiNote);
   // Map/reduce over the scale to find the closest note
+  const octave = note[note.length - 1];
   return scale
     .map((scaleNote) => ({
-      note: scaleNote,
+      note: scaleNote + octave,
       distance: Math.abs(Interval.semitones(Note.distance(scaleNote, note))),
     }))
     .reduce((prev, current) =>
