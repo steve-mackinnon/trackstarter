@@ -14,7 +14,7 @@ import {
   OscProps,
   SequencerNode,
   SequencerProps,
-} from "./audioGraph";
+} from "./webAudioNodes";
 
 export function output(props: any, children: Node[]): Node {
   return {

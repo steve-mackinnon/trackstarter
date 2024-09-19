@@ -6,27 +6,54 @@ import {
 } from "standardized-audio-context";
 import { ADSR } from "./adsr";
 import { AudioGraphDelegate } from "./graph";
+import { Scheduler } from "./scheduler";
 import { Sequencer } from "./sequencer";
 import { ADSRNode, Node, OscNode } from "./webAudioNodes";
 
 const BPM = 160;
 
-export class WebAudioDelegate implements AudioGraphDelegate {
-  private context = new AudioContext();
+async function addWorklets(context: AudioContext) {
+  try {
+    await context.audioWorklet?.addModule("/audio/feedbackDelayProcessor.js");
+    await context.audioWorklet?.addModule("/audio/masterClipper.js");
+  } catch (e) {
+    console.error(e);
+  }
+}
 
-  createNode(type: string, findNode: (key: string) => Node | null) {
+export class WebAudioDelegate implements AudioGraphDelegate {
+  constructor() {
+    addWorklets(this.context);
+    this.scheduler.tempo = BPM;
+  }
+
+  private context = new AudioContext();
+  private sequencers = new Map<string, Sequencer>();
+  private stepIndex = 0;
+  private scheduler = new Scheduler(this.context, (t) => {
+    this.sequencers.forEach((seq) => {
+      seq.playStep(this.stepIndex, t);
+    });
+    this.stepIndex = (this.stepIndex + 1) % 1024;
+  });
+
+  createNode(
+    type: string,
+    findNode: (key: string) => Node | null,
+    key?: string,
+  ) {
     switch (type) {
       case "osc": {
         // Osc nodes are created dynamically when they are triggered by a sequence
         return null;
       }
       case "filter": {
-        return context.createBiquadFilter();
+        return this.context.createBiquadFilter();
       }
       case "destination":
-        return context.destination;
+        return this.context.destination;
       case "mul":
-        return context.createGain();
+        return this.context.createGain();
       case "adsr":
         // ADSR nodes are built on the fly when triggered
         return null;
@@ -43,7 +70,7 @@ export class WebAudioDelegate implements AudioGraphDelegate {
         return null;
       }
       case "sequencer": {
-        return new Sequencer(
+        const seq = new Sequencer(
           (key) => findNode(key),
           (node, freq, startTime, endTime) => {
             if (node.type === "osc") {
@@ -59,18 +86,85 @@ export class WebAudioDelegate implements AudioGraphDelegate {
           },
           BPM,
         );
+        if (!key) {
+          throw new Error("Key must be provided for sequencer nodes");
+        }
+        this.sequencers.set(key, seq);
+        return seq;
       }
     }
   }
 
-  deleteNode(node: Node) {}
+  deleteNode(node: Node) {
+    if (node.key && this.sequencers.has(node.key)) {
+      this.sequencers.delete(node.key);
+    }
+    if (isAudioNode(node)) {
+      node.disconnect();
+    }
+  }
 
-  updateNode(node: Node) {}
+  updateNode(node: Node) {
+    if (!node.backingNode) {
+      return;
+    }
+    switch (node.type) {
+      case "filter": {
+        node.backingNode.frequency.value = node.props.frequency;
+        node.backingNode.type = node.props.type;
+        node.backingNode.Q.value = node.props.q;
+        break;
+      }
+      case "mul": {
+        node.backingNode.gain.value = node.props.multiplier;
+        break;
+      }
+      case "adsr": {
+        // TODO: split out prop update handlers into a separate place
+        node.backingNode.update(node.props);
+        break;
+      }
+      case "delay": {
+        (node.backingNode as any).parameters.get("delayTime")!.value =
+          node.props.time;
+        (node.backingNode as any).parameters.get("feedback")!.value =
+          node.props.feedback;
+        break;
+      }
+      case "sequencer": {
+        (node.backingNode as Sequencer).update(node.props);
+        break;
+      }
+    }
+  }
 
-  connectNodes(src: Node | string, dest: Node | string) {}
+  connectNodes(src: Node, dest: Node) {
+    if (isAudioNode(src.backingNode) && isAudioNode(dest.backingNode)) {
+      src.backingNode.connect(dest.backingNode);
+    } else {
+      console.error("Failed to connect nodes");
+    }
+  }
+
+  start(step?: number) {
+    this.stepIndex = step ?? 0;
+    this.scheduler.start();
+  }
+
+  stop() {
+    this.scheduler.stop();
+  }
 }
 
-export function buildOscNode(
+function isAudioNode(obj: any): obj is AudioNode {
+  return (
+    obj &&
+    typeof obj.connect === "function" &&
+    typeof obj.disconnect === "function"
+  );
+}
+
+function buildOscNode(
   context: IAudioContext,
   node: OscNode,
   freq: number,

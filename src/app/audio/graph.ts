@@ -12,10 +12,16 @@ export interface BaseNode {
 }
 
 export interface AudioGraphDelegate {
-  createNode: (type: string, findNode: (key: string) => Node | null) => any;
+  createNode: (
+    type: string,
+    findNode: (key: string) => Node | null,
+    key?: string,
+  ) => any;
   deleteNode: (node: Node) => void;
   updateNode: (node: Node) => void;
   connectNodes: (src: Node, dest: Node) => void;
+  start: (step?: number) => void;
+  stop: () => void;
 }
 
 type NodeProps<T extends BaseNode["type"]> = Extract<
@@ -27,6 +33,7 @@ export class AudioGraph {
   constructor(private delegate: AudioGraphDelegate) {}
 
   private currentRoot: Node | null = null;
+  private playing = false;
 
   async render(newRoot: Node) {
     newRoot = this.buildAudioGraph({
@@ -36,6 +43,20 @@ export class AudioGraph {
     });
     this.currentRoot = produce(this.currentRoot, () => newRoot);
     this.setupAuxConnections(this.currentRoot!);
+  }
+
+  isPlaying() {
+    return this.playing;
+  }
+
+  start(startStep?: number) {
+    this.playing = true;
+    this.delegate.start(startStep);
+  }
+
+  stop() {
+    this.playing = false;
+    this.delegate.stop();
   }
 
   setProperty<T extends Node["type"], P extends keyof NodeProps<T>>(
@@ -87,8 +108,10 @@ export class AudioGraph {
       newNode = produce(newNode, (node) => {
         node.parent = parent ?? undefined;
         // Build the new audio node
-        node.backingNode = this.delegate.createNode(newNode.type, (key) =>
-          this.findNodeWithKey(this.currentRoot, key),
+        node.backingNode = this.delegate.createNode(
+          newNode.type,
+          (key) => this.findNodeWithKey(this.currentRoot, key),
+          newNode.key,
         );
       });
       if (parent) {
@@ -170,11 +193,8 @@ export class AudioGraph {
     if (node.auxConnections) {
       node.auxConnections.forEach((key) => {
         const auxNode = this.findNodeWithKey(this.currentRoot, key);
-        if (auxNode && auxNode.backingNode) {
-          this.delegate.connectNodes(
-            node.backingNode as any as Node,
-            auxNode?.backingNode as any as Node,
-          );
+        if (auxNode) {
+          this.delegate.connectNodes(node, auxNode);
         } else {
           throw new Error(
             `Failed to make aux connection to node with key: ${key}`,
