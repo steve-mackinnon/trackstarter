@@ -31,6 +31,7 @@ function buildParamMap(
   synthParams: SynthParams,
   instrumentKey: string,
   updateSynthParams: (prev: SetStateAction<SynthParams>) => void,
+  zeroSustain: boolean,
 ): ParamMap {
   return {
     filter: {
@@ -78,15 +79,17 @@ function buildParamMap(
       },
       yParam: {
         min: 0.05,
-        max: 12,
+        max: 3,
         scaling: 3,
         value: synthParams.decay,
         onChange: (decay: number) => {
-          const sustain = linearMap(decay, 0.05, 12, 0, 0.7);
+          const sustain = zeroSustain ? 0 : linearMap(decay, 0.05, 3, 0, 0.7);
+          const release = decay * 0.5;
           updateSynthParams((prev) => ({
             ...prev,
             decay: decay,
             sustain: sustain,
+            release,
           }));
           audioGraph.setProperty(
             `${instrumentKey}-amp-env`,
@@ -94,6 +97,13 @@ function buildParamMap(
             "decay",
             decay,
           );
+          audioGraph.setProperty(
+            `${instrumentKey}-amp-env`,
+            "adsr",
+            "release",
+            release,
+          );
+
           audioGraph.setProperty(
             `${instrumentKey}-amp-env`,
             "adsr",
@@ -203,8 +213,8 @@ export function XYPadContainer() {
 
   const harmonySelected = selectedInstrument === "harmony";
   const paramMap = harmonySelected
-    ? buildParamMap(harmonySynthParams, "harmony", setHarmonySynthParams)
-    : buildParamMap(melodySynthParams, "melody", setMelodySynthParams);
+    ? buildParamMap(harmonySynthParams, "harmony", setHarmonySynthParams, false)
+    : buildParamMap(melodySynthParams, "melody", setMelodySynthParams, true);
   const params = (() => {
     switch (selectedControls) {
       case "amp":

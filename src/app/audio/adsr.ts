@@ -36,17 +36,11 @@ export class ADSR {
       1,
       startTime + this.props.attack,
     );
-    const reachedSustainTime = Math.min(
-      stopTime,
-      startTime + this.props.attack + this.props.decay,
-    );
-    // Decay
+    const reachedSustainTime = startTime + this.props.attack + this.props.decay;
     this.constantSource.offset.linearRampToValueAtTime(
       this.props.sustain,
       reachedSustainTime,
     );
-    // Sustain
-    this.constantSource.offset.setValueAtTime(this.props.sustain, stopTime);
     // Release
     this.constantSource.offset.linearRampToValueAtTime(
       0,

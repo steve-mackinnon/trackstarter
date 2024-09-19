@@ -58,7 +58,7 @@ export const melodySynthParamsAtom = atom<SynthParams>({
   filterQ: 4,
   attack: 0.01,
   decay: 0.1,
-  sustain: 0.1,
+  sustain: 0.0,
   delayParams: { ...defaultDelayParams },
   gain: 0.25,
 });
