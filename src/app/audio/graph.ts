@@ -22,6 +22,7 @@ export interface AudioGraphDelegate {
   connectNodes: (src: Node, dest: Node) => void;
   start: (step?: number) => void;
   stop: () => void;
+  initialize: () => Promise<void>;
 }
 
 type NodeProps<T extends BaseNode["type"]> = Extract<
@@ -40,6 +41,8 @@ export class AudioGraph {
   private playing = false;
 
   async render(newRoot: Node) {
+    await this.delegate.initialize();
+
     newRoot = this.buildAudioGraph({
       newNode: newRoot,
       currentNode: this.currentRoot,

@@ -23,10 +23,15 @@ async function addWorklets(context: AudioContext) {
 
 export class WebAudioDelegate implements AudioGraphDelegate {
   constructor() {
-    addWorklets(this.context);
+    this.workletPromise = addWorklets(this.context);
     this.scheduler.tempo = BPM;
   }
 
+  async initialize() {
+    await this.workletPromise;
+  }
+
+  private workletPromise: Promise<void>;
   private context = new AudioContext();
   private sequencers = new Map<string, Sequencer>();
   private stepIndex = 0;
@@ -146,7 +151,7 @@ export class WebAudioDelegate implements AudioGraphDelegate {
     }
   }
 
-  start(step?: number) {
+  async start(step?: number) {
     this.stepIndex = step ?? 0;
     this.scheduler.start();
   }
