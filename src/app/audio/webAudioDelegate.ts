@@ -64,7 +64,18 @@ export class WebAudioDelegate implements AudioGraphDelegate {
         return null;
       case "delay": {
         if (AudioWorkletNode) {
-          return new AudioWorkletNode(this.context, "feedback-delay-processor");
+          const delay = new AudioWorkletNode(
+            this.context,
+            "feedback-delay-processor",
+          );
+          // We need to pipe a dummy input into the delay node to ensure it doesn't stop
+          // producing audio after a source is disconnected from it. Without this, feedback
+          // signal from the delay line can stop abruptly.
+          const dummySource = this.context.createConstantSource();
+          dummySource.offset.value = 0;
+          dummySource.connect(delay);
+          dummySource.start();
+          return delay;
         }
         return null;
       }
