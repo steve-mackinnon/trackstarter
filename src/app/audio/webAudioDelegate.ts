@@ -9,16 +9,22 @@ import { AudioGraphDelegate } from "./graph";
 import { Scheduler } from "./scheduler";
 import { Sequencer } from "./sequencer";
 import { ADSRNode, Node, OscNode } from "./webAudioNodes";
+import feedbackDelayWorklet from "/audio/worklets/feedbackDelay.audioworklet.js";
+import masterClipperWorklet from "/audio/worklets/masterClipper.audioworklet.js";
 
 const BPM = 160;
 
+async function loadWorklet(context: AudioContext, script: string) {
+  const blob = new Blob([script], { type: "application/javascript" });
+  const blobURL = URL.createObjectURL(blob);
+  await context.audioWorklet?.addModule(blobURL);
+}
+
 async function addWorklets(context: AudioContext) {
-  try {
-    await context.audioWorklet?.addModule("/audio/feedbackDelayProcessor.js");
-    await context.audioWorklet?.addModule("/audio/masterClipper.js");
-  } catch (e) {
-    console.error(e);
-  }
+  await Promise.all([
+    loadWorklet(context, feedbackDelayWorklet),
+    loadWorklet(context, masterClipperWorklet),
+  ]);
 }
 
 export class WebAudioDelegate implements AudioGraphDelegate {
