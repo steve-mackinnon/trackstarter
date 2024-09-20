@@ -190,7 +190,15 @@
 }
 
 .app-title {
-  background: linear-gradient(to right, var(--harmony-border-active), var(--melody-border-active));
+  background: linear-gradient(
+    to right,
+    var(--harmony-border-active),
+    var(--melody-border-active)
+  );
   color: transparent;
   background-clip: text;
+}
+
+.glow-on-hover:hover {
+  box-shadow: 2px 2px 20px 20px rgb(25, 228, 255, 0.1);
 }

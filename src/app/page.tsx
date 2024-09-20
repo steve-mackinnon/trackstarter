@@ -65,10 +65,9 @@ export default function Home() {
       <Link href={"/workstation"} className="mb-6 pt-6">
         <Button
           variant={"outline"}
-          className="bg-slate-900 border-2 text-2xl w-48 h-16 rounded-xl"
+          className="glow-on-hover bg-slate-900 border-2 text-2xl w-48 h-16 rounded-xl"
           style={{
             borderColor: "var(--harmony-border-active)",
-            boxShadow: "2px 2px 20px 20px rgb(25, 228, 255, 0.1)",
           }}
         >
           Get Started
