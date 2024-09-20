@@ -1,3 +1,7 @@
+//@ts-ignore
+import feedbackDelayWorklet from "audio/worklets/feedbackDelay.audioworklet.js";
+//@ts-ignore
+import masterClipperWorklet from "audio/worklets/masterClipper.audioworklet.js";
 import {
   AudioContext,
   AudioWorkletNode,
@@ -9,8 +13,6 @@ import { AudioGraphDelegate } from "./graph";
 import { Scheduler } from "./scheduler";
 import { Sequencer } from "./sequencer";
 import { ADSRNode, Node, OscNode } from "./webAudioNodes";
-import feedbackDelayWorklet from "/audio/worklets/feedbackDelay.audioworklet.js";
-import masterClipperWorklet from "/audio/worklets/masterClipper.audioworklet.js";
 
 const BPM = 160;
 
