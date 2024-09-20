@@ -127,10 +127,6 @@ export class AudioGraph {
         node.parent = currentNode.parent;
         node.backingNode = currentNode.backingNode;
       });
-      // TODO: if sequencer is reworked this may not be necessary
-      // if (newNode.backingNode instanceof Sequencer) {
-      //   newNode.backingNode.setNode(newNode as SequencerNode);
-      // }
     }
     const updatedNode = this.applyChildNodeUpdates(newNode, currentNode);
     this.delegate.updateNode(updatedNode);
