@@ -22,6 +22,7 @@ export interface AudioGraphDelegate {
   connectNodes: (src: Node, dest: Node) => void;
   start: (step?: number) => void;
   stop: () => void;
+  isPlaying: () => boolean;
   initialize: () => Promise<void>;
 }
 
@@ -38,7 +39,6 @@ export class AudioGraph {
   constructor(private delegate: AudioGraphDelegate) {}
 
   private currentRoot: Node | null = null;
-  private playing = false;
 
   async render(newRoot: Node) {
     await this.delegate.initialize();
@@ -52,17 +52,15 @@ export class AudioGraph {
     this.setupAuxConnections(this.currentRoot!);
   }
 
-  isPlaying() {
-    return this.playing;
+  public isPlaying() {
+    return this.delegate.isPlaying();
   }
 
   start(startStep?: number) {
-    this.playing = true;
     this.delegate.start(startStep);
   }
 
   stop() {
-    this.playing = false;
     this.delegate.stop();
   }
 

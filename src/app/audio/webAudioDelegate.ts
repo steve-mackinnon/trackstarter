@@ -159,6 +159,10 @@ export class WebAudioDelegate implements AudioGraphDelegate {
   stop() {
     this.scheduler.stop();
   }
+
+  isPlaying(): boolean {
+    return this.scheduler.isPlaying();
+  }
 }
 
 function isAudioNode(obj: any): obj is AudioNode {

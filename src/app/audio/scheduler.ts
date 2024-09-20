@@ -15,7 +15,10 @@ export class Scheduler {
   private nextNoteTime = 0;
   private timerID?: NodeJS.Timeout;
 
-  public start() {
+  public async start() {
+    if (this.context.state !== "running") {
+      await this.context.resume();
+    }
     this.nextNoteTime = this.context.currentTime;
     this.tick();
   }
@@ -27,7 +30,15 @@ export class Scheduler {
     }
   }
 
+  public isPlaying() {
+    return this.timerID !== undefined;
+  }
+
   private tick() {
+    if (this.context.state !== "running") {
+      this.stop();
+      return;
+    }
     if (this.context.currentTime === undefined) {
       return;
     }

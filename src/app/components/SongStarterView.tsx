@@ -2,6 +2,7 @@
 
 import { audioGraph } from "common/audio";
 import { useGenerateSongOnFirstRender } from "hooks/useGenerateSongOnFirstRender";
+import { useListenToPlaybackStateChanges } from "hooks/useListenToPlaybackStateChanges";
 import { useSetupHotkeys } from "hooks/useSetupHotkeys";
 import { useEffect } from "react";
 import { Footer } from "./Footer";
@@ -12,6 +13,7 @@ import { XYPadContainer } from "./XYPadContainer";
 export default function SongStarterView() {
   useSetupHotkeys();
   useGenerateSongOnFirstRender();
+  useListenToPlaybackStateChanges();
 
   // Stop audio when this top-level component is unmounted
   useEffect(() => {
