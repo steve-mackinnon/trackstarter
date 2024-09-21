@@ -1,4 +1,5 @@
 import { audioGraph } from "common/audio";
+import { LFOControls } from "common/components/LFOControls";
 import {
   ParameterXYPad,
   ParamInfo as XYPadParamInfo,
@@ -251,7 +252,7 @@ export function XYPadContainer() {
       </div>
       <div
         className={cn(
-          "bg-secondary w-[316px] h-[316px] flex items-center justify-center rounded-b-xl rounded-br-xl rounded-tr-xl",
+          "bg-secondary w-[316px] h-[316px] flex flex-col items-center justify-center rounded-b-xl rounded-br-xl rounded-tr-xl space-y-4",
           { "rounded-tl-xl": selectedControls !== "filter" },
         )}
       >
@@ -260,6 +261,14 @@ export function XYPadContainer() {
           borderColor={borderColor}
           xParam={params.xParam}
           yParam={params.yParam}
+          height={200}
+        />
+        <LFOControls
+          className="w-[95%] h-20 rounded-xl"
+          rate={0.5}
+          amount={0.5}
+          onRateChange={() => {}}
+          onAmountChange={() => {}}
         />
       </div>
     </div>
