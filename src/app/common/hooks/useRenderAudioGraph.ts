@@ -144,7 +144,7 @@ export function useRenderAudioGraph() {
         ...sequencers,
         lfo({ key: "harmony-lfo", frequency: 0.5, type: "sine" }),
         lfo({ key: "melody-lfo", frequency: 4, type: "sine" }),
-        lfo({ key: "filter-lfo", frequency: 12, type: "sine" }),
+        lfo({ key: "filter-lfo", frequency: 2, type: "sine" }),
         adsr(harmonyParams, "harmony-amp-env"),
         adsr(melodyParams, "melody-amp-env"),
         clipper({}, [

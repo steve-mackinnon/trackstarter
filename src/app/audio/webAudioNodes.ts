@@ -21,7 +21,7 @@ interface BaseNode {
   auxConnections?: string[];
 }
 
-interface ModInfo {
+export interface ModInfo {
   key: string;
   amount: number;
 }

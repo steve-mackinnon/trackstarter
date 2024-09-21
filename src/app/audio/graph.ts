@@ -10,14 +10,11 @@ export interface BaseNode {
   props?: any;
 }
 
+export type FindNode = (key: string) => Node | undefined;
 export interface AudioGraphDelegate {
-  createNode: (
-    type: Node["type"],
-    findNode: (key: string) => Node | undefined,
-    key?: string,
-  ) => any;
+  createNode: (type: Node["type"], findNode: FindNode, key?: string) => any;
   deleteNode: (node: Node) => void;
-  updateNode: (node: Node, findNode: (key: string) => Node | undefined) => void;
+  updateNode: (node: Node, findNode: FindNode) => void;
   connectNodes: (src: Node, dest: Node) => void;
   start: (step?: number) => void;
   stop: () => void;
