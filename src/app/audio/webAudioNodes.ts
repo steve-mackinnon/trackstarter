@@ -1,8 +1,10 @@
 import { ADSR, ADSRProps } from "./adsr";
+import { LFO } from "./lfo";
 import { Sequencer } from "./sequencer";
 
 export type NodeType =
   | "osc"
+  | "lfo"
   | "filter"
   | "sequencer"
   | "destination"
@@ -34,10 +36,25 @@ export interface OscNode extends BaseNode {
   backingNode?: OscillatorNode;
 }
 
+export interface LFOProps {
+  type: OscillatorType;
+  frequency: number;
+  amount: number;
+}
+
+export interface LFONode extends BaseNode {
+  type: "lfo";
+  props: LFOProps;
+  backingNode?: LFO;
+}
+
 export interface FilterProps {
   type: BiquadFilterType;
   frequency: number;
   q: number;
+  modSources?: {
+    frequency?: string[];
+  };
 }
 export interface FilterNode extends BaseNode {
   type: "filter";
@@ -64,6 +81,9 @@ export interface ADSRNode extends BaseNode {
 export interface FeedbackDelayProps {
   feedback: number;
   time: number;
+  modSources?: {
+    time?: string[];
+  };
 }
 
 export interface FeedbackDelayNode extends BaseNode {
@@ -107,6 +127,7 @@ export interface SequencerNode extends BaseNode {
 
 export type Node =
   | OscNode
+  | LFONode
   | FilterNode
   | SequencerNode
   | DestinationNode

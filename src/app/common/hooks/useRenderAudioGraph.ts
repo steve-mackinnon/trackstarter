@@ -3,6 +3,7 @@ import {
   clipper,
   delay,
   filter,
+  lfo,
   mul,
   osc,
   output,
@@ -63,7 +64,7 @@ function synthVoice({
       mul({ multiplier: params.gain, key: `${prefix}-gain` }, [
         osc({
           ...params,
-          modSources: { gain: [`${prefix}-amp-env`] },
+          modSources: { gain: [`${prefix}-amp-env`], frequency: ["lfo-1"] },
           key: `${prefix}-osc`,
         }),
       ]),
@@ -131,6 +132,7 @@ export function useRenderAudioGraph() {
     audioGraph.render(
       output([
         ...sequencers,
+        lfo({ key: "lfo-1", frequency: 10, amount: 10, type: "sine" }),
         clipper({}, [
           adsr(harmonyParams, "harmony-amp-env"),
           adsr(melodyParams, "melody-amp-env"),

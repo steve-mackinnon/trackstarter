@@ -13,7 +13,7 @@ export interface BaseNode {
 
 export interface AudioGraphDelegate {
   createNode: (
-    type: string,
+    type: Node["type"],
     findNode: (key: string) => Node | null,
     key?: string,
   ) => any;
