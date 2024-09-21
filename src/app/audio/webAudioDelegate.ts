@@ -239,7 +239,7 @@ function buildOscNode(
 
   const stopTime =
     oscStopTime +
-    connectModulators(
+    connectOscModulators(
       context,
       node.props,
       oscNode,
@@ -253,7 +253,7 @@ function buildOscNode(
 }
 
 // Returns updated endTime in case release is applied to osc gain
-function connectModulators(
+function connectOscModulators(
   context: IAudioContext,
   props: OscProps,
   osc: OscillatorNode<AudioContext>,
