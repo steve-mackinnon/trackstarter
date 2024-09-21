@@ -49,7 +49,6 @@ function synthVoice({
   params,
   prefix,
   lfoAmount,
-  filterLfo,
 }: {
   params: SynthParams;
   prefix: string;
@@ -63,9 +62,6 @@ function synthVoice({
       q: params.filterQ,
       auxOutputs: [`${prefix}-delay-input`],
       key: `${prefix}-filter`,
-      modSources: {
-        frequency: filterLfo ? [{ key: filterLfo, amount: 500 }] : undefined,
-      },
     },
     [
       mul({ multiplier: params.gain, key: `${prefix}-gain` }, [
@@ -164,7 +160,6 @@ export function useRenderAudioGraph() {
             params: harmonyParams,
             prefix: "harmony",
             lfoAmount: 1.5,
-            filterLfo: "filter-lfo",
           }),
           synthVoice({ params: melodyParams, prefix: "melody", lfoAmount: 2 }),
         ]),
