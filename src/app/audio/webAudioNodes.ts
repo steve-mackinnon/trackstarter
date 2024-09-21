@@ -21,12 +21,17 @@ interface BaseNode {
   auxConnections?: string[];
 }
 
+interface ModInfo {
+  key: string;
+  amount: number;
+}
+
 export interface OscProps {
   type: OscillatorType;
   detune: number;
   modSources?: {
-    gain?: string[];
-    frequency?: string[];
+    gain?: ModInfo[];
+    frequency?: ModInfo[];
   };
 }
 
@@ -39,7 +44,6 @@ export interface OscNode extends BaseNode {
 export interface LFOProps {
   type: OscillatorType;
   frequency: number;
-  amount: number;
 }
 
 export interface LFONode extends BaseNode {

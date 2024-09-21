@@ -6,31 +6,44 @@ import {
 } from "standardized-audio-context";
 import { LFOProps } from "./webAudioNodes";
 
+type Connection = {
+  param: IAudioParam;
+  gain: GainNode<AudioContext>;
+};
+
 export class LFO {
-  constructor(audioContext: AudioContext) {
-    this.gain = audioContext.createGain();
+  constructor(private audioContext: AudioContext) {
     this.osc = audioContext.createOscillator();
-    this.osc.connect(this.gain);
-    this.update(this.props);
     this.osc.start();
+    this.update(this.props);
   }
 
-  private gain: GainNode<AudioContext>;
   private osc: OscillatorNode<AudioContext>;
-  private props: LFOProps = { frequency: 2, type: "sine", amount: 10 };
+  private props: LFOProps = { frequency: 2, type: "sine" };
+  private connections: Connection[] = [];
 
   update(props: LFOProps) {
     this.props = props;
     this.osc.frequency.value = props.frequency;
     this.osc.type = props.type;
-    this.gain.gain.value = props.amount;
   }
 
-  connect(param: IAudioParam) {
-    this.gain.connect(param);
+  connect(param: IAudioParam, amount: number) {
+    const gain = this.audioContext.createGain();
+    gain.gain.value = amount;
+    this.osc.connect(gain);
+    gain.connect(param);
+    this.connections.push({ param, gain });
   }
 
   disconnect(param: IAudioParam) {
-    this.gain.disconnect(param);
+    const gain = this.connections.find((c) => c.param === param)?.gain;
+    if (gain) {
+      this.osc.disconnect(gain);
+      gain.disconnect(param);
+      this.connections = this.connections.filter((c) => c.param !== param);
+    } else {
+      throw new Error("Failed to find connection to disconnect");
+    }
   }
 }

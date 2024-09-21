@@ -273,7 +273,7 @@ function connectModulators(
   ]
     .filter((m) => !!m.sources && m.sources.length > 0)
     .forEach((modSettings) => {
-      modSettings.sources?.forEach((key) => {
+      modSettings.sources?.forEach(({ key, amount }) => {
         const modulator = findNode(key);
         if (modulator) {
           if (modulator.type !== "adsr" && modulator.type !== "lfo") {
@@ -301,7 +301,7 @@ function connectModulators(
               envNode.disconnect(modSettings.param);
             });
           } else if (modulator.type === "lfo") {
-            modulator.backingNode!.connect(modSettings.param);
+            modulator.backingNode!.connect(modSettings.param, amount);
             osc.addEventListener("ended", () => {
               modulator.backingNode!.disconnect(modSettings.param);
             });
