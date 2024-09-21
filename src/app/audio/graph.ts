@@ -1,4 +1,3 @@
-import { produce, setAutoFreeze } from "immer";
 import { Node } from "./webAudioNodes";
 
 export interface BaseNode {
@@ -31,10 +30,6 @@ type NodeProps<T extends BaseNode["type"]> = Extract<
   { type: T }
 >["props"];
 
-// Disable auto freezing in immer so we can mutate the current state when
-// setting props
-setAutoFreeze(false);
-
 export class AudioGraph {
   constructor(private delegate: AudioGraphDelegate) {}
 
@@ -49,7 +44,7 @@ export class AudioGraph {
       currentNode: this.currentRoot,
       parent: null,
     });
-    this.currentRoot = produce(this.currentRoot, () => newRoot);
+    this.currentRoot = newRoot;
     this.setupAuxConnections(this.currentRoot!);
   }
 
@@ -111,23 +106,18 @@ export class AudioGraph {
         // Remove existing node
         this.delegate.deleteNode(currentNode);
       }
-      newNode = produce(newNode, (node) => {
-        node.parent = parent ?? undefined;
-        // Build the new audio node
-        node.backingNode = this.delegate.createNode(
-          newNode.type,
-          (key) => this.nodeStore.get(key),
-          newNode.key,
-        );
-      });
+      newNode.parent = parent ?? undefined;
+      newNode.backingNode = this.delegate.createNode(
+        newNode.type,
+        (key) => this.nodeStore.get(key),
+        newNode.key,
+      );
       if (parent) {
         this.delegate.connectNodes(newNode, parent);
       }
     } else {
-      newNode = produce(newNode, (node) => {
-        node.parent = currentNode.parent;
-        node.backingNode = currentNode.backingNode;
-      });
+      newNode.parent = currentNode.parent;
+      newNode.backingNode = currentNode.backingNode;
     }
     const updatedNode = this.applyChildNodeUpdates(newNode, currentNode);
     this.delegate.updateNode(updatedNode, (key) => this.nodeStore.get(key));
@@ -151,12 +141,10 @@ export class AudioGraph {
           currentParent.children.length > index
             ? currentParent.children[index]
             : null;
-        newParent = produce(newParent, (parent) => {
-          parent.children![index] = this.buildAudioGraph({
-            newNode: newChild as Node,
-            currentNode: currentChild as Node,
-            parent: newParent,
-          });
+        newParent.children![index] = this.buildAudioGraph({
+          newNode: newChild as Node,
+          currentNode: currentChild as Node,
+          parent: newParent,
         });
       });
     }
