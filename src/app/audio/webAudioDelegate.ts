@@ -230,10 +230,7 @@ function buildOscNode(
 
   const oscGain = context.createGain();
   oscNode.connect(oscGain);
-  if (
-    node.parent?.backingNode
-    // node.parent.backingNode instanceof AudioNode
-  ) {
+  if (node.parent?.backingNode) {
     oscGain.connect(node.parent.backingNode as any as IAudioNode<AudioContext>);
   }
 
