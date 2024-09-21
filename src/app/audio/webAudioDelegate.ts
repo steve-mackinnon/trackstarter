@@ -34,7 +34,7 @@ async function addWorklets(context: AudioContext) {
 }
 
 export class WebAudioDelegate implements AudioGraphDelegate {
-  constructor() {
+  constructor(private context: AudioContext) {
     this.workletPromise = addWorklets(this.context);
     this.scheduler.tempo = BPM;
   }
@@ -44,7 +44,6 @@ export class WebAudioDelegate implements AudioGraphDelegate {
   }
 
   private workletPromise: Promise<void>;
-  private context = new AudioContext();
   private sequencers = new Map<string, Sequencer>();
   private stepIndex = 0;
   private scheduler = new Scheduler(this.context, (t) => {
