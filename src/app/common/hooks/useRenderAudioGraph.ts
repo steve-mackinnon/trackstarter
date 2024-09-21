@@ -3,6 +3,7 @@ import {
   clipper,
   delay,
   filter,
+  lfo,
   mul,
   osc,
   output,
@@ -47,9 +48,13 @@ function filterDelay({
 function synthVoice({
   params,
   prefix,
+  lfoAmount,
+  filterLfo,
 }: {
   params: SynthParams;
   prefix: string;
+  lfoAmount: number;
+  filterLfo?: string;
 }) {
   return filter(
     {
@@ -58,12 +63,18 @@ function synthVoice({
       q: params.filterQ,
       auxOutputs: [`${prefix}-delay-input`],
       key: `${prefix}-filter`,
+      modSources: {
+        frequency: filterLfo ? [{ key: filterLfo, amount: 500 }] : undefined,
+      },
     },
     [
       mul({ multiplier: params.gain, key: `${prefix}-gain` }, [
         osc({
           ...params,
-          modSources: { gain: [`${prefix}-amp-env`] },
+          modSources: {
+            gain: [{ key: `${prefix}-amp-env`, amount: 1 }],
+            frequency: [{ key: `${prefix}-lfo`, amount: lfoAmount }],
+          },
           key: `${prefix}-osc`,
         }),
       ]),
@@ -131,9 +142,12 @@ export function useRenderAudioGraph() {
     audioGraph.render(
       output([
         ...sequencers,
+        lfo({ key: "harmony-lfo", frequency: 0.5, type: "sine" }),
+        lfo({ key: "melody-lfo", frequency: 4, type: "sine" }),
+        lfo({ key: "filter-lfo", frequency: 2, type: "sine" }),
+        adsr(harmonyParams, "harmony-amp-env"),
+        adsr(melodyParams, "melody-amp-env"),
         clipper({}, [
-          adsr(harmonyParams, "harmony-amp-env"),
-          adsr(melodyParams, "melody-amp-env"),
           filterDelay({
             prefix: "melody",
             sendAmount: melodyParams.delayParams.sendAmount,
@@ -146,8 +160,13 @@ export function useRenderAudioGraph() {
             time: harmonyParams.delayParams.time,
             feedback: harmonyParams.delayParams.feedback,
           }),
-          synthVoice({ params: harmonyParams, prefix: "harmony" }),
-          synthVoice({ params: melodyParams, prefix: "melody" }),
+          synthVoice({
+            params: harmonyParams,
+            prefix: "harmony",
+            lfoAmount: 1.5,
+            filterLfo: "filter-lfo",
+          }),
+          synthVoice({ params: melodyParams, prefix: "melody", lfoAmount: 2 }),
         ]),
       ]),
     );

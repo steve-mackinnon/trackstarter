@@ -24,8 +24,12 @@ export class ADSR {
     this.props = props;
   }
 
-  connect(node: IAudioParam) {
-    this.constantSource.connect(node);
+  connect(param: IAudioParam) {
+    this.constantSource.connect(param);
+  }
+
+  disconnect(param: IAudioParam) {
+    this.constantSource.disconnect(param);
   }
 
   trigger(startTime: number, stopTime: number) {

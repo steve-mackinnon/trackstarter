@@ -1,4 +1,3 @@
-import { produce, setAutoFreeze } from "immer";
 import { Node } from "./webAudioNodes";
 
 export interface BaseNode {
@@ -11,14 +10,11 @@ export interface BaseNode {
   props?: any;
 }
 
+export type FindNode = (key: string) => Node | undefined;
 export interface AudioGraphDelegate {
-  createNode: (
-    type: string,
-    findNode: (key: string) => Node | null,
-    key?: string,
-  ) => any;
+  createNode: (type: Node["type"], findNode: FindNode, key?: string) => any;
   deleteNode: (node: Node) => void;
-  updateNode: (node: Node) => void;
+  updateNode: (node: Node, findNode: FindNode) => void;
   connectNodes: (src: Node, dest: Node) => void;
   start: (step?: number) => void;
   stop: () => void;
@@ -31,14 +27,11 @@ type NodeProps<T extends BaseNode["type"]> = Extract<
   { type: T }
 >["props"];
 
-// Disable auto freezing in immer so we can mutate the current state when
-// setting props
-setAutoFreeze(false);
-
 export class AudioGraph {
   constructor(private delegate: AudioGraphDelegate) {}
 
   private currentRoot: Node | null = null;
+  private nodeStore: Map<string, Node> = new Map();
 
   async render(newRoot: Node) {
     await this.delegate.initialize();
@@ -48,7 +41,7 @@ export class AudioGraph {
       currentNode: this.currentRoot,
       parent: null,
     });
-    this.currentRoot = produce(this.currentRoot, () => newRoot);
+    this.currentRoot = newRoot;
     this.setupAuxConnections(this.currentRoot!);
   }
 
@@ -73,13 +66,13 @@ export class AudioGraph {
     if (!this.currentRoot) {
       return;
     }
-    const node = this.findNodeWithKey(this.currentRoot, nodeKey);
+    const node = this.nodeStore.get(nodeKey);
     if (!node) {
       return;
     }
     if (node.type === nodeType) {
       node.props[propId] = value;
-      this.delegate.updateNode(node);
+      this.delegate.updateNode(node, (key) => this.nodeStore.get(key));
     } else {
       throw new Error(
         `Node types were incompatible ${nodeType} and ${node.type}`,
@@ -110,26 +103,24 @@ export class AudioGraph {
         // Remove existing node
         this.delegate.deleteNode(currentNode);
       }
-      newNode = produce(newNode, (node) => {
-        node.parent = parent ?? undefined;
-        // Build the new audio node
-        node.backingNode = this.delegate.createNode(
-          newNode.type,
-          (key) => this.findNodeWithKey(this.currentRoot, key),
-          newNode.key,
-        );
-      });
+      newNode.parent = parent ?? undefined;
+      newNode.backingNode = this.delegate.createNode(
+        newNode.type,
+        (key) => this.nodeStore.get(key),
+        newNode.key,
+      );
       if (parent) {
         this.delegate.connectNodes(newNode, parent);
       }
     } else {
-      newNode = produce(newNode, (node) => {
-        node.parent = currentNode.parent;
-        node.backingNode = currentNode.backingNode;
-      });
+      newNode.parent = currentNode.parent;
+      newNode.backingNode = currentNode.backingNode;
     }
     const updatedNode = this.applyChildNodeUpdates(newNode, currentNode);
-    this.delegate.updateNode(updatedNode);
+    this.delegate.updateNode(updatedNode, (key) => this.nodeStore.get(key));
+    if (updatedNode.key) {
+      this.nodeStore.set(updatedNode.key, updatedNode);
+    }
     return updatedNode;
   }
 
@@ -147,12 +138,10 @@ export class AudioGraph {
           currentParent.children.length > index
             ? currentParent.children[index]
             : null;
-        newParent = produce(newParent, (parent) => {
-          parent.children![index] = this.buildAudioGraph({
-            newNode: newChild as Node,
-            currentNode: currentChild as Node,
-            parent: newParent,
-          });
+        newParent.children![index] = this.buildAudioGraph({
+          newNode: newChild as Node,
+          currentNode: currentChild as Node,
+          parent: newParent,
         });
       });
     }
@@ -172,28 +161,10 @@ export class AudioGraph {
     return newParent;
   }
 
-  private findNodeWithKey(root: Node | null, key: string): Node | null {
-    if (!root) {
-      return null;
-    }
-    if (root.key === key) {
-      return root;
-    }
-    if (root.children) {
-      for (const child of root.children) {
-        const node = this.findNodeWithKey(child as Node, key);
-        if (node) {
-          return node;
-        }
-      }
-    }
-    return null;
-  }
-
   private setupAuxConnections(node: Node) {
     if (node.auxConnections) {
       node.auxConnections.forEach((key) => {
-        const auxNode = this.findNodeWithKey(this.currentRoot, key);
+        const auxNode = this.nodeStore.get(key);
         if (auxNode) {
           this.delegate.connectNodes(node, auxNode);
         } else {

@@ -5,6 +5,8 @@ import {
   FeedbackDelayProps,
   FilterNode,
   FilterProps,
+  LFONode,
+  LFOProps,
   MasterClipperNode,
   MulNode,
   MulProps,
@@ -33,6 +35,15 @@ export function osc(props: WithCommonProps<OscProps>): OscNode {
     children: [],
     key: props.key,
     auxConnections: props.auxOutputs,
+  };
+}
+
+export function lfo(props: WithKey<LFOProps>): LFONode {
+  return {
+    type: "lfo",
+    props,
+    children: [],
+    key: props.key,
   };
 }
 

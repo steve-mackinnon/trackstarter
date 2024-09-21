@@ -12,7 +12,7 @@ function lengthOf16thNoteInSeconds(bpm: number): number {
 
 export class Sequencer {
   constructor(
-    private findNode: (key: string) => Node | null,
+    private findNode: (key: string) => Node | undefined,
     private triggerAudioNode: (
       node: Node,
       frequency: number,

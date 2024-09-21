@@ -5,14 +5,18 @@ import masterClipperWorklet from "audio/worklets/masterClipper.audioworklet.js";
 import {
   AudioContext,
   AudioWorkletNode,
+  GainNode,
   IAudioContext,
   IAudioNode,
+  IAudioParam,
+  OscillatorNode,
 } from "standardized-audio-context";
 import { ADSR } from "./adsr";
-import { AudioGraphDelegate } from "./graph";
+import { AudioGraphDelegate, FindNode } from "./graph";
+import { LFO } from "./lfo";
 import { Scheduler } from "./scheduler";
 import { Sequencer } from "./sequencer";
-import { ADSRNode, Node, OscNode } from "./webAudioNodes";
+import { ADSRNode, ModInfo, Node, OscNode, OscProps } from "./webAudioNodes";
 
 const BPM = 160;
 
@@ -50,15 +54,14 @@ export class WebAudioDelegate implements AudioGraphDelegate {
     this.stepIndex = (this.stepIndex + 1) % 1024;
   });
 
-  createNode(
-    type: string,
-    findNode: (key: string) => Node | null,
-    key?: string,
-  ) {
+  createNode(type: Node["type"], findNode: FindNode, key?: string) {
     switch (type) {
       case "osc": {
         // Osc nodes are created dynamically when they are triggered by a sequence
         return null;
+      }
+      case "lfo": {
+        return new LFO(this.context);
       }
       case "filter": {
         return this.context.createBiquadFilter();
@@ -116,6 +119,10 @@ export class WebAudioDelegate implements AudioGraphDelegate {
         this.sequencers.set(key, seq);
         return seq;
       }
+      default:
+        // Guard against unhandled Node.type enum cases
+        const _exhaustiveCheck: never = type;
+        return _exhaustiveCheck;
     }
   }
 
@@ -128,7 +135,7 @@ export class WebAudioDelegate implements AudioGraphDelegate {
     }
   }
 
-  updateNode(node: Node) {
+  updateNode(node: Node, findNode: FindNode) {
     if (!node.backingNode) {
       return;
     }
@@ -137,6 +144,11 @@ export class WebAudioDelegate implements AudioGraphDelegate {
         node.backingNode.frequency.value = node.props.frequency;
         node.backingNode.type = node.props.type;
         node.backingNode.Q.value = node.props.q;
+        if (node.props.modSources) {
+          node.props.modSources.frequency?.forEach((modInfo) =>
+            connectModSource(modInfo, node.backingNode!.frequency, findNode),
+          );
+        }
         break;
       }
       case "mul": {
@@ -144,29 +156,43 @@ export class WebAudioDelegate implements AudioGraphDelegate {
         break;
       }
       case "adsr": {
-        // TODO: split out prop update handlers into a separate place
         node.backingNode.update(node.props);
         break;
       }
       case "delay": {
-        (node.backingNode as any).parameters.get("delayTime")!.value =
-          node.props.time;
+        const delayTime = (node.backingNode as any).parameters.get(
+          "delayTime",
+        ) as IAudioParam;
+        delayTime.value = node.props.time;
         (node.backingNode as any).parameters.get("feedback")!.value =
           node.props.feedback;
+        if (node.props.modSources) {
+          node.props.modSources.time?.forEach((modInfo) => {
+            connectModSource(modInfo, delayTime, findNode);
+          });
+        }
         break;
       }
       case "sequencer": {
         (node.backingNode as Sequencer).update(node.props);
         break;
       }
+      case "lfo": {
+        node.backingNode?.update(node.props);
+        break;
+      }
+      case "master-clipper":
+      case "osc":
+        break;
     }
   }
 
   connectNodes(src: Node, dest: Node) {
+    if (!shouldConnectToParent(src.type)) {
+      return;
+    }
     if (isAudioNode(src.backingNode) && isAudioNode(dest.backingNode)) {
       src.backingNode.connect(dest.backingNode);
-    } else {
-      console.error("Failed to connect nodes");
     }
   }
 
@@ -192,13 +218,17 @@ function isAudioNode(obj: any): obj is AudioNode {
   );
 }
 
+function shouldConnectToParent(type: Node["type"]) {
+  return type !== "lfo" && type !== "adsr";
+}
+
 function buildOscNode(
   context: IAudioContext,
   node: OscNode,
   freq: number,
   startTime: number,
   endTime: number,
-  findNode: (key: string) => Node | null,
+  findNode: FindNode,
 ) {
   const oscNode = context.createOscillator();
   const oscType = node.props.type;
@@ -209,33 +239,98 @@ function buildOscNode(
 
   const oscGain = context.createGain();
   oscNode.connect(oscGain);
-  if (
-    node.parent?.backingNode
-    // node.parent.backingNode instanceof AudioNode
-  ) {
+  if (node.parent?.backingNode) {
     oscGain.connect(node.parent.backingNode as any as IAudioNode<AudioContext>);
   }
 
-  if (node.props.modSources?.gain && node.props.modSources.gain.length > 0) {
-    oscGain.gain.value = 0;
-    node.props.modSources.gain.forEach((modulatorKey) => {
-      const modulator = findNode(modulatorKey);
-      if (modulator && modulator.type === "adsr") {
-        const gainEnvNode = buildADSRNode(
-          context,
-          modulator,
-          startTime,
-          endTime,
-        );
-        gainEnvNode.connect(oscGain.gain);
-        oscStopTime += modulator.props.release;
-      } else {
-        throw new Error("Failed to build modulator");
-      }
-    });
-  }
-  oscNode.stop(oscStopTime);
+  const stopTime =
+    oscStopTime +
+    connectOscModulators(
+      context,
+      node.props,
+      oscNode,
+      oscGain,
+      startTime,
+      endTime,
+      findNode,
+    );
+  oscNode.stop(stopTime);
   return oscNode;
+}
+
+// Returns updated endTime in case release is applied to osc gain
+function connectOscModulators(
+  context: IAudioContext,
+  props: OscProps,
+  osc: OscillatorNode<AudioContext>,
+  gain: GainNode<AudioContext>,
+  startTime: number,
+  endTime: number,
+  findNode: FindNode,
+): number {
+  let endTimeIncrease = 0;
+  [
+    {
+      sources: props.modSources?.frequency,
+      param: osc.frequency,
+      type: "freq",
+    },
+    { sources: props.modSources?.gain, param: gain.gain, type: "gain" },
+  ]
+    .filter((m) => !!m.sources && m.sources.length > 0)
+    .forEach((modSettings) => {
+      modSettings.sources?.forEach(({ key, amount }) => {
+        const modulator = findNode(key);
+        if (modulator) {
+          if (modulator.type !== "adsr" && modulator.type !== "lfo") {
+            throw new Error(`Invalid modulator type: ${modulator.type}`);
+          }
+          if (modSettings.type === "gain") {
+            // When modulated, rely on modulators to determine the oscillator's gain value
+            gain.gain.value = 0;
+          }
+          if (modulator.type === "adsr") {
+            const envNode = buildADSRNode(
+              context,
+              modulator,
+              startTime,
+              endTime,
+            );
+            envNode.connect(modSettings.param);
+            if (modSettings.type === "gain") {
+              endTimeIncrease = Math.max(
+                endTimeIncrease,
+                modulator.props.release,
+              );
+            }
+            osc.addEventListener("ended", () => {
+              envNode.disconnect(modSettings.param);
+            });
+          } else if (modulator.type === "lfo") {
+            modulator.backingNode!.connect(modSettings.param, amount);
+            osc.addEventListener("ended", () => {
+              modulator.backingNode!.disconnect(modSettings.param);
+            });
+          }
+        }
+      });
+    });
+  return endTime + endTimeIncrease;
+}
+
+function connectModSource(
+  modInfo: ModInfo,
+  param: IAudioParam,
+  findNode: FindNode,
+) {
+  const modulator = findNode(modInfo.key);
+  if (!modulator) {
+    throw new Error(`Failed to find modulator: ${modInfo.key}`);
+  }
+  if (modulator.type !== "adsr" && modulator.type !== "lfo") {
+    throw new Error(`Invalid modulator type: ${modulator.type}`);
+  }
+  modulator.backingNode!.connect(param, modInfo.amount);
 }
 
 function buildADSRNode(
