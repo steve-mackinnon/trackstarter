@@ -27,7 +27,7 @@ export function useGenerateNewSong() {
       octave: 3,
     });
     setChordProgression(chordProgression);
-    await generateMelody({ chordProgression, restartPlayback: true });
+    await generateMelody({ chordProgression, restartPlayback: false });
     setIsPlaying(true);
     setChordProgressionLoading(false);
   };
