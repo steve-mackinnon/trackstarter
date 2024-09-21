@@ -55,7 +55,7 @@ export class WebAudioDelegate implements AudioGraphDelegate {
 
   createNode(
     type: Node["type"],
-    findNode: (key: string) => Node | null,
+    findNode: (key: string) => Node | undefined,
     key?: string,
   ) {
     switch (type) {
@@ -138,7 +138,7 @@ export class WebAudioDelegate implements AudioGraphDelegate {
     }
   }
 
-  updateNode(node: Node) {
+  updateNode(node: Node, findNode: (key: string) => Node | undefined) {
     if (!node.backingNode) {
       return;
     }
@@ -147,6 +147,21 @@ export class WebAudioDelegate implements AudioGraphDelegate {
         node.backingNode.frequency.value = node.props.frequency;
         node.backingNode.type = node.props.type;
         node.backingNode.Q.value = node.props.q;
+        if (node.props.modSources) {
+          node.props.modSources.frequency?.forEach((modInfo) => {
+            const modulator = findNode(modInfo.key);
+            if (!modulator) {
+              throw new Error(`Failed to find modulator: ${modInfo.key}`);
+            }
+            if (modulator.type !== "adsr" && modulator.type !== "lfo") {
+              throw new Error(`Invalid modulator type: ${modulator.type}`);
+            }
+            modulator.backingNode!.connect(
+              node.backingNode!.frequency,
+              modInfo.amount,
+            );
+          });
+        }
         break;
       }
       case "mul": {
@@ -219,7 +234,7 @@ function buildOscNode(
   freq: number,
   startTime: number,
   endTime: number,
-  findNode: (key: string) => Node | null,
+  findNode: (key: string) => Node | undefined,
 ) {
   const oscNode = context.createOscillator();
   const oscType = node.props.type;
@@ -257,7 +272,7 @@ function connectOscModulators(
   gain: GainNode<AudioContext>,
   startTime: number,
   endTime: number,
-  findNode: (key: string) => Node | null,
+  findNode: (key: string) => Node | undefined,
 ): number {
   let endTimeIncrease = 0;
   [

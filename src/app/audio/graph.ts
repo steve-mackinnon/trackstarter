@@ -14,11 +14,11 @@ export interface BaseNode {
 export interface AudioGraphDelegate {
   createNode: (
     type: Node["type"],
-    findNode: (key: string) => Node | null,
+    findNode: (key: string) => Node | undefined,
     key?: string,
   ) => any;
   deleteNode: (node: Node) => void;
-  updateNode: (node: Node) => void;
+  updateNode: (node: Node, findNode: (key: string) => Node | undefined) => void;
   connectNodes: (src: Node, dest: Node) => void;
   start: (step?: number) => void;
   stop: () => void;
@@ -39,6 +39,7 @@ export class AudioGraph {
   constructor(private delegate: AudioGraphDelegate) {}
 
   private currentRoot: Node | null = null;
+  private nodeStore: Map<string, Node> = new Map();
 
   async render(newRoot: Node) {
     await this.delegate.initialize();
@@ -73,13 +74,13 @@ export class AudioGraph {
     if (!this.currentRoot) {
       return;
     }
-    const node = this.findNodeWithKey(this.currentRoot, nodeKey);
+    const node = this.nodeStore.get(nodeKey);
     if (!node) {
       return;
     }
     if (node.type === nodeType) {
       node.props[propId] = value;
-      this.delegate.updateNode(node);
+      this.delegate.updateNode(node, (key) => this.nodeStore.get(key));
     } else {
       throw new Error(
         `Node types were incompatible ${nodeType} and ${node.type}`,
@@ -115,7 +116,7 @@ export class AudioGraph {
         // Build the new audio node
         node.backingNode = this.delegate.createNode(
           newNode.type,
-          (key) => this.findNodeWithKey(this.currentRoot, key),
+          (key) => this.nodeStore.get(key),
           newNode.key,
         );
       });
@@ -129,7 +130,10 @@ export class AudioGraph {
       });
     }
     const updatedNode = this.applyChildNodeUpdates(newNode, currentNode);
-    this.delegate.updateNode(updatedNode);
+    this.delegate.updateNode(updatedNode, (key) => this.nodeStore.get(key));
+    if (updatedNode.key) {
+      this.nodeStore.set(updatedNode.key, updatedNode);
+    }
     return updatedNode;
   }
 
@@ -172,28 +176,10 @@ export class AudioGraph {
     return newParent;
   }
 
-  private findNodeWithKey(root: Node | null, key: string): Node | null {
-    if (!root) {
-      return null;
-    }
-    if (root.key === key) {
-      return root;
-    }
-    if (root.children) {
-      for (const child of root.children) {
-        const node = this.findNodeWithKey(child as Node, key);
-        if (node) {
-          return node;
-        }
-      }
-    }
-    return null;
-  }
-
   private setupAuxConnections(node: Node) {
     if (node.auxConnections) {
       node.auxConnections.forEach((key) => {
-        const auxNode = this.findNodeWithKey(this.currentRoot, key);
+        const auxNode = this.nodeStore.get(key);
         if (auxNode) {
           this.delegate.connectNodes(node, auxNode);
         } else {

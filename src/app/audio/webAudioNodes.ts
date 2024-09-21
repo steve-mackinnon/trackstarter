@@ -57,7 +57,7 @@ export interface FilterProps {
   frequency: number;
   q: number;
   modSources?: {
-    frequency?: string[];
+    frequency?: ModInfo[];
   };
 }
 export interface FilterNode extends BaseNode {
@@ -86,7 +86,7 @@ export interface FeedbackDelayProps {
   feedback: number;
   time: number;
   modSources?: {
-    time?: string[];
+    time?: ModInfo[];
   };
 }
 
