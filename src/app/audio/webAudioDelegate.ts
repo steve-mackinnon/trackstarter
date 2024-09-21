@@ -160,10 +160,17 @@ export class WebAudioDelegate implements AudioGraphDelegate {
         break;
       }
       case "delay": {
-        (node.backingNode as any).parameters.get("delayTime")!.value =
-          node.props.time;
+        const delayTime = (node.backingNode as any).parameters.get(
+          "delayTime",
+        ) as IAudioParam;
+        delayTime.value = node.props.time;
         (node.backingNode as any).parameters.get("feedback")!.value =
           node.props.feedback;
+        if (node.props.modSources) {
+          node.props.modSources.time?.forEach((modInfo) => {
+            connectModSource(modInfo, delayTime, findNode);
+          });
+        }
         break;
       }
       case "sequencer": {
