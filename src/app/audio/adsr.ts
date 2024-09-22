@@ -28,8 +28,9 @@ export class ADSR {
     this.constantSource.connect(param);
   }
 
-  disconnect(param: IAudioParam) {
-    this.constantSource.disconnect(param);
+  disconnect() {
+    this.constantSource.disconnect();
+    this.constantSource.stop();
   }
 
   trigger(startTime: number, stopTime: number) {
