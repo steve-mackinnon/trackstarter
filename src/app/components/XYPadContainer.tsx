@@ -208,9 +208,9 @@ function buildLfoParamMap(
       {
         label: "filter",
         rate: {
-          min: 0.1,
-          max: 12,
-          scaling: 3,
+          min: 0.01,
+          max: 20,
+          scaling: 4,
           value: synthParams.filterLFO.rate,
           onChange: (rate: number) => {
             updateSynthParams((prev) => ({
@@ -231,7 +231,7 @@ function buildLfoParamMap(
         amount: {
           min: 0,
           max: 5000,
-          scaling: 10,
+          scaling: 5,
           value: synthParams.filterLFO.amount,
           onChange: (amount: number) => {
             let synthParams: SynthParams;
@@ -253,8 +253,8 @@ function buildLfoParamMap(
         label: "osc",
         rate: {
           min: 0.01,
-          max: 10,
-          scaling: 10,
+          max: 16,
+          scaling: 3,
           value: synthParams.oscFrequencyLFO.rate,
           onChange: (rate: number) => {
             updateSynthParams((prev) => ({
@@ -274,8 +274,8 @@ function buildLfoParamMap(
         },
         amount: {
           min: 0,
-          max: 10,
-          scaling: 10,
+          max: 30,
+          scaling: 4,
           value: synthParams.oscFrequencyLFO.amount,
           onChange: (amount: number) => {
             let synthParams: SynthParams;
@@ -413,18 +413,14 @@ export function XYPadContainer() {
                 key={`${selectedControls}-${selectedInstrument}-${lfo.label}`}
                 label={lfo.label}
                 className="w-[95%] rounded-xl"
-                rate={lfo.rate.value}
-                amount={lfo.amount.value}
+                rate={lfo.rate}
+                amount={lfo.amount}
                 onRateChange={(rate) => {
                   lfo.rate.onChange(rate);
                 }}
                 onAmountChange={(amount) => {
                   lfo.amount.onChange(amount);
                 }}
-                minRate={lfo.rate.min}
-                maxRate={lfo.rate.max}
-                minAmount={lfo.amount.min}
-                maxAmount={lfo.amount.max}
               />
             ))}
           </div>
