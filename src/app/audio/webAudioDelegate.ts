@@ -233,27 +233,31 @@ function buildOscNode(
   const oscType = node.props.type;
   oscNode.type = oscType;
   oscNode.frequency.value = freq;
-  oscNode.start(startTime);
-  let oscStopTime = endTime;
 
   const oscGain = context.createGain();
+  oscGain.gain.value = 1;
   oscNode.connect(oscGain);
   if (node.parent?.backingNode) {
     oscGain.connect(node.parent.backingNode as any as IAudioNode<AudioContext>);
   }
 
-  const stopTime =
-    oscStopTime +
-    connectOscModulators(
-      context,
-      node.props,
-      oscNode,
-      oscGain,
-      startTime,
-      endTime,
-      findNode,
-    );
+  const stopTime = connectOscModulators(
+    context,
+    node.props,
+    oscNode,
+    oscGain,
+    startTime,
+    endTime,
+    findNode,
+  );
+  oscNode.start(startTime);
   oscNode.stop(stopTime);
+
+  // Ensure the oscNode is fully disconnected after it has stopped to prevent leaks
+  oscNode.addEventListener("ended", () => {
+    oscNode.disconnect();
+    oscGain.disconnect();
+  });
   return oscNode;
 }
 
@@ -302,8 +306,8 @@ function connectOscModulators(
                 modulator.props.release,
               );
             }
-            osc.addEventListener("ended", () => {
-              envNode.disconnect(modSettings.param);
+            osc.addEventListener("ended", function () {
+              envNode.disconnect();
             });
           } else if (modulator.type === "lfo") {
             modulator.backingNode!.connect(modSettings.param, amount);
