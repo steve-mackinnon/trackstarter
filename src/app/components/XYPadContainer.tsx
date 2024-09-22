@@ -5,6 +5,7 @@ import {
   ParamInfo as XYPadParamInfo,
 } from "common/components/ParameterXYPad";
 import { Button } from "common/components/ui/button";
+import { useRenderAudioGraph } from "common/hooks/useRenderAudioGraph";
 import { cn } from "common/utils";
 import { linearMap } from "common/utils/parameterScaling";
 import { useAtom, useAtomValue } from "jotai";
@@ -177,6 +178,82 @@ function buildParamMap(
   };
 }
 
+interface LfoParamMap {
+  filter: {
+    rate: {
+      min: number;
+      max: number;
+      scaling: number;
+      value: number;
+      onChange: (rate: number) => void;
+    };
+    amount: {
+      min: number;
+      max: number;
+      scaling: number;
+      value: number;
+      onChange: (amount: number) => void;
+    };
+  };
+  amp?: undefined;
+  delay?: undefined;
+}
+
+function buildLfoParamMap(
+  synthParams: SynthParams,
+  instrumentKey: string,
+  updateSynthParams: (prev: SetStateAction<SynthParams>) => void,
+  renderAudioGraph: (params: SynthParams) => void,
+): LfoParamMap {
+  return {
+    filter: {
+      rate: {
+        min: 0.1,
+        max: 12,
+        scaling: 3,
+        value: synthParams.filterLFO.rate,
+        onChange: (rate: number) => {
+          updateSynthParams((prev) => ({
+            ...prev,
+            filterLFO: {
+              ...prev.filterLFO,
+              rate,
+            },
+          }));
+          audioGraph.setProperty(
+            `${instrumentKey}-filter-lfo`,
+            "lfo",
+            "frequency",
+            rate,
+          );
+        },
+      },
+      amount: {
+        min: 0,
+        max: 1000,
+        scaling: 1,
+        value: synthParams.filterLFO.amount,
+        onChange: (amount: number) => {
+          let synthParams: SynthParams;
+          updateSynthParams((prev) => {
+            synthParams = {
+              ...prev,
+              filterLFO: {
+                ...prev.filterLFO,
+                amount,
+              },
+            };
+            renderAudioGraph(synthParams);
+            return synthParams;
+          });
+        },
+      },
+    },
+    amp: undefined,
+    delay: undefined,
+  };
+}
+
 function TabButton({
   label,
   selected,
@@ -213,18 +290,35 @@ export function XYPadContainer() {
   const selectedInstrument = useAtomValue(selectedInstrumentAtom);
 
   const harmonySelected = selectedInstrument === "harmony";
-  const paramMap = harmonySelected
-    ? buildParamMap(harmonySynthParams, "harmony", setHarmonySynthParams, false)
-    : buildParamMap(melodySynthParams, "melody", setMelodySynthParams, true);
+  const renderAudioGraph = useRenderAudioGraph();
+
   const params = (() => {
-    switch (selectedControls) {
-      case "amp":
-        return paramMap.amp;
-      case "delay":
-        return paramMap.delay;
-      case "filter":
-        return paramMap.filter;
-    }
+    const xyPadParamMap = harmonySelected
+      ? buildParamMap(
+          harmonySynthParams,
+          "harmony",
+          setHarmonySynthParams,
+          false,
+        )
+      : buildParamMap(melodySynthParams, "melody", setMelodySynthParams, true);
+    return xyPadParamMap[selectedControls];
+  })();
+
+  const lfoParams = (() => {
+    const lfoParamMap = harmonySelected
+      ? buildLfoParamMap(
+          harmonySynthParams,
+          "harmony",
+          setHarmonySynthParams,
+          (params) => renderAudioGraph({ harmonySynthParams: params }),
+        )
+      : buildLfoParamMap(
+          melodySynthParams,
+          "melody",
+          setMelodySynthParams,
+          (params) => renderAudioGraph({ melodySynthParams: params }),
+        );
+    return lfoParamMap[selectedControls];
   })();
 
   const borderColor = harmonySelected
@@ -261,15 +355,25 @@ export function XYPadContainer() {
           borderColor={borderColor}
           xParam={params.xParam}
           yParam={params.yParam}
-          height={200}
+          height={lfoParams ? 200 : 300}
         />
-        <LFOControls
-          className="w-[95%] h-20 rounded-xl"
-          rate={0.5}
-          amount={0.5}
-          onRateChange={() => {}}
-          onAmountChange={() => {}}
-        />
+        {lfoParams && (
+          <LFOControls
+            className="w-[95%] h-20 rounded-xl"
+            rate={lfoParams.rate.value}
+            amount={lfoParams.amount.value}
+            onRateChange={(rate) => {
+              lfoParams.rate.onChange(rate);
+            }}
+            onAmountChange={(amount) => {
+              lfoParams.amount.onChange(amount);
+            }}
+            minRate={lfoParams.rate.min}
+            maxRate={lfoParams.rate.max}
+            minAmount={lfoParams.amount.min}
+            maxAmount={lfoParams.amount.max}
+          />
+        )}
       </div>
     </div>
   );

@@ -48,12 +48,9 @@ function filterDelay({
 function synthVoice({
   params,
   prefix,
-  lfoAmount,
 }: {
   params: SynthParams;
   prefix: string;
-  lfoAmount: number;
-  filterLfo?: string;
 }) {
   return filter(
     {
@@ -62,6 +59,11 @@ function synthVoice({
       q: params.filterQ,
       auxOutputs: [`${prefix}-delay-input`],
       key: `${prefix}-filter`,
+      modSources: {
+        frequency: [
+          { key: `${prefix}-filter-lfo`, amount: params.filterLFO.amount },
+        ],
+      },
     },
     [
       mul({ multiplier: params.gain, key: `${prefix}-gain` }, [
@@ -69,7 +71,12 @@ function synthVoice({
           ...params,
           modSources: {
             gain: [{ key: `${prefix}-amp-env`, amount: 1 }],
-            frequency: [{ key: `${prefix}-lfo`, amount: lfoAmount }],
+            frequency: [
+              {
+                key: `${prefix}-osc-frequency-lfo`,
+                amount: params.oscFrequencyLFO.amount,
+              },
+            ],
           },
           key: `${prefix}-osc`,
         }),
@@ -140,7 +147,16 @@ export function useRenderAudioGraph() {
         ...sequencers,
         lfo({ key: "harmony-lfo", frequency: 0.5, type: "sine" }),
         lfo({ key: "melody-lfo", frequency: 4, type: "sine" }),
-        lfo({ key: "filter-lfo", frequency: 2, type: "sine" }),
+        lfo({
+          key: "harmony-filter-lfo",
+          frequency: harmonyParams.filterLFO.rate,
+          type: "sine",
+        }),
+        lfo({
+          key: "melody-filter-lfo",
+          frequency: melodyParams.filterLFO.rate,
+          type: "sine",
+        }),
         adsr(harmonyParams, "harmony-amp-env"),
         adsr(melodyParams, "melody-amp-env"),
         clipper({}, [
@@ -159,9 +175,8 @@ export function useRenderAudioGraph() {
           synthVoice({
             params: harmonyParams,
             prefix: "harmony",
-            lfoAmount: 1.5,
           }),
-          synthVoice({ params: melodyParams, prefix: "melody", lfoAmount: 2 }),
+          synthVoice({ params: melodyParams, prefix: "melody" }),
         ]),
       ]),
     );
