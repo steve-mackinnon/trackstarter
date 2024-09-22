@@ -25,6 +25,7 @@ export class LFO {
 
   connect(param: IAudioParam, amount: number) {
     if (this.connections.has(param)) {
+      this.connections.get(param)!.gain.value = amount;
       return;
     }
     const gain = this.audioContext.createGain();

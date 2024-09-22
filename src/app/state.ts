@@ -15,12 +15,20 @@ export const moodAtom = atom<Mood | null>(null);
 
 export const selectedInstrumentAtom = atom<"harmony" | "melody">("harmony");
 
+interface LFOParams {
+  rate: number;
+  amount: number;
+}
+
 export interface SynthParams extends OscProps {
   filterFrequency: number;
+  filterLFO: LFOParams;
+  oscFrequencyLFO: LFOParams;
   filterQ: number;
   attack: number;
   decay: number;
   sustain: number;
+  release: number;
   delayParams: DelayParams;
   gain: number;
 }
@@ -39,14 +47,25 @@ const defaultDelayParams: DelayParams = {
   lpfFrequency: 800,
 };
 
+const defaultLFOParams: LFOParams = {
+  rate: 0.5,
+  amount: 0,
+};
+
 export const harmonySynthParamsAtom = atom<SynthParams>({
   type: "square",
   detune: 0,
   filterFrequency: 900,
+  filterLFO: {
+    rate: 0.2,
+    amount: 500,
+  },
+  oscFrequencyLFO: { ...defaultLFOParams },
   filterQ: 2,
   attack: 0.3,
   decay: 0.9,
   sustain: 0.2,
+  release: 0.45,
   delayParams: { ...defaultDelayParams },
   gain: 0.1,
 });
@@ -55,9 +74,12 @@ export const melodySynthParamsAtom = atom<SynthParams>({
   type: "sawtooth",
   detune: 0,
   filterFrequency: 3500,
+  filterLFO: { ...defaultLFOParams },
+  oscFrequencyLFO: { ...defaultLFOParams },
   filterQ: 4,
   attack: 0.01,
-  decay: 0.1,
+  decay: 0.8,
+  release: 0.6,
   sustain: 0.0,
   delayParams: { ...defaultDelayParams },
   gain: 0.25,
