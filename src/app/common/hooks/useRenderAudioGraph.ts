@@ -145,8 +145,16 @@ export function useRenderAudioGraph() {
     audioGraph.render(
       output([
         ...sequencers,
-        lfo({ key: "harmony-lfo", frequency: 0.5, type: "sine" }),
-        lfo({ key: "melody-lfo", frequency: 4, type: "sine" }),
+        lfo({
+          key: "harmony-osc-frequency-lfo",
+          frequency: harmonyParams.oscFrequencyLFO.rate,
+          type: "sine",
+        }),
+        lfo({
+          key: "melody-osc-frequency-lfo",
+          frequency: melodyParams.oscFrequencyLFO.rate,
+          type: "sine",
+        }),
         lfo({
           key: "harmony-filter-lfo",
           frequency: harmonyParams.filterLFO.rate,

@@ -178,23 +178,21 @@ function buildParamMap(
   };
 }
 
+interface LFOParam {
+  min: number;
+  max: number;
+  scaling: number;
+  value: number;
+  onChange: (value: number) => void;
+}
+interface LFOParams {
+  rate: LFOParam;
+  amount: LFOParam;
+  label: string;
+}
+
 interface LfoParamMap {
-  filter: {
-    rate: {
-      min: number;
-      max: number;
-      scaling: number;
-      value: number;
-      onChange: (rate: number) => void;
-    };
-    amount: {
-      min: number;
-      max: number;
-      scaling: number;
-      value: number;
-      onChange: (amount: number) => void;
-    };
-  };
+  filter: LFOParams[];
   amp?: undefined;
   delay?: undefined;
 }
@@ -206,49 +204,96 @@ function buildLfoParamMap(
   renderAudioGraph: (params: SynthParams) => void,
 ): LfoParamMap {
   return {
-    filter: {
-      rate: {
-        min: 0.1,
-        max: 12,
-        scaling: 3,
-        value: synthParams.filterLFO.rate,
-        onChange: (rate: number) => {
-          updateSynthParams((prev) => ({
-            ...prev,
-            filterLFO: {
-              ...prev.filterLFO,
-              rate,
-            },
-          }));
-          audioGraph.setProperty(
-            `${instrumentKey}-filter-lfo`,
-            "lfo",
-            "frequency",
-            rate,
-          );
-        },
-      },
-      amount: {
-        min: 0,
-        max: 1000,
-        scaling: 1,
-        value: synthParams.filterLFO.amount,
-        onChange: (amount: number) => {
-          let synthParams: SynthParams;
-          updateSynthParams((prev) => {
-            synthParams = {
+    filter: [
+      {
+        label: "filter",
+        rate: {
+          min: 0.1,
+          max: 12,
+          scaling: 3,
+          value: synthParams.filterLFO.rate,
+          onChange: (rate: number) => {
+            updateSynthParams((prev) => ({
               ...prev,
               filterLFO: {
                 ...prev.filterLFO,
-                amount,
+                rate,
               },
-            };
-            renderAudioGraph(synthParams);
-            return synthParams;
-          });
+            }));
+            audioGraph.setProperty(
+              `${instrumentKey}-filter-lfo`,
+              "lfo",
+              "frequency",
+              rate,
+            );
+          },
+        },
+        amount: {
+          min: 0,
+          max: 1000,
+          scaling: 10,
+          value: synthParams.filterLFO.amount,
+          onChange: (amount: number) => {
+            let synthParams: SynthParams;
+            updateSynthParams((prev) => {
+              synthParams = {
+                ...prev,
+                filterLFO: {
+                  ...prev.filterLFO,
+                  amount,
+                },
+              };
+              renderAudioGraph(synthParams);
+              return synthParams;
+            });
+          },
         },
       },
-    },
+      {
+        label: "osc",
+        rate: {
+          min: 0.01,
+          max: 10,
+          scaling: 10,
+          value: synthParams.oscFrequencyLFO.rate,
+          onChange: (rate: number) => {
+            updateSynthParams((prev) => ({
+              ...prev,
+              oscFrequencyLFO: {
+                ...prev.oscFrequencyLFO,
+                rate,
+              },
+            }));
+            audioGraph.setProperty(
+              `${instrumentKey}-osc-frequency-lfo`,
+              "lfo",
+              "frequency",
+              rate,
+            );
+          },
+        },
+        amount: {
+          min: 0,
+          max: 10,
+          scaling: 10,
+          value: synthParams.oscFrequencyLFO.amount,
+          onChange: (amount: number) => {
+            let synthParams: SynthParams;
+            updateSynthParams((prev) => {
+              synthParams = {
+                ...prev,
+                oscFrequencyLFO: {
+                  ...prev.oscFrequencyLFO,
+                  amount,
+                },
+              };
+              renderAudioGraph(synthParams);
+              return synthParams;
+            });
+          },
+        },
+      },
+    ],
     amp: undefined,
     delay: undefined,
   };
@@ -358,21 +403,31 @@ export function XYPadContainer() {
           height={lfoParams ? 200 : 300}
         />
         {lfoParams && (
-          <LFOControls
-            className="w-[95%] h-20 rounded-xl"
-            rate={lfoParams.rate.value}
-            amount={lfoParams.amount.value}
-            onRateChange={(rate) => {
-              lfoParams.rate.onChange(rate);
-            }}
-            onAmountChange={(amount) => {
-              lfoParams.amount.onChange(amount);
-            }}
-            minRate={lfoParams.rate.min}
-            maxRate={lfoParams.rate.max}
-            minAmount={lfoParams.amount.min}
-            maxAmount={lfoParams.amount.max}
-          />
+          <div className="flex flex-col w-[95%] items-center bg-primary-foreground p-2 rounded-xl">
+            <div className="flex w-[90%]">
+              <label className="px-12">Rate</label>
+              <label className="px-6">Amount</label>
+            </div>
+            {lfoParams.map((lfo) => (
+              <LFOControls
+                key={lfo.label}
+                label={lfo.label}
+                className="w-[95%] rounded-xl"
+                rate={lfo.rate.value}
+                amount={lfo.amount.value}
+                onRateChange={(rate) => {
+                  lfo.rate.onChange(rate);
+                }}
+                onAmountChange={(amount) => {
+                  lfo.amount.onChange(amount);
+                }}
+                minRate={lfo.rate.min}
+                maxRate={lfo.rate.max}
+                minAmount={lfo.amount.min}
+                maxAmount={lfo.amount.max}
+              />
+            ))}
+          </div>
         )}
       </div>
     </div>
