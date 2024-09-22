@@ -410,7 +410,7 @@ export function XYPadContainer() {
             </div>
             {lfoParams.map((lfo) => (
               <LFOControls
-                key={lfo.label}
+                key={`${selectedControls}-${selectedInstrument}-${lfo.label}`}
                 label={lfo.label}
                 className="w-[95%] rounded-xl"
                 rate={lfo.rate.value}
