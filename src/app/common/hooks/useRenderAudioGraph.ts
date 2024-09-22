@@ -89,7 +89,7 @@ function adsr(params: SynthParams, key: string) {
     attack: params.attack,
     decay: params.decay,
     sustain: params.sustain,
-    release: 0.1,
+    release: params.release,
     key,
   });
 }

@@ -28,6 +28,7 @@ export interface SynthParams extends OscProps {
   attack: number;
   decay: number;
   sustain: number;
+  release: number;
   delayParams: DelayParams;
   gain: number;
 }
@@ -61,6 +62,7 @@ export const harmonySynthParamsAtom = atom<SynthParams>({
   attack: 0.3,
   decay: 0.9,
   sustain: 0.2,
+  release: 0.45,
   delayParams: { ...defaultDelayParams },
   gain: 0.1,
 });
@@ -74,6 +76,7 @@ export const melodySynthParamsAtom = atom<SynthParams>({
   filterQ: 4,
   attack: 0.01,
   decay: 0.1,
+  release: 0.6,
   sustain: 0.0,
   delayParams: { ...defaultDelayParams },
   gain: 0.25,
