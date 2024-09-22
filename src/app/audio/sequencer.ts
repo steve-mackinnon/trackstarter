@@ -32,13 +32,7 @@ export class Sequencer {
     this.props = props;
   }
 
-  // Map from step index when osc stops to osc nodes
-  private activeNodes: Map<number, AudioNode[]> = new Map();
-
   public playStep(stepIndex: number, time: number) {
-    // All active oscs at stepIndex are now stopped, so drop those refs
-    this.activeNodes.delete(stepIndex);
-
     stepIndex = stepIndex % this.props.length;
     const events = this.props.notes.filter((e) => e.startStep === stepIndex);
     if (events.length === 0) {
@@ -64,31 +58,7 @@ export class Sequencer {
           time,
           time + eventDuration,
         );
-        if (destNode) {
-          this.addToNodeMap(destNode, event.endStep);
-        }
       }
-    }
-  }
-
-  public stop() {
-    for (const [_, node] of this.activeNodes) {
-      node.forEach((node) => {
-        if (node instanceof OscillatorNode) {
-          (node as OscillatorNode).stop();
-        }
-      });
-    }
-    this.activeNodes.clear();
-  }
-
-  private addToNodeMap(node: AudioNode, endStep: number) {
-    const cleanupIndex = (endStep + 1) % this.props.length;
-    const existingNodes = this.activeNodes.get(cleanupIndex);
-    if (existingNodes) {
-      existingNodes.push(node);
-    } else {
-      this.activeNodes.set(cleanupIndex, [node]);
     }
   }
 }
