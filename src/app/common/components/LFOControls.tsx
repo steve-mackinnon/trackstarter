@@ -37,7 +37,7 @@ export function LFOControls({
     >
       <div className="flex flex-row space-x-4 w-full">
         <div className="flex-1 w-1/2 space-y-4 text-center">
-          <label htmlFor="lfo-rate" className="block text-xs font-xs mb-1">
+          <label htmlFor="lfo-rate" className="block text-sm font-sm mb-1">
             Mod Rate
           </label>
           <Slider
@@ -54,7 +54,7 @@ export function LFOControls({
           />
         </div>
         <div className="flex-1 space-y-4 text-center">
-          <label htmlFor="lfo-amount" className="block text-xs font-xs mb-1">
+          <label htmlFor="lfo-amount" className="block text-sm font-sm mb-1">
             Mod Amount
           </label>
           <Slider
