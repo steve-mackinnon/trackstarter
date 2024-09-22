@@ -400,13 +400,13 @@ export function XYPadContainer() {
           borderColor={borderColor}
           xParam={params.xParam}
           yParam={params.yParam}
-          height={lfoParams ? 200 : 300}
+          height={lfoParams ? 196 : 300}
         />
         {lfoParams && (
           <div className="flex flex-col w-[95%] items-center bg-primary-foreground p-2 rounded-xl">
             <div className="flex w-[90%]">
-              <label className="px-12">Rate</label>
-              <label className="px-6">Amount</label>
+              <label className="px-12">rate</label>
+              <label className="px-8">amount</label>
             </div>
             {lfoParams.map((lfo) => (
               <LFOControls
