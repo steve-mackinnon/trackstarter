@@ -230,7 +230,7 @@ function buildLfoParamMap(
         },
         amount: {
           min: 0,
-          max: 1000,
+          max: 5000,
           scaling: 10,
           value: synthParams.filterLFO.amount,
           onChange: (amount: number) => {
