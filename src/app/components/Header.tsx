@@ -51,7 +51,7 @@ export function Header({ className }: { className?: string }) {
             newMood = null;
           }
           setMood(newMood as Mood);
-          generateNewChordProgression(newMood as Mood | null);
+          generateNewChordProgression(newMood as Mood | null, false);
         }}
         defaultValue="Any"
       />
