@@ -55,13 +55,13 @@ const defaultLFOParams: LFOParams = {
 export const harmonySynthParamsAtom = atom<SynthParams>({
   type: "square",
   detune: 0,
-  filterFrequency: 900,
+  filterFrequency: 1900,
   filterLFO: {
-    rate: 0.2,
-    amount: 500,
+    rate: 0.03,
+    amount: 100,
   },
-  oscFrequencyLFO: { ...defaultLFOParams },
-  filterQ: 2,
+  oscFrequencyLFO: { rate: 2.67, amount: 1 },
+  filterQ: 2.5,
   attack: 0.3,
   decay: 0.9,
   sustain: 0.2,
