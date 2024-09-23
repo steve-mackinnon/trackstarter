@@ -393,6 +393,6 @@ function buildSampleNode(
     throw new Error("Sample node has an invalid parent");
   }
   sampleNode.start(startTime);
-  sampleNode.stop(endTime);
+  sampleNode.stop(startTime + node.props.lengthMs * 1000);
   return sampleNode;
 }

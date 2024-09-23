@@ -13,6 +13,8 @@ import {
   Node,
   OscNode,
   OscProps,
+  SampleNode,
+  SampleProps,
   SequencerNode,
   SequencerProps,
 } from "./webAudioNodes";
@@ -31,6 +33,16 @@ export function output(children: Node[]): Node {
 export function osc(props: WithCommonProps<OscProps>): OscNode {
   return {
     type: "osc",
+    props,
+    children: [],
+    key: props.key,
+    auxConnections: props.auxOutputs,
+  };
+}
+
+export function sample(props: WithCommonProps<SampleProps>): SampleNode {
+  return {
+    type: "sample",
     props,
     children: [],
     key: props.key,

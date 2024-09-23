@@ -7,6 +7,7 @@ import {
   mul,
   osc,
   output,
+  sample,
   sequencer,
 } from "audio/nodes";
 import {
@@ -18,9 +19,12 @@ import { audioGraph } from "common/audio";
 import { useAtomValue } from "jotai";
 import {
   chordProgressionAtom,
+  closedHHPatternAtom,
   harmonySynthParamsAtom,
+  kickPatternAtom,
   melodyAtom,
   melodySynthParamsAtom,
+  snarePatternAtom,
   SynthParams,
 } from "state";
 
@@ -99,7 +103,9 @@ export function useRenderAudioGraph() {
   const harmonySynthParamsState = useAtomValue(harmonySynthParamsAtom);
   const melodySynthParamsState = useAtomValue(melodySynthParamsAtom);
   const melodyState = useAtomValue(melodyAtom);
-
+  const kickPatternState = useAtomValue(kickPatternAtom);
+  const snarePatternState = useAtomValue(snarePatternAtom);
+  const closedHHPatternState = useAtomValue(closedHHPatternAtom);
   return ({
     progression,
     harmonySynthParams,
@@ -145,6 +151,24 @@ export function useRenderAudioGraph() {
     audioGraph.render(
       output([
         ...sequencers,
+        sequencer({
+          destinationNodes: ["kick"],
+          notes: kickPatternState ?? [],
+          length: 64,
+          key: "kick-seq",
+        }),
+        sequencer({
+          destinationNodes: ["snare"],
+          notes: snarePatternState ?? [],
+          length: 64,
+          key: "snare-seq",
+        }),
+        sequencer({
+          destinationNodes: ["closed-hh"],
+          notes: closedHHPatternState ?? [],
+          length: 64,
+          key: "closed-hh-seq",
+        }),
         lfo({
           key: "harmony-osc-frequency-lfo",
           frequency: harmonyParams.oscFrequencyLFO.rate,
@@ -186,6 +210,9 @@ export function useRenderAudioGraph() {
           }),
           synthVoice({ params: melodyParams, prefix: "melody" }),
         ]),
+        sample({ key: "kick", sampleId: "kick", lengthMs: 700 }),
+        sample({ key: "snare", sampleId: "snare", lengthMs: 700 }),
+        sample({ key: "closed-hh", sampleId: "closed-hh", lengthMs: 700 }),
       ]),
     );
     // Re-trigger playback when a new progression is rendered OR when a new

@@ -44,6 +44,7 @@ export interface OscNode extends BaseNode {
 
 export interface SampleProps {
   sampleId: string;
+  lengthMs: number;
 }
 
 export interface SampleNode extends BaseNode {
