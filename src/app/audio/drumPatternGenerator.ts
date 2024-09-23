@@ -92,34 +92,30 @@ export interface DrumPattern {
   kicks: SequencerEvent[];
   snares: SequencerEvent[];
   hihats: SequencerEvent[];
+  openHihats: SequencerEvent[];
+}
+
+function mapToSequencerEvents(
+  notes: mm.NoteSequence.INote[],
+  note: number,
+): SequencerEvent[] {
+  return notes
+    .filter((n) => n.pitch === note)
+    .map((n) => ({
+      note: "C3",
+      startStep: n.quantizedStartStep as number,
+      endStep: n.quantizedEndStep as number,
+    }));
 }
 
 export async function generateDrumPattern(): Promise<DrumPattern> {
   await initPromise;
   const TEMP = 1.1;
   const sequence = await drumsRnn.continueSequence(seed, 128, TEMP);
-
-  const kicks = sequence.notes!.filter((note) => note.pitch === KICK);
-  const snares = sequence.notes!.filter((note) => note.pitch === SNARE);
-  const hihats = sequence.notes!.filter((note) => note.pitch === HIHAT);
-  const mappedKicks = kicks.map((kick) => ({
-    note: "C3",
-    startStep: kick.quantizedStartStep as number,
-    endStep: kick.quantizedEndStep as number,
-  }));
-  const mappedSnares = snares.map((snare) => ({
-    note: "C3",
-    startStep: snare.quantizedStartStep as number,
-    endStep: snare.quantizedEndStep as number,
-  }));
-  const mappedHihats = hihats.map((hihat) => ({
-    note: "C3",
-    startStep: hihat.quantizedStartStep as number,
-    endStep: hihat.quantizedEndStep as number,
-  }));
   return {
-    kicks: mappedKicks,
-    snares: mappedSnares,
-    hihats: mappedHihats,
+    kicks: mapToSequencerEvents(sequence.notes!, KICK),
+    snares: mapToSequencerEvents(sequence.notes!, SNARE),
+    hihats: mapToSequencerEvents(sequence.notes!, HIHAT),
+    openHihats: mapToSequencerEvents(sequence.notes!, OPEN_HIHAT),
   };
 }
