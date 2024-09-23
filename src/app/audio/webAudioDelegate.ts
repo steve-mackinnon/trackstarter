@@ -16,7 +16,14 @@ import { AudioGraphDelegate, FindNode } from "./graph";
 import { LFO } from "./lfo";
 import { Scheduler } from "./scheduler";
 import { Sequencer } from "./sequencer";
-import { ADSRNode, ModInfo, Node, OscNode, OscProps } from "./webAudioNodes";
+import {
+  ADSRNode,
+  ModInfo,
+  Node,
+  OscNode,
+  OscProps,
+  SampleNode,
+} from "./webAudioNodes";
 
 const BPM = 160;
 
@@ -53,7 +60,12 @@ export class WebAudioDelegate implements AudioGraphDelegate {
     this.stepIndex = (this.stepIndex + 1) % 1024;
   });
 
-  createNode(type: Node["type"], findNode: FindNode, key?: string) {
+  createNode(
+    type: Node["type"],
+    findNode: FindNode,
+    getSample: (key: string) => AudioBuffer | undefined,
+    key?: string,
+  ) {
     switch (type) {
       case "osc": {
         // Osc nodes are created dynamically when they are triggered by a sequence
@@ -108,6 +120,14 @@ export class WebAudioDelegate implements AudioGraphDelegate {
                 endTime,
                 (key) => findNode(key),
               );
+            } else if (node.type === "sample") {
+              return buildSampleNode(
+                this.context,
+                node,
+                (key) => getSample(key),
+                startTime,
+                endTime,
+              );
             }
           },
           BPM,
@@ -117,6 +137,10 @@ export class WebAudioDelegate implements AudioGraphDelegate {
         }
         this.sequencers.set(key, seq);
         return seq;
+      }
+      case "sample": {
+        // Sample nodes are created dynamically when they are triggered by a sequence
+        return null;
       }
       default:
         // Guard against unhandled Node.type enum cases
@@ -345,4 +369,30 @@ function buildADSRNode(
   const adsrNode = new ADSR(context, node.props);
   adsrNode.trigger(startTime, endTime);
   return adsrNode;
+}
+
+function buildSampleNode(
+  context: IAudioContext,
+  node: SampleNode,
+  getSample: (id: string) => AudioBuffer | undefined,
+  startTime: number,
+  endTime: number,
+) {
+  const sampleNode = context.createBufferSource();
+  const sample = getSample(node.props.sampleId);
+  if (!sample) {
+    throw new Error(`Sample not found: ${node.props.sampleId}`);
+  }
+  sampleNode.buffer = sample;
+
+  if (node.parent?.backingNode) {
+    sampleNode.connect(
+      node.parent.backingNode as any as IAudioNode<AudioContext>,
+    );
+  } else {
+    throw new Error("Sample node has an invalid parent");
+  }
+  sampleNode.start(startTime);
+  sampleNode.stop(endTime);
+  return sampleNode;
 }

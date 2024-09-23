@@ -4,6 +4,7 @@ import { Sequencer } from "./sequencer";
 
 export type NodeType =
   | "osc"
+  | "sample"
   | "lfo"
   | "filter"
   | "sequencer"
@@ -39,6 +40,16 @@ export interface OscNode extends BaseNode {
   type: "osc";
   props: OscProps;
   backingNode?: OscillatorNode;
+}
+
+export interface SampleProps {
+  sampleId: string;
+}
+
+export interface SampleNode extends BaseNode {
+  type: "sample";
+  props: SampleProps;
+  backingNode?: AudioBufferSourceNode;
 }
 
 export interface LFOProps {
@@ -133,6 +144,7 @@ export type Node =
   | OscNode
   | LFONode
   | FilterNode
+  | SampleNode
   | SequencerNode
   | DestinationNode
   | MulNode
