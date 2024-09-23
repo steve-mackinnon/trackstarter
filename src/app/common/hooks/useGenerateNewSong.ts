@@ -1,3 +1,4 @@
+import { generateDrumPattern } from "audio/drumPatternGenerator";
 import { Mood } from "audio/melodicConstants";
 import {
   generateChordProgression,
@@ -8,7 +9,10 @@ import { useSetAtom } from "jotai";
 import {
   chordProgressionAtom,
   chordProgressionLoadingAtom,
+  closedHHPatternAtom,
   isPlayingAtom,
+  kickPatternAtom,
+  snarePatternAtom,
 } from "state";
 import { useGenerateNewMelody } from "./useGenerateNewMelody";
 
@@ -17,6 +21,9 @@ export function useGenerateNewSong() {
   const setIsPlaying = useSetAtom(isPlayingAtom);
   const generateMelody = useGenerateNewMelody();
   const setChordProgressionLoading = useSetAtom(chordProgressionLoadingAtom);
+  const setKickPattern = useSetAtom(kickPatternAtom);
+  const setSnarePattern = useSetAtom(snarePatternAtom);
+  const setClosedHHPattern = useSetAtom(closedHHPatternAtom);
 
   return async (mood: Mood | null) => {
     setChordProgressionLoading(true);
@@ -27,7 +34,18 @@ export function useGenerateNewSong() {
       octave: 3,
     });
     setChordProgression(chordProgression);
-    await generateMelody({ chordProgression, restartPlayback: false });
+    const drumPattern = await generateDrumPattern();
+    setKickPattern(drumPattern.kicks);
+    setSnarePattern(drumPattern.snares);
+    setClosedHHPattern(drumPattern.hihats);
+
+    await generateMelody({
+      chordProgression,
+      restartPlayback: false,
+      kickPattern: drumPattern.kicks,
+      snarePattern: drumPattern.snares,
+      closedHHPattern: drumPattern.hihats,
+    });
     setIsPlaying(true);
     setChordProgressionLoading(false);
   };

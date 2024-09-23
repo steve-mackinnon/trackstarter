@@ -1,6 +1,7 @@
 import { removeFlatChords } from "audio/melodicUtils";
 import { generateMelodyForChordProgression } from "audio/melodyGenerator";
 import { ChordProgression } from "audio/sequenceGenerator";
+import { SequencerEvent } from "audio/webAudioNodes";
 import { useAtomValue, useSetAtom } from "jotai";
 import { chordProgressionAtom, melodyAtom, melodyLoadingAtom } from "state";
 import { useRenderAudioGraph } from "./useRenderAudioGraph";
@@ -14,9 +15,15 @@ export function useGenerateNewMelody() {
   return async ({
     chordProgression,
     restartPlayback,
+    kickPattern,
+    snarePattern,
+    closedHHPattern,
   }: {
     chordProgression?: ChordProgression;
     restartPlayback: boolean;
+    kickPattern?: SequencerEvent[];
+    snarePattern?: SequencerEvent[];
+    closedHHPattern?: SequencerEvent[];
   }) => {
     chordProgression =
       chordProgression ??
@@ -37,6 +44,9 @@ export function useGenerateNewMelody() {
         progression: chordProgression,
         melody: melodySeq,
         restartPlayback,
+        kickPattern,
+        snarePattern,
+        closedHHPattern,
       });
     } catch (e) {
       console.error(e);

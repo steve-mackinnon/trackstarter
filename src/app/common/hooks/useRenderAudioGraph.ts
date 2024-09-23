@@ -112,6 +112,9 @@ export function useRenderAudioGraph() {
     melodySynthParams,
     startStep,
     melody,
+    kickPattern,
+    snarePattern,
+    closedHHPattern,
     restartPlayback = false,
   }: {
     progression?: ChordProgression;
@@ -120,6 +123,9 @@ export function useRenderAudioGraph() {
     startStep?: number;
     melody?: SequencerEvent[];
     restartPlayback?: boolean;
+    kickPattern?: SequencerEvent[];
+    snarePattern?: SequencerEvent[];
+    closedHHPattern?: SequencerEvent[];
   }) => {
     const prog = progression ?? progressionState;
     if (!prog) {
@@ -128,6 +134,9 @@ export function useRenderAudioGraph() {
     const melodySequence = melody ?? melodyState;
     const harmonyParams = harmonySynthParams ?? harmonySynthParamsState;
     const melodyParams = melodySynthParams ?? melodySynthParamsState;
+    kickPattern = kickPattern ?? kickPatternState ?? [];
+    snarePattern = snarePattern ?? snarePatternState ?? [];
+    closedHHPattern = closedHHPattern ?? closedHHPatternState ?? [];
 
     const sequence = chordProgressionToSequencerEvents(prog.chordNotes);
     const sequencers = [
@@ -153,20 +162,20 @@ export function useRenderAudioGraph() {
         ...sequencers,
         sequencer({
           destinationNodes: ["kick"],
-          notes: kickPatternState ?? [],
-          length: 64,
+          notes: kickPattern,
+          length: 128,
           key: "kick-seq",
         }),
         sequencer({
           destinationNodes: ["snare"],
           notes: snarePatternState ?? [],
-          length: 64,
+          length: 128,
           key: "snare-seq",
         }),
         sequencer({
           destinationNodes: ["closed-hh"],
           notes: closedHHPatternState ?? [],
-          length: 64,
+          length: 128,
           key: "closed-hh-seq",
         }),
         lfo({
