@@ -3,33 +3,6 @@ import { ChordProgression } from "audio/sequenceGenerator";
 import { OscProps, SequencerEvent } from "audio/webAudioNodes";
 import { atom } from "jotai";
 
-const defaultKickPattern: SequencerEvent[] = Array.from({ length: 8 }).map(
-  (_, index) => {
-    return {
-      note: "C3",
-      startStep: index * 8,
-      endStep: index * 8 + 1,
-    };
-  },
-);
-const defaultSnarePattern: SequencerEvent[] = Array.from({ length: 4 }).map(
-  (_, index) => {
-    return {
-      note: "C3",
-      startStep: index * 16 + 8,
-      endStep: index * 16 + 9,
-    };
-  },
-);
-const defaultClosedHHPattern: SequencerEvent[] = Array.from({ length: 32 }).map(
-  (_, index) => {
-    return {
-      note: "C3",
-      startStep: index * 4,
-      endStep: index * 4 + 1,
-    };
-  },
-);
 export const isPlayingAtom = atom(false);
 
 export const chordProgressionAtom = atom<ChordProgression | null>(null);
@@ -38,15 +11,10 @@ export const chordProgressionLoadingAtom = atom(false);
 export const melodyAtom = atom<SequencerEvent[] | null>(null);
 export const melodyLoadingAtom = atom(false);
 
-export const kickPatternAtom = atom<SequencerEvent[] | null>(
-  defaultKickPattern,
-);
-export const snarePatternAtom = atom<SequencerEvent[] | null>(
-  defaultSnarePattern,
-);
-export const closedHHPatternAtom = atom<SequencerEvent[] | null>(
-  defaultClosedHHPattern,
-);
+export const kickPatternAtom = atom<SequencerEvent[]>([]);
+export const snarePatternAtom = atom<SequencerEvent[]>([]);
+export const openHHPatternAtom = atom<SequencerEvent[]>([]);
+export const closedHHPatternAtom = atom<SequencerEvent[]>([]);
 
 export const moodAtom = atom<Mood | null>(null);
 

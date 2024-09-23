@@ -12,6 +12,7 @@ import {
   closedHHPatternAtom,
   isPlayingAtom,
   kickPatternAtom,
+  openHHPatternAtom,
   snarePatternAtom,
 } from "state";
 import { useGenerateNewMelody } from "./useGenerateNewMelody";
@@ -24,6 +25,7 @@ export function useGenerateNewSong() {
   const setKickPattern = useSetAtom(kickPatternAtom);
   const setSnarePattern = useSetAtom(snarePatternAtom);
   const setClosedHHPattern = useSetAtom(closedHHPatternAtom);
+  const setOpenHHPattern = useSetAtom(openHHPatternAtom);
 
   return async (mood: Mood | null) => {
     setChordProgressionLoading(true);
@@ -38,6 +40,7 @@ export function useGenerateNewSong() {
     setKickPattern(drumPattern.kicks);
     setSnarePattern(drumPattern.snares);
     setClosedHHPattern(drumPattern.hihats);
+    setOpenHHPattern(drumPattern.openHihats);
 
     await generateMelody({
       chordProgression,
@@ -45,6 +48,7 @@ export function useGenerateNewSong() {
       kickPattern: drumPattern.kicks,
       snarePattern: drumPattern.snares,
       closedHHPattern: drumPattern.hihats,
+      openHHPattern: drumPattern.openHihats,
     });
     setIsPlaying(true);
     setChordProgressionLoading(false);

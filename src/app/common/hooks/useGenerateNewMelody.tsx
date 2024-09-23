@@ -18,12 +18,14 @@ export function useGenerateNewMelody() {
     kickPattern,
     snarePattern,
     closedHHPattern,
+    openHHPattern,
   }: {
     chordProgression?: ChordProgression;
     restartPlayback: boolean;
     kickPattern?: SequencerEvent[];
     snarePattern?: SequencerEvent[];
     closedHHPattern?: SequencerEvent[];
+    openHHPattern?: SequencerEvent[];
   }) => {
     chordProgression =
       chordProgression ??
@@ -47,6 +49,7 @@ export function useGenerateNewMelody() {
         kickPattern,
         snarePattern,
         closedHHPattern,
+        openHHPattern,
       });
     } catch (e) {
       console.error(e);

@@ -110,7 +110,7 @@ function mapToSequencerEvents(
 
 export async function generateDrumPattern(): Promise<DrumPattern> {
   await initPromise;
-  const TEMP = 1.1;
+  const TEMP = 1.05;
   const sequence = await drumsRnn.continueSequence(seed, 128, TEMP);
   return {
     kicks: mapToSequencerEvents(sequence.notes!, KICK),

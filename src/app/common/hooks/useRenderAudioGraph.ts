@@ -24,6 +24,7 @@ import {
   kickPatternAtom,
   melodyAtom,
   melodySynthParamsAtom,
+  openHHPatternAtom,
   snarePatternAtom,
   SynthParams,
 } from "state";
@@ -106,6 +107,8 @@ export function useRenderAudioGraph() {
   const kickPatternState = useAtomValue(kickPatternAtom);
   const snarePatternState = useAtomValue(snarePatternAtom);
   const closedHHPatternState = useAtomValue(closedHHPatternAtom);
+  const openHHPatternState = useAtomValue(openHHPatternAtom);
+
   return ({
     progression,
     harmonySynthParams,
@@ -115,6 +118,7 @@ export function useRenderAudioGraph() {
     kickPattern,
     snarePattern,
     closedHHPattern,
+    openHHPattern,
     restartPlayback = false,
   }: {
     progression?: ChordProgression;
@@ -126,6 +130,7 @@ export function useRenderAudioGraph() {
     kickPattern?: SequencerEvent[];
     snarePattern?: SequencerEvent[];
     closedHHPattern?: SequencerEvent[];
+    openHHPattern?: SequencerEvent[];
   }) => {
     const prog = progression ?? progressionState;
     if (!prog) {
@@ -137,6 +142,7 @@ export function useRenderAudioGraph() {
     kickPattern = kickPattern ?? kickPatternState ?? [];
     snarePattern = snarePattern ?? snarePatternState ?? [];
     closedHHPattern = closedHHPattern ?? closedHHPatternState ?? [];
+    openHHPattern = openHHPattern ?? openHHPatternState ?? [];
 
     const sequence = chordProgressionToSequencerEvents(prog.chordNotes);
     const sequencers = [
@@ -145,6 +151,12 @@ export function useRenderAudioGraph() {
         notes: sequence,
         length: 64,
         key: "harmony-seq",
+      }),
+      sequencer({
+        destinationNodes: ["open-hh-osc"],
+        notes: openHHPattern,
+        length: 64,
+        key: "open-hh-seq",
       }),
     ];
     if (melodySequence) {
@@ -177,6 +189,12 @@ export function useRenderAudioGraph() {
           notes: closedHHPatternState ?? [],
           length: 128,
           key: "closed-hh-seq",
+        }),
+        sequencer({
+          destinationNodes: ["open-hh"],
+          notes: openHHPattern,
+          length: 128,
+          key: "open-hh-seq",
         }),
         lfo({
           key: "harmony-osc-frequency-lfo",
@@ -222,6 +240,7 @@ export function useRenderAudioGraph() {
         sample({ key: "kick", sampleId: "kick", lengthMs: 700 }),
         sample({ key: "snare", sampleId: "snare", lengthMs: 700 }),
         sample({ key: "closed-hh", sampleId: "closed-hh", lengthMs: 700 }),
+        sample({ key: "open-hh", sampleId: "open-hh", lengthMs: 700 }),
       ]),
     );
     // Re-trigger playback when a new progression is rendered OR when a new

@@ -18,6 +18,7 @@ const loadAudioFiles = async () => {
     loadAudioFile("audio/kick.wav", "kick"),
     loadAudioFile("audio/snare.wav", "snare"),
     loadAudioFile("audio/ch.wav", "closed-hh"),
+    loadAudioFile("audio/oh.wav", "open-hh"),
   ]);
 };
 loadAudioFiles();
