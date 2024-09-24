@@ -43,7 +43,7 @@ export function useGenerateNewSong() {
       }
       const { kicks, snares, closedHihats, openHihats } =
         await generateDrumPattern();
-      const drums = {
+      drums = {
         muted: false,
         kickPattern: kicks,
         snarePattern: snares,
