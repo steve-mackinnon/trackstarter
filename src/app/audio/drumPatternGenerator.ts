@@ -9,7 +9,7 @@ const initPromise = drumsRnn.initialize();
 
 const KICK = 36;
 const SNARE = 38;
-const HIHAT = 42;
+const CLOSED_HIHAT = 42;
 const OPEN_HIHAT = 46;
 
 // For reference, here's a snippet from the Neural Drum Machine demo
@@ -76,7 +76,7 @@ const seed: mm.INoteSequence = {
       quantizedEndStep: 1,
     },
     {
-      pitch: HIHAT,
+      pitch: CLOSED_HIHAT,
       startTime: 1,
       endTime: 1.5,
       quantizedStartStep: 2,
@@ -91,7 +91,7 @@ const seed: mm.INoteSequence = {
 export interface DrumPattern {
   kicks: SequencerEvent[];
   snares: SequencerEvent[];
-  hihats: SequencerEvent[];
+  closedHihats: SequencerEvent[];
   openHihats: SequencerEvent[];
 }
 
@@ -115,7 +115,7 @@ export async function generateDrumPattern(): Promise<DrumPattern> {
   return {
     kicks: mapToSequencerEvents(sequence.notes!, KICK),
     snares: mapToSequencerEvents(sequence.notes!, SNARE),
-    hihats: mapToSequencerEvents(sequence.notes!, HIHAT),
+    closedHihats: mapToSequencerEvents(sequence.notes!, CLOSED_HIHAT),
     openHihats: mapToSequencerEvents(sequence.notes!, OPEN_HIHAT),
   };
 }

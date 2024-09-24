@@ -11,10 +11,21 @@ export const chordProgressionLoadingAtom = atom(false);
 export const melodyAtom = atom<SequencerEvent[] | null>(null);
 export const melodyLoadingAtom = atom(false);
 
-export const kickPatternAtom = atom<SequencerEvent[]>([]);
-export const snarePatternAtom = atom<SequencerEvent[]>([]);
-export const openHHPatternAtom = atom<SequencerEvent[]>([]);
-export const closedHHPatternAtom = atom<SequencerEvent[]>([]);
+export interface DrumsParams {
+  muted: boolean;
+  kickPattern: SequencerEvent[];
+  snarePattern: SequencerEvent[];
+  openHHPattern: SequencerEvent[];
+  closedHHPattern: SequencerEvent[];
+}
+
+export const drumsAtom = atom<DrumsParams>({
+  muted: false,
+  kickPattern: [],
+  snarePattern: [],
+  openHHPattern: [],
+  closedHHPattern: [],
+});
 
 export const moodAtom = atom<Mood | null>(null);
 

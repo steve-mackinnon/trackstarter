@@ -19,13 +19,11 @@ import { audioGraph } from "common/audio";
 import { useAtomValue } from "jotai";
 import {
   chordProgressionAtom,
-  closedHHPatternAtom,
+  drumsAtom,
+  DrumsParams,
   harmonySynthParamsAtom,
-  kickPatternAtom,
   melodyAtom,
   melodySynthParamsAtom,
-  openHHPatternAtom,
-  snarePatternAtom,
   SynthParams,
 } from "state";
 
@@ -104,10 +102,7 @@ export function useRenderAudioGraph() {
   const harmonySynthParamsState = useAtomValue(harmonySynthParamsAtom);
   const melodySynthParamsState = useAtomValue(melodySynthParamsAtom);
   const melodyState = useAtomValue(melodyAtom);
-  const kickPatternState = useAtomValue(kickPatternAtom);
-  const snarePatternState = useAtomValue(snarePatternAtom);
-  const closedHHPatternState = useAtomValue(closedHHPatternAtom);
-  const openHHPatternState = useAtomValue(openHHPatternAtom);
+  const drumsState = useAtomValue(drumsAtom);
 
   return ({
     progression,
@@ -115,10 +110,7 @@ export function useRenderAudioGraph() {
     melodySynthParams,
     startStep,
     melody,
-    kickPattern,
-    snarePattern,
-    closedHHPattern,
-    openHHPattern,
+    drums,
     restartPlayback = false,
   }: {
     progression?: ChordProgression;
@@ -127,10 +119,7 @@ export function useRenderAudioGraph() {
     startStep?: number;
     melody?: SequencerEvent[];
     restartPlayback?: boolean;
-    kickPattern?: SequencerEvent[];
-    snarePattern?: SequencerEvent[];
-    closedHHPattern?: SequencerEvent[];
-    openHHPattern?: SequencerEvent[];
+    drums?: DrumsParams;
   }) => {
     const prog = progression ?? progressionState;
     if (!prog) {
@@ -139,10 +128,7 @@ export function useRenderAudioGraph() {
     const melodySequence = melody ?? melodyState;
     const harmonyParams = harmonySynthParams ?? harmonySynthParamsState;
     const melodyParams = melodySynthParams ?? melodySynthParamsState;
-    kickPattern = kickPattern ?? kickPatternState ?? [];
-    snarePattern = snarePattern ?? snarePatternState ?? [];
-    closedHHPattern = closedHHPattern ?? closedHHPatternState ?? [];
-    openHHPattern = openHHPattern ?? openHHPatternState ?? [];
+    drums = drums ?? drumsState;
 
     const sequence = chordProgressionToSequencerEvents(prog.chordNotes);
     const sequencers = [
@@ -154,7 +140,7 @@ export function useRenderAudioGraph() {
       }),
       sequencer({
         destinationNodes: ["open-hh-osc"],
-        notes: openHHPattern,
+        notes: drums.openHHPattern,
         length: 64,
         key: "open-hh-seq",
       }),
@@ -174,25 +160,25 @@ export function useRenderAudioGraph() {
         ...sequencers,
         sequencer({
           destinationNodes: ["kick"],
-          notes: kickPattern,
+          notes: drums.kickPattern,
           length: 128,
           key: "kick-seq",
         }),
         sequencer({
           destinationNodes: ["snare"],
-          notes: snarePatternState ?? [],
+          notes: drums.snarePattern,
           length: 128,
           key: "snare-seq",
         }),
         sequencer({
           destinationNodes: ["closed-hh"],
-          notes: closedHHPatternState ?? [],
+          notes: drums.closedHHPattern,
           length: 128,
           key: "closed-hh-seq",
         }),
         sequencer({
           destinationNodes: ["open-hh"],
-          notes: openHHPattern,
+          notes: drums.openHHPattern,
           length: 128,
           key: "open-hh-seq",
         }),
@@ -237,10 +223,12 @@ export function useRenderAudioGraph() {
           }),
           synthVoice({ params: melodyParams, prefix: "melody" }),
         ]),
-        sample({ key: "kick", sampleId: "kick", lengthMs: 700 }),
-        sample({ key: "snare", sampleId: "snare", lengthMs: 700 }),
-        sample({ key: "closed-hh", sampleId: "closed-hh", lengthMs: 700 }),
-        sample({ key: "open-hh", sampleId: "open-hh", lengthMs: 700 }),
+        mul({ key: "drums-gain", multiplier: drums.muted ? 0 : 1 }, [
+          sample({ key: "kick", sampleId: "kick", lengthMs: 700 }),
+          sample({ key: "snare", sampleId: "snare", lengthMs: 700 }),
+          sample({ key: "closed-hh", sampleId: "closed-hh", lengthMs: 700 }),
+          sample({ key: "open-hh", sampleId: "open-hh", lengthMs: 700 }),
+        ]),
       ]),
     );
     // Re-trigger playback when a new progression is rendered OR when a new

@@ -10,11 +10,9 @@ import { useSetAtom } from "jotai";
 import {
   chordProgressionAtom,
   chordProgressionLoadingAtom,
-  closedHHPatternAtom,
+  drumsAtom,
+  DrumsParams,
   isPlayingAtom,
-  kickPatternAtom,
-  openHHPatternAtom,
-  snarePatternAtom,
 } from "state";
 import { useGenerateNewMelody } from "./useGenerateNewMelody";
 import { useRenderAudioGraph } from "./useRenderAudioGraph";
@@ -24,10 +22,7 @@ export function useGenerateNewSong() {
   const setIsPlaying = useSetAtom(isPlayingAtom);
   const generateMelody = useGenerateNewMelody();
   const setChordProgressionLoading = useSetAtom(chordProgressionLoadingAtom);
-  const setKickPattern = useSetAtom(kickPatternAtom);
-  const setSnarePattern = useSetAtom(snarePatternAtom);
-  const setClosedHHPattern = useSetAtom(closedHHPatternAtom);
-  const setOpenHHPattern = useSetAtom(openHHPatternAtom);
+  const setDrums = useSetAtom(drumsAtom);
   const renderAudioGraph = useRenderAudioGraph();
 
   return async (mood: Mood | null, generateDrums: boolean) => {
@@ -41,19 +36,21 @@ export function useGenerateNewSong() {
 
     setChordProgression(chordProgression);
 
-    let kicks: SequencerEvent[] | undefined;
-    let snares: SequencerEvent[] | undefined;
-    let hihats: SequencerEvent[] | undefined;
-    let openHihats: SequencerEvent[] | undefined;
+    let drums: DrumsParams | undefined;
     const runDrumGeneration = async () => {
       if (!generateDrums) {
         return;
       }
-      ({ kicks, snares, hihats, openHihats } = await generateDrumPattern());
-      setKickPattern(kicks);
-      setSnarePattern(snares);
-      setClosedHHPattern(hihats);
-      setOpenHHPattern(openHihats);
+      const { kicks, snares, closedHihats, openHihats } =
+        await generateDrumPattern();
+      const drums = {
+        muted: false,
+        kickPattern: kicks,
+        snarePattern: snares,
+        closedHHPattern: closedHihats,
+        openHHPattern: openHihats,
+      };
+      setDrums(drums);
     };
 
     let melody: SequencerEvent[] | undefined;
@@ -67,10 +64,7 @@ export function useGenerateNewSong() {
     renderAudioGraph({
       melody,
       progression: chordProgression,
-      kickPattern: kicks,
-      snarePattern: snares,
-      closedHHPattern: hihats,
-      openHHPattern: openHihats,
+      drums,
       restartPlayback: generateDrums,
     });
     setIsPlaying(true);
