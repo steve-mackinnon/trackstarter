@@ -58,7 +58,7 @@ export function InstrumentSelectionContainer() {
         }}
         onShuffleClicked={async () => {
           const melody = await generateNewMelody({});
-          renderAudioGraph({ melody: melody });
+          renderAudioGraph({ melody: melody, startPlaybackIfStopped: true });
         }}
         borderColorActive="var(--melody-border-active)"
         borderColorInactive="var(--melody-border-inactive)"

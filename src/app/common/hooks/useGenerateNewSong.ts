@@ -69,6 +69,7 @@ export function useGenerateNewSong() {
       progression: chordProgression,
       drums,
       restartPlayback: generateDrums,
+      startPlaybackIfStopped: true,
     });
     setIsPlaying(true);
     setDrumsLoading(false);

@@ -20,6 +20,7 @@ export function useGenerateNewDrumPattern() {
     setDrums(drums);
     renderAudioGraph({
       drums,
+      startPlaybackIfStopped: true,
     });
   };
 }
