@@ -11,6 +11,7 @@ import {
   chordProgressionAtom,
   chordProgressionLoadingAtom,
   drumsAtom,
+  drumsLoadingAtom,
   DrumsParams,
   isPlayingAtom,
 } from "state";
@@ -22,6 +23,7 @@ export function useGenerateNewSong() {
   const setIsPlaying = useSetAtom(isPlayingAtom);
   const generateMelody = useGenerateNewMelody();
   const setChordProgressionLoading = useSetAtom(chordProgressionLoadingAtom);
+  const setDrumsLoading = useSetAtom(drumsLoadingAtom);
   const setDrums = useSetAtom(drumsAtom);
   const renderAudioGraph = useRenderAudioGraph();
 
@@ -41,6 +43,7 @@ export function useGenerateNewSong() {
       if (!generateDrums) {
         return;
       }
+      setDrumsLoading(true);
       const { kicks, snares, closedHihats, openHihats } =
         await generateDrumPattern();
       drums = {
@@ -68,6 +71,7 @@ export function useGenerateNewSong() {
       restartPlayback: generateDrums,
     });
     setIsPlaying(true);
+    setDrumsLoading(false);
     setChordProgressionLoading(false);
   };
 }

@@ -26,6 +26,7 @@ export const drumsAtom = atom<DrumsParams>({
   openHHPattern: [],
   closedHHPattern: [],
 });
+export const drumsLoadingAtom = atom(false);
 
 export const moodAtom = atom<Mood | null>(null);
 
