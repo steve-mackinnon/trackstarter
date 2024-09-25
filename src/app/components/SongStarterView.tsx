@@ -26,11 +26,8 @@ export default function SongStarterView() {
       <Header className="absolute top-4" />
       <XYPadContainer />
       <InstrumentSelectionContainer />
-      <div className="flex gap-x-14 sm:gap-x-0 items-center sm:justify-center justify-between">
-        <div></div>
-        <DrumControls />
-        <TransportButton className="sm:absolute sm:bottom-2 self-end" />
-      </div>
+      <DrumControls />
+      <TransportButton className="absolute bottom-2 self-end sm:self-center" />
     </div>
   );
 }
