@@ -5,59 +5,36 @@ const worker = new Worker("drumPatternGen.worker.js");
 
 const KICK = 36;
 const SNARE = 38;
+const LOW_TOM = 43;
+const MID_TOM = 47;
+const HIGH_TOM = 50;
+const CRASH_CYMBAL = 49;
+const RIDE_CYMBAL = 51;
 const CLOSED_HIHAT = 42;
 const OPEN_HIHAT = 46;
 
-// For reference, here's a snippet from the Neural Drum Machine demo
-// https://codepen.io/teropa/pen/JLjXGK
-// let drumKit = [
-//   new Tone.Players({
-//     high: `${sampleBaseUrl}/808-kick-vh.mp3`,
-//     med: `${sampleBaseUrl}/808-kick-vm.mp3`,
-//     low: `${sampleBaseUrl}/808-kick-vl.mp3`
-//   }).toMaster(),
-//   new Tone.Players({
-//     high: `${sampleBaseUrl}/flares-snare-vh.mp3`,
-//     med: `${sampleBaseUrl}/flares-snare-vm.mp3`,
-//     low: `${sampleBaseUrl}/flares-snare-vl.mp3`
-//   }).connect(snarePanner),
-//   new Tone.Players({
-//     high: `${sampleBaseUrl}/808-hihat-vh.mp3`,
-//     med: `${sampleBaseUrl}/808-hihat-vm.mp3`,
-//     low: `${sampleBaseUrl}/808-hihat-vl.mp3`
-//   }).connect(new Tone.Panner(-0.5).connect(reverb)),
-//   new Tone.Players({
-//     high: `${sampleBaseUrl}/808-hihat-open-vh.mp3`,
-//     med: `${sampleBaseUrl}/808-hihat-open-vm.mp3`,
-//     low: `${sampleBaseUrl}/808-hihat-open-vl.mp3`
-//   }).connect(new Tone.Panner(-0.5).connect(reverb)),
-//   new Tone.Players({
-//     high: `${sampleBaseUrl}/slamdam-tom-low-vh.mp3`,
-//     med: `${sampleBaseUrl}/slamdam-tom-low-vm.mp3`,
-//     low: `${sampleBaseUrl}/slamdam-tom-low-vl.mp3`
-//   }).connect(new Tone.Panner(-0.4).connect(reverb)),
-//   new Tone.Players({
-//     high: `${sampleBaseUrl}/slamdam-tom-mid-vh.mp3`,
-//     med: `${sampleBaseUrl}/slamdam-tom-mid-vm.mp3`,
-//     low: `${sampleBaseUrl}/slamdam-tom-mid-vl.mp3`
-//   }).connect(reverb),
-//   new Tone.Players({
-//     high: `${sampleBaseUrl}/slamdam-tom-high-vh.mp3`,
-//     med: `${sampleBaseUrl}/slamdam-tom-high-vm.mp3`,
-//     low: `${sampleBaseUrl}/slamdam-tom-high-vl.mp3`
-//   }).connect(new Tone.Panner(0.4).connect(reverb)),
-//   new Tone.Players({
-//     high: `${sampleBaseUrl}/909-clap-vh.mp3`,
-//     med: `${sampleBaseUrl}/909-clap-vm.mp3`,
-//     low: `${sampleBaseUrl}/909-clap-vl.mp3`
-//   }).connect(new Tone.Panner(0.5).connect(reverb)),
-//   new Tone.Players({
-//     high: `${sampleBaseUrl}/909-rim-vh.wav`,
-//     med: `${sampleBaseUrl}/909-rim-vm.wav`,
-//     low: `${sampleBaseUrl}/909-rim-vl.wav`
-//   }).connect(new Tone.Panner(0.5).connect(reverb))
-// ];
-//let midiDrums = [36, 38, 42, 46, 41, 43, 45, 49, 51];
+// Drum pitch classes for reference:
+// https://github.com/magenta/magenta/blob/f8cfff4756344f04ed69304cbe02eef4875f27b9/magenta/models/music_vae/data.py#L55C1-L74C2
+// ROLAND_DRUM_PITCH_CLASSES = [
+//     # kick drum
+//     [36],
+//     # snare drum
+//     [38, 37, 40],
+//     # closed hi-hat
+//     [42, 22, 44],
+//     # open hi-hat
+//     [46, 26],
+//     # low tom
+//     [43, 58],
+//     # mid tom
+//     [47, 45],
+//     # high tom
+//     [50, 48],
+//     # crash cymbal
+//     [49, 52, 55, 57],
+//     # ride cymbal
+//     [51, 53, 59]
+// ]
 
 const seed: mm.INoteSequence = {
   ticksPerQuarter: 220,
@@ -71,13 +48,13 @@ const seed: mm.INoteSequence = {
       quantizedStartStep: 0,
       quantizedEndStep: 1,
     },
-    {
-      pitch: CLOSED_HIHAT,
-      startTime: 1,
-      endTime: 1.5,
-      quantizedStartStep: 2,
-      quantizedEndStep: 3,
-    },
+    // {
+    //   pitch: CLOSED_HIHAT,
+    //   startTime: 1,
+    //   endTime: 1.5,
+    //   quantizedStartStep: 2,
+    //   quantizedEndStep: 3,
+    // },
   ],
   totalTime: 8,
   quantizationInfo: { stepsPerQuarter: 1 },
@@ -89,6 +66,11 @@ export interface DrumPattern {
   snares: SequencerEvent[];
   closedHihats: SequencerEvent[];
   openHihats: SequencerEvent[];
+  // crash: SequencerEvent[];
+  ride: SequencerEvent[];
+  lowTom: SequencerEvent[];
+  midTom: SequencerEvent[];
+  highTom: SequencerEvent[];
 }
 
 function mapToSequencerEvents(
@@ -115,7 +97,7 @@ export async function generateDrumPattern(
       case "medium":
         return 1.0;
       case "high":
-        return 1.15;
+        return 1.08;
     }
   })();
 
@@ -127,6 +109,11 @@ export async function generateDrumPattern(
         snares: mapToSequencerEvents(sequence.notes, SNARE),
         closedHihats: mapToSequencerEvents(sequence.notes, CLOSED_HIHAT),
         openHihats: mapToSequencerEvents(sequence.notes, OPEN_HIHAT),
+        // crash: mapToSequencerEvents(sequence.notes, CRASH_CYMBAL),
+        ride: mapToSequencerEvents(sequence.notes, RIDE_CYMBAL),
+        lowTom: mapToSequencerEvents(sequence.notes, LOW_TOM),
+        midTom: mapToSequencerEvents(sequence.notes, MID_TOM),
+        highTom: mapToSequencerEvents(sequence.notes, HIGH_TOM),
       };
       resolve(drumPattern);
     };

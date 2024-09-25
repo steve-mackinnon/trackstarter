@@ -44,11 +44,20 @@ export function useGenerateNewSong() {
         return;
       }
       setDrumsLoading(true);
-      const { kicks, snares, closedHihats, openHihats } =
-        await generateDrumPattern(
-          drumState.patternGenIntensity,
-          drumState.patternLength,
-        );
+      const {
+        kicks,
+        snares,
+        closedHihats,
+        openHihats,
+        lowTom,
+        midTom,
+        highTom,
+        crash,
+        ride,
+      } = await generateDrumPattern(
+        drumState.patternGenIntensity,
+        drumState.patternLength,
+      );
       drums = {
         patternLength: drumState.patternLength,
         patternGenIntensity: drumState.patternGenIntensity,
@@ -57,6 +66,11 @@ export function useGenerateNewSong() {
         snarePattern: snares,
         closedHHPattern: closedHihats,
         openHHPattern: openHihats,
+        lowTomPattern: lowTom,
+        midTomPattern: midTom,
+        highTomPattern: highTom,
+        crashCymbalPattern: crash,
+        rideCymbalPattern: ride,
       };
       setDrumState(drums);
     };

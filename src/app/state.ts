@@ -19,6 +19,11 @@ export interface DrumsParams {
   snarePattern: SequencerEvent[];
   openHHPattern: SequencerEvent[];
   closedHHPattern: SequencerEvent[];
+  lowTomPattern: SequencerEvent[];
+  midTomPattern: SequencerEvent[];
+  highTomPattern: SequencerEvent[];
+  // crashCymbalPattern: SequencerEvent[];
+  rideCymbalPattern: SequencerEvent[];
 }
 
 export const drumsAtom = atom<DrumsParams>({
@@ -29,6 +34,11 @@ export const drumsAtom = atom<DrumsParams>({
   snarePattern: [],
   openHHPattern: [],
   closedHHPattern: [],
+  lowTomPattern: [],
+  midTomPattern: [],
+  highTomPattern: [],
+  // crashCymbalPattern: [],
+  rideCymbalPattern: [],
 });
 export const drumsLoadingAtom = atom(false);
 

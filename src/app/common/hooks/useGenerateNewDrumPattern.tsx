@@ -8,8 +8,17 @@ export function useGenerateNewDrumPattern() {
   const [drums, setDrums] = useAtom(drumsAtom);
 
   return async (intensity: "low" | "medium" | "high") => {
-    const { kicks, snares, closedHihats, openHihats } =
-      await generateDrumPattern(intensity, drums.patternLength);
+    const {
+      kicks,
+      snares,
+      closedHihats,
+      openHihats,
+      lowTom,
+      midTom,
+      highTom,
+      // crash,
+      ride,
+    } = await generateDrumPattern(intensity, drums.patternLength);
     const newDrums = {
       patternGenIntensity: intensity,
       patternLength: drums.patternLength,
@@ -18,6 +27,11 @@ export function useGenerateNewDrumPattern() {
       snarePattern: snares,
       closedHHPattern: closedHihats,
       openHHPattern: openHihats,
+      lowTomPattern: lowTom,
+      midTomPattern: midTom,
+      highTomPattern: highTom,
+      // crashCymbalPattern: crash,
+      rideCymbalPattern: ride,
     };
     setDrums(newDrums);
     renderAudioGraph({
