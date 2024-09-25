@@ -15,10 +15,10 @@ const loadAudioFile = async (file: string, id: string) => {
 
 const loadAudioFiles = async () => {
   await Promise.all([
-    loadAudioFile("audio/kick.wav", "kick"),
-    loadAudioFile("audio/snare.wav", "snare"),
-    loadAudioFile("audio/ch.wav", "closed-hh"),
-    loadAudioFile("audio/oh.wav", "open-hh"),
+    loadAudioFile("audio/kick.mp3", "kick"),
+    loadAudioFile("audio/snare.mp3", "snare"),
+    loadAudioFile("audio/ch.mp3", "closed-hh"),
+    loadAudioFile("audio/oh.mp3", "open-hh"),
   ]);
 };
 loadAudioFiles();
