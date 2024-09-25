@@ -17,7 +17,7 @@ export function DrumControls() {
   const [drumsLoading, setDrumsLoading] = useAtom(drumsLoadingAtom);
 
   return (
-    <div className="flex flex-col relative justify-center items-center bg-primary-foreground p-4 rounded-xl border-2 border-fuchsia-800 space-y-2">
+    <div className="flex flex-col relative justify-center items-center bg-primary-foreground p-2 rounded-xl border-2 border-fuchsia-800 space-y-2">
       <span className="font-bold text-lg">drums</span>
       <div className="flex space-x-2">
         <Button

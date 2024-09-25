@@ -391,7 +391,7 @@ export function XYPadContainer() {
       </div>
       <div
         className={cn(
-          "bg-secondary w-[316px] h-[316px] flex flex-col items-center justify-center rounded-b-xl rounded-br-xl rounded-tr-xl space-y-4",
+          "bg-secondary w-[316px] h-[274px] flex flex-col items-center justify-center rounded-b-xl rounded-br-xl rounded-tr-xl space-y-4",
           { "rounded-tl-xl": selectedControls !== "filter" },
         )}
       >
@@ -400,7 +400,7 @@ export function XYPadContainer() {
           borderColor={borderColor}
           xParam={params.xParam}
           yParam={params.yParam}
-          height={lfoParams ? 196 : 300}
+          height={lfoParams ? 156 : 260}
         />
         {lfoParams && (
           <div className="flex flex-col w-[95%] items-center bg-primary-foreground p-2 rounded-xl">
