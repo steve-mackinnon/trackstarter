@@ -255,7 +255,7 @@ export function useRenderAudioGraph() {
           }),
           synthVoice({ params: melodyParams, prefix: "melody" }),
         ]),
-        mul({ key: "drums-gain", multiplier: drums.muted ? 0 : 0.7 }, [
+        mul({ key: "drums-gain", multiplier: drums.muted ? 0 : 0.6 }, [
           sample({ key: "kick", sampleId: "kick", lengthMs: 700 }),
           sample({ key: "snare", sampleId: "snare", lengthMs: 700 }),
           sample({ key: "closed-hh", sampleId: "closed-hh", lengthMs: 700 }),
