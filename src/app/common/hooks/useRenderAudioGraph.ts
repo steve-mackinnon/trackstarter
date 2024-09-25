@@ -257,14 +257,20 @@ export function useRenderAudioGraph() {
         ]),
         mul({ key: "drums-gain", multiplier: drums.muted ? 0 : 0.6 }, [
           sample({ key: "kick", sampleId: "kick", lengthMs: 700 }),
-          sample({ key: "snare", sampleId: "snare", lengthMs: 700 }),
-          sample({ key: "closed-hh", sampleId: "closed-hh", lengthMs: 700 }),
+          mul({ multiplier: 1.1 }, [
+            sample({ key: "snare", sampleId: "snare", lengthMs: 700 }),
+          ]),
+          mul({ multiplier: 0.6 }, [
+            sample({ key: "closed-hh", sampleId: "closed-hh", lengthMs: 700 }),
+          ]),
           sample({ key: "open-hh", sampleId: "open-hh", lengthMs: 700 }),
           sample({ key: "low-tom", sampleId: "low-tom", lengthMs: 700 }),
           sample({ key: "mid-tom", sampleId: "mid-tom", lengthMs: 700 }),
           sample({ key: "high-tom", sampleId: "high-tom", lengthMs: 700 }),
           // sample({ key: "crash", sampleId: "crash", lengthMs: 700 }),
-          sample({ key: "ride", sampleId: "ride", lengthMs: 700 }),
+          mul({ multiplier: 0.6 }, [
+            sample({ key: "ride", sampleId: "ride", lengthMs: 700 }),
+          ]),
         ]),
       ]),
     );
