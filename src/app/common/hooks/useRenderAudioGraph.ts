@@ -7,6 +7,7 @@ import {
   mul,
   osc,
   output,
+  sample,
   sequencer,
 } from "audio/nodes";
 import {
@@ -18,6 +19,8 @@ import { audioGraph } from "common/audio";
 import { useAtomValue } from "jotai";
 import {
   chordProgressionAtom,
+  drumsAtom,
+  DrumsParams,
   harmonySynthParamsAtom,
   melodyAtom,
   melodySynthParamsAtom,
@@ -99,6 +102,7 @@ export function useRenderAudioGraph() {
   const harmonySynthParamsState = useAtomValue(harmonySynthParamsAtom);
   const melodySynthParamsState = useAtomValue(melodySynthParamsAtom);
   const melodyState = useAtomValue(melodyAtom);
+  const drumsState = useAtomValue(drumsAtom);
 
   return ({
     progression,
@@ -106,7 +110,9 @@ export function useRenderAudioGraph() {
     melodySynthParams,
     startStep,
     melody,
+    drums,
     restartPlayback = false,
+    startPlaybackIfStopped = false,
   }: {
     progression?: ChordProgression;
     harmonySynthParams?: SynthParams;
@@ -114,6 +120,8 @@ export function useRenderAudioGraph() {
     startStep?: number;
     melody?: SequencerEvent[];
     restartPlayback?: boolean;
+    drums?: DrumsParams;
+    startPlaybackIfStopped?: boolean;
   }) => {
     const prog = progression ?? progressionState;
     if (!prog) {
@@ -122,6 +130,7 @@ export function useRenderAudioGraph() {
     const melodySequence = melody ?? melodyState;
     const harmonyParams = harmonySynthParams ?? harmonySynthParamsState;
     const melodyParams = melodySynthParams ?? melodySynthParamsState;
+    drums = drums ?? drumsState;
 
     const sequence = chordProgressionToSequencerEvents(prog.chordNotes);
     const sequencers = [
@@ -130,6 +139,12 @@ export function useRenderAudioGraph() {
         notes: sequence,
         length: 64,
         key: "harmony-seq",
+      }),
+      sequencer({
+        destinationNodes: ["open-hh-osc"],
+        notes: drums.openHHPattern,
+        length: 64,
+        key: "open-hh-seq",
       }),
     ];
     if (melodySequence) {
@@ -145,6 +160,30 @@ export function useRenderAudioGraph() {
     audioGraph.render(
       output([
         ...sequencers,
+        sequencer({
+          destinationNodes: ["kick"],
+          notes: drums.kickPattern,
+          length: 128,
+          key: "kick-seq",
+        }),
+        sequencer({
+          destinationNodes: ["snare"],
+          notes: drums.snarePattern,
+          length: 128,
+          key: "snare-seq",
+        }),
+        sequencer({
+          destinationNodes: ["closed-hh"],
+          notes: drums.closedHHPattern,
+          length: 128,
+          key: "closed-hh-seq",
+        }),
+        sequencer({
+          destinationNodes: ["open-hh"],
+          notes: drums.openHHPattern,
+          length: 128,
+          key: "open-hh-seq",
+        }),
         lfo({
           key: "harmony-osc-frequency-lfo",
           frequency: harmonyParams.oscFrequencyLFO.rate,
@@ -186,14 +225,17 @@ export function useRenderAudioGraph() {
           }),
           synthVoice({ params: melodyParams, prefix: "melody" }),
         ]),
+        mul({ key: "drums-gain", multiplier: drums.muted ? 0 : 1 }, [
+          sample({ key: "kick", sampleId: "kick", lengthMs: 700 }),
+          sample({ key: "snare", sampleId: "snare", lengthMs: 700 }),
+          sample({ key: "closed-hh", sampleId: "closed-hh", lengthMs: 700 }),
+          sample({ key: "open-hh", sampleId: "open-hh", lengthMs: 700 }),
+        ]),
       ]),
     );
-    // Re-trigger playback when a new progression is rendered OR when a new
-    // melody is rendered and playback is stopped (to prevent restarting active
-    // playback when only the melody changes)
     if (
       restartPlayback ||
-      ((progression || melody) && !audioGraph.isPlaying())
+      (startPlaybackIfStopped && !audioGraph.isPlaying())
     ) {
       audioGraph.stop();
       audioGraph.start(startStep);

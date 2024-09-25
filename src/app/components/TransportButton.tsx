@@ -1,14 +1,15 @@
 import { audioGraph } from "common/audio";
+import { cn } from "common/utils";
 import { useAtom } from "jotai";
 import { Pause, Play } from "lucide-react";
 import { isPlayingAtom } from "state";
 
-export function TransportButton() {
+export function TransportButton({ className }: { className?: string }) {
   const [playing, setPlaying] = useAtom(isPlayingAtom);
 
   return (
     <button
-      className="p-4 justify-center items-center"
+      className={cn("p-4 justify-center items-center", className)}
       onClick={() => {
         const play = !playing;
         setPlaying(play);

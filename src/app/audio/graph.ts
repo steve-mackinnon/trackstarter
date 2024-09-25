@@ -12,7 +12,12 @@ export interface BaseNode {
 
 export type FindNode = (key: string) => Node | undefined;
 export interface AudioGraphDelegate {
-  createNode: (type: Node["type"], findNode: FindNode, key?: string) => any;
+  createNode: (
+    type: Node["type"],
+    findNode: FindNode,
+    getSample: (key: string) => AudioBuffer | undefined,
+    key?: string,
+  ) => any;
   deleteNode: (node: Node) => void;
   updateNode: (node: Node, findNode: FindNode) => void;
   connectNodes: (src: Node, dest: Node) => void;
@@ -32,6 +37,7 @@ export class AudioGraph {
 
   private currentRoot: Node | null = null;
   private nodeStore: Map<string, Node> = new Map();
+  private sampleStore: Map<string, AudioBuffer> = new Map();
 
   async render(newRoot: Node) {
     await this.delegate.initialize();
@@ -80,6 +86,10 @@ export class AudioGraph {
     }
   }
 
+  addSample(key: string, buffer: AudioBuffer) {
+    this.sampleStore.set(key, buffer);
+  }
+
   /// Recursively builds a WebAudio graph by diffing the new tree (rooted at newNode) with
   /// the current tree, then adding, removing, or updating nodes and their connections
   /// to fulfill the requested state.
@@ -107,6 +117,7 @@ export class AudioGraph {
       newNode.backingNode = this.delegate.createNode(
         newNode.type,
         (key) => this.nodeStore.get(key),
+        (key) => this.sampleStore.get(key),
         newNode.key,
       );
       if (parent) {

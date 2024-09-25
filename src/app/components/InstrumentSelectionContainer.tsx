@@ -34,7 +34,7 @@ export function InstrumentSelectionContainer() {
           setHarmonyParams(newParams);
           renderAudioGraph({ harmonySynthParams: newParams });
         }}
-        onShuffleClicked={() => generateNewSong(mood)}
+        onShuffleClicked={() => generateNewSong(mood, false)}
         borderColorActive={"var(--harmony-border-active)"}
         borderColorInactive={"var(--harmony-border-inactive)"}
         isLoading={harmonyIsLoading}
@@ -56,7 +56,10 @@ export function InstrumentSelectionContainer() {
           setMelodyParams(newParams);
           renderAudioGraph({ melodySynthParams: newParams });
         }}
-        onShuffleClicked={() => generateNewMelody({ restartPlayback: false })}
+        onShuffleClicked={async () => {
+          const melody = await generateNewMelody({});
+          renderAudioGraph({ melody: melody, startPlaybackIfStopped: true });
+        }}
         borderColorActive="var(--melody-border-active)"
         borderColorInactive="var(--melody-border-inactive)"
         isLoading={melodyIsLoading}
