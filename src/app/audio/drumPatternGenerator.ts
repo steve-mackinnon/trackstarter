@@ -1,11 +1,7 @@
 import * as mm from "@magenta/music";
 import { SequencerEvent } from "./webAudioNodes";
 
-const DRUMS_CHECKPOINT_URL =
-  "https://storage.googleapis.com/magentadata/js/checkpoints/music_rnn/drum_kit_rnn";
-
-const drumsRnn = new mm.MusicRNN(DRUMS_CHECKPOINT_URL);
-const initPromise = drumsRnn.initialize();
+const worker = new Worker("drumPatternGen.worker.js");
 
 const KICK = 36;
 const SNARE = 38;
@@ -112,7 +108,6 @@ export async function generateDrumPattern(
   intensity: "low" | "medium" | "high",
   patternLength: number,
 ): Promise<DrumPattern> {
-  await initPromise;
   const temp = (() => {
     switch (intensity) {
       case "low":
@@ -123,11 +118,22 @@ export async function generateDrumPattern(
         return 1.15;
     }
   })();
-  const sequence = await drumsRnn.continueSequence(seed, patternLength, temp);
-  return {
-    kicks: mapToSequencerEvents(sequence.notes!, KICK),
-    snares: mapToSequencerEvents(sequence.notes!, SNARE),
-    closedHihats: mapToSequencerEvents(sequence.notes!, CLOSED_HIHAT),
-    openHihats: mapToSequencerEvents(sequence.notes!, OPEN_HIHAT),
-  };
+
+  const promise = new Promise<DrumPattern>((resolve, reject) => {
+    worker.onmessage = (e) => {
+      const sequence = e.data;
+      const drumPattern = {
+        kicks: mapToSequencerEvents(sequence.notes, KICK),
+        snares: mapToSequencerEvents(sequence.notes, SNARE),
+        closedHihats: mapToSequencerEvents(sequence.notes, CLOSED_HIHAT),
+        openHihats: mapToSequencerEvents(sequence.notes, OPEN_HIHAT),
+      };
+      resolve(drumPattern);
+    };
+    worker.onerror = (e) => {
+      reject(e);
+    };
+  });
+  worker.postMessage({ seed, steps: patternLength, temperature: temp });
+  return promise;
 }
