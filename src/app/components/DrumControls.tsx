@@ -1,10 +1,9 @@
-import { ComboBox } from "common/components/ComboBox";
 import { Button } from "common/components/ui/button";
 import { Toggle } from "common/components/ui/toggle";
 import { useGenerateNewDrumPattern } from "common/hooks/useGenerateNewDrumPattern";
 import { useRenderAudioGraph } from "common/hooks/useRenderAudioGraph";
 import { useAtom } from "jotai";
-import { Dices, Thermometer, Volume2, VolumeXIcon } from "lucide-react";
+import { Volume2, VolumeXIcon } from "lucide-react";
 import { useState } from "react";
 import LoadingIndicator from "react-spinners/PuffLoader";
 import { drumsAtom, drumsLoadingAtom } from "state";
@@ -16,34 +15,45 @@ export function DrumControls() {
   const renderAudioGraph = useRenderAudioGraph();
   const [drumsLoading, setDrumsLoading] = useAtom(drumsLoadingAtom);
 
+  const randomizePattern = async (temp: "low" | "medium" | "high") => {
+    setDrumsLoading(true);
+    await generateNewDrumPattern(temp);
+    setDrumsLoading(false);
+  };
   return (
     <div className="flex flex-col relative justify-center items-center bg-primary-foreground p-2 rounded-xl border-2 border-fuchsia-800 space-y-2">
-      <span className="font-bold text-lg">drums</span>
+      <div>
+        <span className="font-bold text-lg">drums</span>
+      </div>
       <div className="flex space-x-2">
-        <Button
-          variant="outline"
-          className="gap-x-4 rounded-full active:bg-slate-500 border-slate-400"
-          onClick={async () => {
-            setDrumsLoading(true);
-            await generateNewDrumPattern(drumState.patternGenIntensity);
-            setDrumsLoading(false);
-          }}
-        >
-          <Dices />
-        </Button>
-        <div className="flex items-center">
-          <Thermometer />
-          <ComboBox
-            widthPx={100}
-            choices={["low", "medium", "high"]}
-            defaultValue={drumState.patternGenIntensity}
-            onChange={async (value: "low" | "medium" | "high") => {
-              setDrumState({ ...drumState, patternGenIntensity: value });
-              setDrumsLoading(true);
-              await generateNewDrumPattern(value);
-              setDrumsLoading(false);
-            }}
-          />
+        <div className="flex flex-col justify-center items-center space-y-1">
+          <div className="flex items-center space-x-1">
+            <Button
+              className="rounded-full"
+              variant="outline"
+              onClick={() => randomizePattern("low")}
+              aria-label="generate low intensity drum pattern"
+            >
+              lo
+            </Button>
+            <Button
+              className="rounded-full"
+              variant="outline"
+              onClick={() => randomizePattern("medium")}
+              aria-label="generate medium intensity drum pattern"
+            >
+              md
+            </Button>
+            <Button
+              className="rounded-full"
+              variant="outline"
+              onClick={() => randomizePattern("high")}
+              aria-label="generate high intensity drum pattern"
+            >
+              hi
+            </Button>
+          </div>
+          <span className="text-xs text-slate-300">randomize pattern</span>
         </div>
         <Toggle
           aria-label={`mute drums`}
