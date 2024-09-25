@@ -34,7 +34,7 @@ export function DrumControls() {
         <div className="flex items-center">
           <Thermometer />
           <ComboBox
-            widthPx={110}
+            widthPx={100}
             choices={["low", "medium", "high"]}
             defaultValue={drumState.patternGenIntensity}
             onChange={async (value: "low" | "medium" | "high") => {

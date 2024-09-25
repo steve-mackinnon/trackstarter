@@ -39,7 +39,7 @@ export function ComboBox<T extends string, U extends T>(
         }}
         defaultValue={value}
       >
-        <SelectTrigger className={`w-[${props.widthPx}px] h-8`}>
+        <SelectTrigger className={`h-8`} style={{ width: props.widthPx }}>
           <SelectValue placeholder={value} />
         </SelectTrigger>
 
