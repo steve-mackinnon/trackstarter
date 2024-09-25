@@ -44,6 +44,8 @@ export function Header({ className }: { className?: string }) {
         </Button>
       </Link>
       <ComboBox
+        className="px-5"
+        widthPx={160}
         label="vibe"
         choices={["Any", ...(MOODS as string[])]}
         onChange={(newMood: string | null) => {

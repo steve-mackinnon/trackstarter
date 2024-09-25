@@ -13,6 +13,8 @@ export const melodyLoadingAtom = atom(false);
 
 export interface DrumsParams {
   muted: boolean;
+  patternGenIntensity: "low" | "medium" | "high";
+  patternLength: number;
   kickPattern: SequencerEvent[];
   snarePattern: SequencerEvent[];
   openHHPattern: SequencerEvent[];
@@ -21,6 +23,8 @@ export interface DrumsParams {
 
 export const drumsAtom = atom<DrumsParams>({
   muted: false,
+  patternGenIntensity: "medium",
+  patternLength: 64,
   kickPattern: [],
   snarePattern: [],
   openHHPattern: [],

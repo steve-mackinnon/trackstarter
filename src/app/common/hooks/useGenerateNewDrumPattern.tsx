@@ -1,25 +1,27 @@
 import { generateDrumPattern } from "audio/drumPatternGenerator";
-import { useSetAtom } from "jotai";
+import { useAtom } from "jotai";
 import { drumsAtom } from "state";
 import { useRenderAudioGraph } from "./useRenderAudioGraph";
 
 export function useGenerateNewDrumPattern() {
   const renderAudioGraph = useRenderAudioGraph();
-  const setDrums = useSetAtom(drumsAtom);
+  const [drums, setDrums] = useAtom(drumsAtom);
 
-  return async () => {
+  return async (intensity: "low" | "medium" | "high") => {
     const { kicks, snares, closedHihats, openHihats } =
-      await generateDrumPattern();
-    const drums = {
+      await generateDrumPattern(intensity, drums.patternLength);
+    const newDrums = {
+      patternGenIntensity: intensity,
+      patternLength: drums.patternLength,
       muted: false,
       kickPattern: kicks,
       snarePattern: snares,
       closedHHPattern: closedHihats,
       openHHPattern: openHihats,
     };
-    setDrums(drums);
+    setDrums(newDrums);
     renderAudioGraph({
-      drums,
+      drums: newDrums,
       startPlaybackIfStopped: true,
     });
   };

@@ -6,7 +6,7 @@ import {
   getRandomNote,
 } from "audio/sequenceGenerator";
 import { SequencerEvent } from "audio/webAudioNodes";
-import { useSetAtom } from "jotai";
+import { useAtom, useSetAtom } from "jotai";
 import {
   chordProgressionAtom,
   chordProgressionLoadingAtom,
@@ -24,7 +24,7 @@ export function useGenerateNewSong() {
   const generateMelody = useGenerateNewMelody();
   const setChordProgressionLoading = useSetAtom(chordProgressionLoadingAtom);
   const setDrumsLoading = useSetAtom(drumsLoadingAtom);
-  const setDrums = useSetAtom(drumsAtom);
+  const [drumState, setDrumState] = useAtom(drumsAtom);
   const renderAudioGraph = useRenderAudioGraph();
 
   return async (mood: Mood | null, generateDrums: boolean) => {
@@ -45,15 +45,20 @@ export function useGenerateNewSong() {
       }
       setDrumsLoading(true);
       const { kicks, snares, closedHihats, openHihats } =
-        await generateDrumPattern();
+        await generateDrumPattern(
+          drumState.patternGenIntensity,
+          drumState.patternLength,
+        );
       drums = {
+        patternLength: drumState.patternLength,
+        patternGenIntensity: drumState.patternGenIntensity,
         muted: false,
         kickPattern: kicks,
         snarePattern: snares,
         closedHHPattern: closedHihats,
         openHHPattern: openHihats,
       };
-      setDrums(drums);
+      setDrumState(drums);
     };
 
     let melody: SequencerEvent[] | undefined;

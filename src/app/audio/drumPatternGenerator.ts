@@ -108,10 +108,22 @@ function mapToSequencerEvents(
     }));
 }
 
-export async function generateDrumPattern(): Promise<DrumPattern> {
+export async function generateDrumPattern(
+  intensity: "low" | "medium" | "high",
+  patternLength: number,
+): Promise<DrumPattern> {
   await initPromise;
-  const TEMP = 1.05;
-  const sequence = await drumsRnn.continueSequence(seed, 128, TEMP);
+  const temp = (() => {
+    switch (intensity) {
+      case "low":
+        return 0.9;
+      case "medium":
+        return 1.0;
+      case "high":
+        return 1.15;
+    }
+  })();
+  const sequence = await drumsRnn.continueSequence(seed, patternLength, temp);
   return {
     kicks: mapToSequencerEvents(sequence.notes!, KICK),
     snares: mapToSequencerEvents(sequence.notes!, SNARE),

@@ -1,9 +1,10 @@
+import { ComboBox } from "common/components/ComboBox";
 import { Button } from "common/components/ui/button";
 import { Toggle } from "common/components/ui/toggle";
 import { useGenerateNewDrumPattern } from "common/hooks/useGenerateNewDrumPattern";
 import { useRenderAudioGraph } from "common/hooks/useRenderAudioGraph";
 import { useAtom } from "jotai";
-import { Dices, Volume2, VolumeXIcon } from "lucide-react";
+import { Dices, Thermometer, Volume2, VolumeXIcon } from "lucide-react";
 import { useState } from "react";
 import LoadingIndicator from "react-spinners/PuffLoader";
 import { drumsAtom, drumsLoadingAtom } from "state";
@@ -24,12 +25,26 @@ export function DrumControls() {
           className="gap-x-4 rounded-full active:bg-slate-500 border-slate-400"
           onClick={async () => {
             setDrumsLoading(true);
-            await generateNewDrumPattern();
+            await generateNewDrumPattern(drumState.patternGenIntensity);
             setDrumsLoading(false);
           }}
         >
           <Dices />
         </Button>
+        <div className="flex items-center">
+          <Thermometer />
+          <ComboBox
+            widthPx={110}
+            choices={["low", "medium", "high"]}
+            defaultValue={drumState.patternGenIntensity}
+            onChange={async (value: "low" | "medium" | "high") => {
+              setDrumState({ ...drumState, patternGenIntensity: value });
+              setDrumsLoading(true);
+              await generateNewDrumPattern(value);
+              setDrumsLoading(false);
+            }}
+          />
+        </div>
         <Toggle
           aria-label={`mute drums`}
           onClick={() => {

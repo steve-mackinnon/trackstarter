@@ -5,12 +5,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "common/components/ui/select";
+import { cn } from "common/utils";
 import { useState } from "react";
 
 interface ComboBoxProps<T extends string, U extends T> {
-  label: string;
+  label?: string;
   choices: readonly T[];
   defaultValue: U;
+  widthPx: number;
+  className?: string;
   onChange: (value: T) => void;
 }
 
@@ -20,10 +23,14 @@ export function ComboBox<T extends string, U extends T>(
   const [value, setValue] = useState<T>(props.defaultValue);
 
   return (
-    <div className="flex justify-between items-center px-5 py-1">
-      <label htmlFor={props.label} className="select-none w-[60px]">
-        {props.label}
-      </label>
+    <div
+      className={cn("flex justify-between items-center py-1", props.className)}
+    >
+      {props.label && (
+        <label htmlFor={props.label} className="select-none w-[60px]">
+          {props.label}
+        </label>
+      )}
       <Select
         name={props.label}
         onValueChange={(val: U) => {
@@ -32,7 +39,7 @@ export function ComboBox<T extends string, U extends T>(
         }}
         defaultValue={value}
       >
-        <SelectTrigger className="w-[160px] h-8">
+        <SelectTrigger className={`w-[${props.widthPx}px] h-8`}>
           <SelectValue placeholder={value} />
         </SelectTrigger>
 

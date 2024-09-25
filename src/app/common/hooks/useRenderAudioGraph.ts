@@ -163,25 +163,25 @@ export function useRenderAudioGraph() {
         sequencer({
           destinationNodes: ["kick"],
           notes: drums.kickPattern,
-          length: 128,
+          length: drums.patternLength,
           key: "kick-seq",
         }),
         sequencer({
           destinationNodes: ["snare"],
           notes: drums.snarePattern,
-          length: 128,
+          length: drums.patternLength,
           key: "snare-seq",
         }),
         sequencer({
           destinationNodes: ["closed-hh"],
           notes: drums.closedHHPattern,
-          length: 128,
+          length: drums.patternLength,
           key: "closed-hh-seq",
         }),
         sequencer({
           destinationNodes: ["open-hh"],
           notes: drums.openHHPattern,
-          length: 128,
+          length: drums.patternLength,
           key: "open-hh-seq",
         }),
         lfo({
