@@ -52,7 +52,7 @@ export function useGenerateNewSong() {
         lowTom,
         midTom,
         highTom,
-        crash,
+        // crash,
         ride,
       } = await generateDrumPattern(
         drumState.patternGenIntensity,
@@ -69,7 +69,7 @@ export function useGenerateNewSong() {
         lowTomPattern: lowTom,
         midTomPattern: midTom,
         highTomPattern: highTom,
-        crashCymbalPattern: crash,
+        // crashCymbalPattern: crash,
         rideCymbalPattern: ride,
       };
       setDrumState(drums);
