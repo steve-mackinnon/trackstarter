@@ -64,7 +64,7 @@ export function InstrumentControls({
         <div className="flex justify-between space-x-4">
           <Button
             variant="outline"
-            className="rounded-full active:bg-slate-500 border-slate-400"
+            className="rounded-full"
             onClick={onShuffleClicked}
             disabled={isLoading}
             aria-label={`shuffle ${instrument}`}
