@@ -22,7 +22,7 @@ export async function generateMelodyForChordProgression(
     // to scale to keep the melody in key.
     chordProgression = chordProgression.map((chord) => chord.split("/")[0]);
     const NUM_SAMPLES = 5;
-    const TEMP = 0.5;
+    const TEMP = 0.7;
     const sequences = await mvae.sample(NUM_SAMPLES, TEMP, {
       chordProgression,
     });
