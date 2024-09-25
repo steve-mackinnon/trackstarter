@@ -90,16 +90,18 @@ export async function generateDrumPattern(
   intensity: "low" | "medium" | "high",
   patternLength: number,
 ): Promise<DrumPattern> {
-  const temp = (() => {
-    switch (intensity) {
-      case "low":
-        return 0.9;
-      case "medium":
-        return 1.0;
-      case "high":
-        return 1.08;
-    }
-  })();
+  const temp =
+    (() => {
+      switch (intensity) {
+        case "low":
+          return 0.7;
+        case "medium":
+          return 0.9;
+        case "high":
+          return 1.0;
+      }
+    })() +
+    Math.random() * 0.25;
 
   const promise = new Promise<DrumPattern>((resolve, reject) => {
     worker.onmessage = (e) => {
