@@ -1,6 +1,6 @@
 import { Button } from "common/components/ui/button";
 import { cn } from "common/utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export type OscShape = "sine" | "square" | "sawtooth" | "triangle";
 
@@ -14,6 +14,10 @@ export function OscillatorShapeSelector({
   disabled?: boolean;
 }) {
   const [shape, setShape] = useState<OscShape>(oscShape);
+  useEffect(() => {
+    setShape(oscShape);
+  }, [oscShape]);
+
   const className = (s: OscShape) =>
     cn("w-2 text-xs h-6 w-9", {
       "bg-secondary": s === shape,
