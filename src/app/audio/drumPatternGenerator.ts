@@ -1,7 +1,12 @@
 import * as mm from "@magenta/music";
 import { SequencerEvent } from "./webAudioNodes";
 
-const worker = new Worker("drumPatternGen.worker.js");
+const workers = [
+  new Worker("drumPatternGen.worker.js"),
+  new Worker("drumPatternGen.worker.js"),
+  new Worker("drumPatternGen.worker.js"),
+  new Worker("drumPatternGen.worker.js"),
+];
 
 const KICK = 36;
 const SNARE = 38;
@@ -47,14 +52,8 @@ const seed: mm.INoteSequence = {
       endTime: 0.5,
       quantizedStartStep: 0,
       quantizedEndStep: 1,
+      isDrum: true,
     },
-    // {
-    //   pitch: CLOSED_HIHAT,
-    //   startTime: 1,
-    //   endTime: 1.5,
-    //   quantizedStartStep: 2,
-    //   quantizedEndStep: 3,
-    // },
   ],
   totalTime: 8,
   quantizationInfo: { stepsPerQuarter: 1 },
@@ -101,28 +100,64 @@ export async function generateDrumPattern(
           return 1.0;
       }
     })() +
-    Math.random() * 0.25;
+    Math.random() * 0.15;
 
   const promise = new Promise<DrumPattern>((resolve, reject) => {
-    worker.onmessage = (e) => {
-      const sequence = e.data;
-      const drumPattern = {
-        kicks: mapToSequencerEvents(sequence.notes, KICK),
-        snares: mapToSequencerEvents(sequence.notes, SNARE),
-        closedHihats: mapToSequencerEvents(sequence.notes, CLOSED_HIHAT),
-        openHihats: mapToSequencerEvents(sequence.notes, OPEN_HIHAT),
-        // crash: mapToSequencerEvents(sequence.notes, CRASH_CYMBAL),
-        ride: mapToSequencerEvents(sequence.notes, RIDE_CYMBAL),
-        lowTom: mapToSequencerEvents(sequence.notes, LOW_TOM),
-        midTom: mapToSequencerEvents(sequence.notes, MID_TOM),
-        highTom: mapToSequencerEvents(sequence.notes, HIGH_TOM),
+    let sequences: mm.INoteSequence[] = [];
+    workers.forEach((worker) => {
+      worker.onmessage = (e) => {
+        const sequence = e.data as mm.INoteSequence;
+        sequences.push(sequence);
+        if (sequences.length === workers.length) {
+          // Randomly choose the longest sequence 60% of the time,
+          // and the second longest sequence 40% of the time
+          let index = Math.random() > 0.4 ? 0 : 1;
+          const sortedSequences = sequences.sort(
+            (a, b) => b.notes!.length - a.notes!.length,
+          );
+          // Attempt to filter out "over the top" patterns
+          while (
+            sortedSequences[index].notes!.length >= patternLength * 0.8 &&
+            index > 0
+          ) {
+            index--;
+          }
+          const longestSequence = sortedSequences[index];
+          const drumPattern: DrumPattern = {
+            kicks: mapToSequencerEvents(longestSequence.notes ?? [], KICK),
+            snares: mapToSequencerEvents(longestSequence.notes ?? [], SNARE),
+            closedHihats: mapToSequencerEvents(
+              longestSequence.notes ?? [],
+              CLOSED_HIHAT,
+            ),
+            openHihats: mapToSequencerEvents(
+              longestSequence.notes ?? [],
+              OPEN_HIHAT,
+            ),
+            ride: mapToSequencerEvents(
+              longestSequence.notes ?? [],
+              RIDE_CYMBAL,
+            ),
+            lowTom: mapToSequencerEvents(longestSequence.notes ?? [], LOW_TOM),
+            midTom: mapToSequencerEvents(longestSequence.notes ?? [], MID_TOM),
+            highTom: mapToSequencerEvents(
+              longestSequence.notes ?? [],
+              HIGH_TOM,
+            ),
+          };
+          resolve(drumPattern);
+        }
       };
-      resolve(drumPattern);
-    };
-    worker.onerror = (e) => {
-      reject(e);
-    };
+    });
+    workers.forEach(
+      (worker) =>
+        (worker.onerror = (e) => {
+          reject(e);
+        }),
+    );
   });
-  worker.postMessage({ seed, steps: patternLength, temperature: temp });
+  workers.forEach((worker) =>
+    worker.postMessage({ seed, steps: patternLength, temperature: temp }),
+  );
   return promise;
 }
