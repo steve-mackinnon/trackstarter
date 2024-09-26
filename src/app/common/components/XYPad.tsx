@@ -28,6 +28,11 @@ export function XYPad({
     x,
     y,
   });
+  // Prevents bug where the node doesn't snap to new positions when the props change
+  useEffect(() => {
+    setPosition({ x, y });
+  }, [x, y]);
+
   const [dragOriginOffset, setDragOriginOffset] = useState<Position | null>(
     null,
   );
