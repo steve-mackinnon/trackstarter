@@ -23,7 +23,7 @@ export default function SongStarterView() {
   }, []);
 
   return (
-    <div className="absolute flex flex-col gap-y-4 w-full h-full py-20  items-center">
+    <div className="absolute flex flex-col gap-y-4 w-full h-full py-16  items-center">
       <Header className="absolute top-4" />
       <PresetSelector />
       <XYPadContainer />

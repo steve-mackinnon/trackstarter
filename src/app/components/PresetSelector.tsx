@@ -20,16 +20,32 @@ export function PresetSelector() {
 
   return (
     <div className="flex gap-x-2">
-      <Button variant="outline" onClick={() => loadPreset(PRESETS[0])}>
+      <Button
+        className="w-8 h-8"
+        variant="outline"
+        onClick={() => loadPreset(PRESETS[0])}
+      >
         A
       </Button>
-      <Button variant="outline" onClick={() => loadPreset(PRESETS[1])}>
+      <Button
+        className="w-8 h-8"
+        variant="outline"
+        onClick={() => loadPreset(PRESETS[1])}
+      >
         B
       </Button>
-      <Button variant="outline" onClick={() => loadPreset(PRESETS[2])}>
+      <Button
+        className="w-8 h-8"
+        variant="outline"
+        onClick={() => loadPreset(PRESETS[2])}
+      >
         C
       </Button>
-      <Button variant="outline" onClick={() => loadPreset(PRESETS[3])}>
+      <Button
+        className="w-8 h-8"
+        variant="outline"
+        onClick={() => loadPreset(PRESETS[3])}
+      >
         D
       </Button>
     </div>
