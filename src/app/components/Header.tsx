@@ -5,11 +5,14 @@ import classNames from "classnames";
 import { ComboBox } from "common/components/ComboBox";
 import { Button } from "common/components/ui/button";
 import { useGenerateNewSong } from "common/hooks/useGenerateNewSong";
+import { useSaveParameterStateToFile } from "common/hooks/useSaveParameterStateToFile";
 import { saveToFile } from "common/utils/saveToFile";
 import { useAtomValue, useSetAtom } from "jotai";
 import { Download, HomeIcon } from "lucide-react";
 import Link from "next/link";
 import { chordProgressionAtom, melodyAtom, moodAtom } from "state";
+
+const PRESET_DOWNLOAD_ENABLED = false;
 
 const iOSDevice =
   /(iPad|iPhone|iPod)/g.test(navigator.userAgent) ||
@@ -20,6 +23,7 @@ export function Header({ className }: { className?: string }) {
   const generateNewChordProgression = useGenerateNewSong();
   const melody = useAtomValue(melodyAtom);
   const harmony = useAtomValue(chordProgressionAtom);
+  const saveParameterStateToFile = useSaveParameterStateToFile();
 
   const writeCurrentStateToMidiFile = () => {
     if (!melody || !harmony) {
@@ -66,6 +70,17 @@ export function Header({ className }: { className?: string }) {
         >
           <Download className="px-1" />
           MIDI
+        </Button>
+      )}
+      {PRESET_DOWNLOAD_ENABLED && (
+        <Button
+          variant={"secondary"}
+          disabled={!melody || !harmony}
+          onClick={() => saveParameterStateToFile()}
+          aria-label="Download MIDI"
+        >
+          <Download className="px-1" />
+          Preset
         </Button>
       )}
     </div>
