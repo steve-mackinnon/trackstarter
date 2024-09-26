@@ -3,9 +3,9 @@ import { SequencerEvent } from "./webAudioNodes";
 
 const workers = [
   new Worker("drumPatternGen.worker.js"),
-  new Worker("drumPatternGen.worker.js"),
-  new Worker("drumPatternGen.worker.js"),
-  new Worker("drumPatternGen.worker.js"),
+  // new Worker("drumPatternGen.worker.js"),
+  // new Worker("drumPatternGen.worker.js"),
+  // new Worker("drumPatternGen.worker.js"),
 ];
 
 const KICK = 36;
