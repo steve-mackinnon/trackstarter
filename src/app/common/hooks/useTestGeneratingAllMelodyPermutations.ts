@@ -1,11 +1,10 @@
 import {
   MOOD_TO_PROGRESSIONS,
-  MOOD_TO_SCALE,
+  MOOD_TO_SCALES,
   MOODS,
 } from "audio/melodicConstants";
 import { chordsForProgression } from "audio/melodicUtils";
 import { generateMelodyForChordProgression } from "audio/melodyGenerator";
-import { NOTES } from "audio/sequenceGenerator";
 import { useEffect } from "react";
 
 // This hook is for running an in-browser test that verifies that every
@@ -14,11 +13,19 @@ import { useEffect } from "react";
 export function useTestGeneratingAllMelodyPermutations() {
   useEffect(() => {
     const runTest = async () => {
-      for (const rootNote of NOTES) {
-        for (const mood of MOODS) {
-          for (const progression of MOOD_TO_PROGRESSIONS[mood]) {
-            const scaleName = MOOD_TO_SCALE[mood];
-            console.log(`testing ${rootNote} ${scaleName} ${progression}`);
+      const testSet: Set<string> = new Set();
+      // for (const rootNote of NOTES) {
+      const rootNote = "C";
+      for (const mood of MOODS) {
+        for (const progression of MOOD_TO_PROGRESSIONS[mood]) {
+          for (const scaleName of MOOD_TO_SCALES[mood]) {
+            const key = `${rootNote} ${scaleName} ${progression}`;
+            if (testSet.has(key)) {
+              console.log(`skipping ${key} - already tested`);
+              continue;
+            }
+            testSet.add(key);
+            console.log(`testing ${key}`);
             const { chordNames } = chordsForProgression({
               progression,
               scaleName,
@@ -39,7 +46,9 @@ export function useTestGeneratingAllMelodyPermutations() {
           }
         }
       }
+      // }
     };
+
     runTest();
   });
 }
