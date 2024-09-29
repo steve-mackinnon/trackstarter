@@ -14,6 +14,7 @@ import {
 import { ADSR } from "./adsr";
 import { AudioGraphDelegate, FindNode } from "./graph";
 import { LFO } from "./lfo";
+import { Reverb } from "./reverb";
 import { Scheduler } from "./scheduler";
 import { Sequencer } from "./sequencer";
 import {
@@ -60,7 +61,7 @@ export class WebAudioDelegate implements AudioGraphDelegate {
     this.stepIndex = (this.stepIndex + 1) % 1024;
   });
 
-  createNode(
+  async createNode(
     type: Node["type"],
     findNode: FindNode,
     getSample: (key: string) => AudioBuffer | undefined,
@@ -142,6 +143,9 @@ export class WebAudioDelegate implements AudioGraphDelegate {
         // Sample nodes are created dynamically when they are triggered by a sequence
         return null;
       }
+      case "reverb": {
+        return new Reverb(this.context, { wetMix: 0.5 });
+      }
       default:
         // Guard against unhandled Node.type enum cases
         const _exhaustiveCheck: never = type;
@@ -204,6 +208,10 @@ export class WebAudioDelegate implements AudioGraphDelegate {
         node.backingNode?.update(node.props);
         break;
       }
+      case "reverb": {
+        (node.backingNode as Reverb).update(node.props);
+        break;
+      }
       case "master-clipper":
       case "osc":
         break;
@@ -215,7 +223,11 @@ export class WebAudioDelegate implements AudioGraphDelegate {
       return;
     }
     if (isAudioNode(src.backingNode) && isAudioNode(dest.backingNode)) {
-      src.backingNode.connect(dest.backingNode);
+      if (hasInput(dest.backingNode)) {
+        src.backingNode.connect(dest.backingNode.getInput());
+      } else {
+        src.backingNode.connect(dest.backingNode);
+      }
     }
   }
 
@@ -241,6 +253,14 @@ function isAudioNode(obj: any): obj is AudioNode {
   );
 }
 
+interface HasInput {
+  getInput(): AudioNode;
+}
+
+function hasInput(node: any): node is HasInput {
+  return node && typeof node.getInput === "function";
+}
+
 function shouldConnectToParent(type: Node["type"]) {
   return type !== "lfo" && type !== "adsr";
 }
@@ -262,7 +282,15 @@ function buildOscNode(
   oscGain.gain.value = 1;
   oscNode.connect(oscGain);
   if (node.parent?.backingNode) {
-    oscGain.connect(node.parent.backingNode as any as IAudioNode<AudioContext>);
+    if (hasInput(node.parent.backingNode)) {
+      oscGain.connect(
+        node.parent.backingNode.getInput() as any as IAudioNode<AudioContext>,
+      );
+    } else {
+      oscGain.connect(
+        node.parent.backingNode as any as IAudioNode<AudioContext>,
+      );
+    }
   }
 
   const stopTime = connectOscModulators(
@@ -386,9 +414,15 @@ function buildSampleNode(
   sampleNode.buffer = sample;
 
   if (node.parent?.backingNode) {
-    sampleNode.connect(
-      node.parent.backingNode as any as IAudioNode<AudioContext>,
-    );
+    if (hasInput(node.parent.backingNode)) {
+      sampleNode.connect(
+        node.parent.backingNode.getInput() as any as IAudioNode<AudioContext>,
+      );
+    } else {
+      sampleNode.connect(
+        node.parent.backingNode as any as IAudioNode<AudioContext>,
+      );
+    }
   } else {
     throw new Error("Sample node has an invalid parent");
   }

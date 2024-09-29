@@ -1,5 +1,6 @@
 import { ADSR, ADSRProps } from "./adsr";
 import { LFO } from "./lfo";
+import { Reverb, ReverbProps } from "./reverb";
 import { Sequencer } from "./sequencer";
 
 export type NodeType =
@@ -12,6 +13,7 @@ export type NodeType =
   | "mul"
   | "adsr"
   | "delay"
+  | "reverb"
   | "master-clipper";
 
 interface BaseNode {
@@ -108,6 +110,12 @@ export interface FeedbackDelayNode extends BaseNode {
   backingNode?: AudioNode;
 }
 
+export interface ReverbNode extends BaseNode {
+  type: "reverb";
+  props: ReverbProps;
+  backingNode?: Reverb;
+}
+
 export interface MasterClipperNode extends BaseNode {
   type: "master-clipper";
   props: undefined;
@@ -145,6 +153,7 @@ export type Node =
   | OscNode
   | LFONode
   | FilterNode
+  | ReverbNode
   | SampleNode
   | SequencerNode
   | DestinationNode
