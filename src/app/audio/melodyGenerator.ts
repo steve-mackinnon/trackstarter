@@ -18,17 +18,6 @@ export async function generateMelodyForChordProgression(
       await mvae.initialize();
       initialized = true;
     }
-    // rootNote = "C";
-    // scaleName = "enigmatic";
-    // chordProgression = chordsForProgression({
-    //   progression: "1-4-2-b7",
-    //   scaleName,
-    //   octave: 3,
-    //   rootNote,
-    //   notesPerChord: 4,
-    // }).chordNames;
-    // MusicVAE can't handle slash chords, "no#", or "sus" chords so just omit these notations
-    // and rely on snapping to scale to keep the melody in key.
     chordProgression = chordProgression.map(
       (chord) =>
         chord
