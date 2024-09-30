@@ -14,7 +14,7 @@ export default function Home() {
         href="https://github.com/steve-mackinnon/trackstarter"
         aria-label="Trackstarter on Github"
       >
-        <Button variant={"ghost"}>
+        <Button variant={"ghost"} className="hover:bg-transparent">
           <Github className="w-8 h-8" />
         </Button>
       </a>
