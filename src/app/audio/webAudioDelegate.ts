@@ -61,7 +61,7 @@ export class WebAudioDelegate implements AudioGraphDelegate {
     this.stepIndex = (this.stepIndex + 1) % 1024;
   });
 
-  async createNode(
+  createNode(
     type: Node["type"],
     findNode: FindNode,
     getSample: (key: string) => AudioBuffer | undefined,

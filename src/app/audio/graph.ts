@@ -17,7 +17,7 @@ export interface AudioGraphDelegate {
     findNode: FindNode,
     getSample: (key: string) => AudioBuffer | undefined,
     key?: string,
-  ) => Promise<any>;
+  ) => any;
   deleteNode: (node: Node) => void;
   updateNode: (node: Node, findNode: FindNode) => void;
   connectNodes: (src: Node, dest: Node) => void;
@@ -42,7 +42,7 @@ export class AudioGraph {
   async render(newRoot: Node) {
     await this.delegate.initialize();
 
-    newRoot = await this.buildAudioGraph({
+    newRoot = this.buildAudioGraph({
       newNode: newRoot,
       currentNode: this.currentRoot,
       parent: null,
@@ -95,7 +95,7 @@ export class AudioGraph {
   /// to fulfill the requested state.
   ///
   /// Returns the Node created for `newNode`, or null if none was created.
-  private async buildAudioGraph({
+  private buildAudioGraph({
     newNode,
     currentNode,
     parent,
@@ -103,7 +103,7 @@ export class AudioGraph {
     newNode: Node;
     currentNode: Node | null;
     parent: Node | null;
-  }): Promise<Node> {
+  }): Node {
     const keyMatch =
       newNode.key !== undefined && newNode.key === currentNode?.key;
     const addNode =
@@ -114,7 +114,7 @@ export class AudioGraph {
         this.delegate.deleteNode(currentNode);
       }
       newNode.parent = parent ?? undefined;
-      newNode.backingNode = await this.delegate.createNode(
+      newNode.backingNode = this.delegate.createNode(
         newNode.type,
         (key) => this.nodeStore.get(key),
         (key) => this.sampleStore.get(key),
@@ -127,7 +127,7 @@ export class AudioGraph {
       newNode.parent = currentNode.parent;
       newNode.backingNode = currentNode.backingNode;
     }
-    const updatedNode = await this.applyChildNodeUpdates(newNode, currentNode);
+    const updatedNode = this.applyChildNodeUpdates(newNode, currentNode);
     this.delegate.updateNode(updatedNode, (key) => this.nodeStore.get(key));
     if (updatedNode.key) {
       this.nodeStore.set(updatedNode.key, updatedNode);
@@ -137,10 +137,10 @@ export class AudioGraph {
 
   /// Recursively iterates over the children of newNode and currentNode and adds or
   /// removes AudioNodes from the tree to satisfy the requested state.
-  private async applyChildNodeUpdates(
+  private applyChildNodeUpdates(
     newParent: Node,
     currentParent: Node | null,
-  ): Promise<Node> {
+  ): Node {
     if (newParent.children) {
       for (let index = 0; index < newParent.children.length; ++index) {
         const newChild = newParent.children[index];
@@ -150,7 +150,7 @@ export class AudioGraph {
           currentParent.children.length > index
             ? currentParent.children[index]
             : null;
-        newParent.children![index] = await this.buildAudioGraph({
+        newParent.children![index] = this.buildAudioGraph({
           newNode: newChild as Node,
           currentNode: currentChild as Node,
           parent: newParent,
