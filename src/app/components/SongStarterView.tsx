@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import { DrumControls } from "./DrumControls";
 import { Header } from "./Header";
 import { InstrumentSelectionContainer } from "./InstrumentSelectionContainer";
+import { MelodicInfoReadout } from "./MelodicInfoReadout";
 import { PresetSelector } from "./PresetSelector";
 import { TransportButton } from "./TransportButton";
 import { XYPadContainer } from "./XYPadContainer";
@@ -25,6 +26,7 @@ export default function SongStarterView() {
   return (
     <div className="absolute flex flex-col gap-y-4 w-full h-full py-16  items-center">
       <Header className="absolute top-4" />
+      <MelodicInfoReadout />
       <PresetSelector />
       <XYPadContainer />
       <InstrumentSelectionContainer />
