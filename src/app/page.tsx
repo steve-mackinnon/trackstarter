@@ -59,6 +59,7 @@ export default function Home() {
           </li>
           <li>Dedicated synthesizers for harmony and melody</li>
           <li>Customizable amp envelopes, filters, and delay effects</li>
+          <li>909 drum machine with AI-generated patterns</li>
         </ul>
       </section>
 
