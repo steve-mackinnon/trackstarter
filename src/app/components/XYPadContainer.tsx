@@ -404,15 +404,17 @@ export function XYPadContainer() {
         />
         {lfoParams && (
           <div className="flex flex-col w-[95%] items-center bg-primary-foreground p-2 rounded-xl">
-            <div className="flex w-[90%]">
-              <label className="px-12">rate</label>
-              <label className="px-8">amount</label>
+            <div className="flex w-[90%] mb-1">
+              <label className="px-12 text-sm">rate</label>
+              <label className="px-8 text-sm">amount</label>
             </div>
-            {lfoParams.map((lfo) => (
+            {lfoParams.map((lfo, index) => (
               <LFOControls
                 key={`${selectedControls}-${selectedInstrument}-${lfo.label}`}
                 label={lfo.label}
-                className="w-[95%] rounded-xl"
+                className={cn("w-[95%] rounded-xl", {
+                  "mb-1": index !== lfoParams.length - 1,
+                })}
                 rate={lfo.rate}
                 amount={lfo.amount}
                 onRateChange={(rate) => {

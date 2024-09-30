@@ -49,8 +49,8 @@ export function LFOControls({
 
   return (
     <div className={cn("flex flex-col w-full", className)}>
-      <div className="flex space-x-4 w-full">
-        <label className="min-w-10">{label}</label>
+      <div className="flex space-x-4 w-full items-center">
+        <label className="min-w-10 text-sm">{label}</label>
         <Slider
           id="lfo-rate"
           min={0}

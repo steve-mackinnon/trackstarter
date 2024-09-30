@@ -23,7 +23,7 @@ export function DrumControls() {
   return (
     <div className="flex flex-col relative justify-center items-center bg-primary-foreground p-2 rounded-xl border-2 border-fuchsia-800 space-y-2">
       <div>
-        <span className="font-bold text-lg">drums</span>
+        <span className="font-bold text-md">drums</span>
       </div>
       <div className="flex space-x-2">
         <div className="flex flex-col justify-center items-center space-y-1">
