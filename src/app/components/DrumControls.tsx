@@ -53,7 +53,7 @@ export function DrumControls() {
               hi
             </Button>
           </div>
-          <span className="text-xs text-slate-300">randomize pattern</span>
+          <span className="text-xs text-slate-300">generate pattern</span>
         </div>
         <Toggle
           aria-label={`mute drums`}
