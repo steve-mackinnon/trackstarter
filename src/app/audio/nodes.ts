@@ -1,4 +1,5 @@
 import { ADSRProps } from "./adsr";
+import { ReverbProps } from "./reverb";
 import {
   ADSRNode,
   FeedbackDelayNode,
@@ -13,6 +14,7 @@ import {
   Node,
   OscNode,
   OscProps,
+  ReverbNode,
   SampleNode,
   SampleProps,
   SequencerNode,
@@ -123,6 +125,19 @@ export function delay(
 ): FeedbackDelayNode {
   return {
     type: "delay",
+    props,
+    children,
+    key: props.key,
+    auxConnections: props.auxOutputs,
+  };
+}
+
+export function reverb(
+  props: WithCommonProps<ReverbProps>,
+  children: Node[],
+): ReverbNode {
+  return {
+    type: "reverb",
     props,
     children,
     key: props.key,

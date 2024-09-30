@@ -7,6 +7,7 @@ import {
   mul,
   osc,
   output,
+  reverb,
   sample,
   sequencer,
 } from "audio/nodes";
@@ -70,19 +71,21 @@ function synthVoice({
     },
     [
       mul({ multiplier: params.gain, key: `${prefix}-gain` }, [
-        osc({
-          ...params,
-          modSources: {
-            gain: [{ key: `${prefix}-amp-env`, amount: 1 }],
-            frequency: [
-              {
-                key: `${prefix}-osc-frequency-lfo`,
-                amount: params.oscFrequencyLFO.amount,
-              },
-            ],
-          },
-          key: `${prefix}-osc`,
-        }),
+        reverb({ wetMix: 0.12 }, [
+          osc({
+            ...params,
+            modSources: {
+              gain: [{ key: `${prefix}-amp-env`, amount: 1 }],
+              frequency: [
+                {
+                  key: `${prefix}-osc-frequency-lfo`,
+                  amount: params.oscFrequencyLFO.amount,
+                },
+              ],
+            },
+            key: `${prefix}-osc`,
+          }),
+        ]),
       ]),
     ],
   );

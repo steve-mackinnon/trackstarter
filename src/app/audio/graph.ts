@@ -142,7 +142,8 @@ export class AudioGraph {
     currentParent: Node | null,
   ): Node {
     if (newParent.children) {
-      newParent.children.forEach((newChild: BaseNode, index: number) => {
+      for (let index = 0; index < newParent.children.length; ++index) {
+        const newChild = newParent.children[index];
         const currentChild =
           currentParent &&
           currentParent.children &&
@@ -154,7 +155,7 @@ export class AudioGraph {
           currentNode: currentChild as Node,
           parent: newParent,
         });
-      });
+      }
     }
 
     // Delete removed children
