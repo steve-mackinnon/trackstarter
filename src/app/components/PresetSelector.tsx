@@ -23,7 +23,7 @@ export function PresetSelector() {
       <span className="text-sm text-slate-300">presets</span>
       <div className="flex gap-x-2 items-center w-full justify-center">
         <Button
-          className="w-8 h-8"
+          className="w-8 h-8 ml-2"
           variant="outline"
           onClick={() => loadPreset(PRESETS[0])}
         >
