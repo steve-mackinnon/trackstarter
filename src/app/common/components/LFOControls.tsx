@@ -20,6 +20,7 @@ interface LFOControlsProps {
   onAmountChange: (value: number) => void;
   className?: string;
   label: string;
+  rangeColor?: string;
 }
 
 export function LFOControls({
@@ -29,6 +30,7 @@ export function LFOControls({
   onAmountChange,
   className,
   label,
+  rangeColor,
 }: LFOControlsProps) {
   const [rateValue, setRateValue] = useState(
     inverseScaleAndNormalizeValue({
@@ -68,6 +70,7 @@ export function LFOControls({
             onRateChange(mappedValue);
           }}
           className="w-full"
+          rangeColor={rangeColor}
         />
         <Slider
           id="lfo-amount"
@@ -86,6 +89,7 @@ export function LFOControls({
             onAmountChange(mappedValue);
           }}
           className="w-full"
+          rangeColor={rangeColor}
         />
       </div>
     </div>

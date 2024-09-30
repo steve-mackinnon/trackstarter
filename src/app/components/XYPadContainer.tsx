@@ -423,6 +423,7 @@ export function XYPadContainer() {
                 onAmountChange={(amount) => {
                   lfo.amount.onChange(amount);
                 }}
+                rangeColor={borderColor}
               />
             ))}
           </div>
