@@ -2,7 +2,7 @@ import { Chord, Scale } from "tonal";
 import {
   Mood,
   MOOD_TO_PROGRESSIONS,
-  MOOD_TO_SCALE,
+  MOOD_TO_SCALES,
   MOODS,
 } from "./melodicConstants";
 import {
@@ -77,7 +77,7 @@ export function generateChordProgression({
   notesPerChord: number;
   octave: number;
 }): ChordProgression {
-  const scale = MOOD_TO_SCALE[mood];
+  const scale = getRandomValue(MOOD_TO_SCALES[mood]);
   const progression = getRandomValue(MOOD_TO_PROGRESSIONS[mood]);
   const { chordNotes, chordNames } = chordsForProgression({
     progression,

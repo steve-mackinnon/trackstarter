@@ -3,20 +3,24 @@ export type Mood =
   | "Dark"
   | "Exotic"
   | "Mysterious"
-  | "Dramatic"
   | "Dreamy"
   | "Groovy"
   | "Surreal";
 
-export const MOOD_TO_SCALE: Record<Mood, string> = {
-  Dark: "aeolian",
-  Dramatic: "harmonic minor",
-  Dreamy: "lydian",
-  Exotic: "phrygian",
-  Groovy: "mixolydian",
-  Mysterious: "whole tone",
-  Surreal: "augmented",
-  Uplifting: "ionian",
+export const MOOD_TO_SCALES: Record<Mood, string[]> = {
+  Uplifting: ["ionian", "lydian", "mixolydian", "major pentatonic"],
+  Dark: ["aeolian", "phrygian", "locrian", "harmonic minor"],
+  Exotic: [
+    "phrygian dominant",
+    "double harmonic major",
+    "hungarian minor",
+    "arabian",
+    "gypsy",
+  ],
+  Mysterious: ["whole tone", "diminished", "locrian", "double harmonic lydian"],
+  Dreamy: ["lydian", "lydian dominant", "whole tone", "dorian"],
+  Groovy: ["dorian", "mixolydian", "blues", "minor pentatonic"],
+  Surreal: ["whole tone", "lydian"],
 };
 
 export const MOOD_TO_PROGRESSIONS = {
@@ -68,18 +72,6 @@ export const MOOD_TO_PROGRESSIONS = {
     "1-b6-3-b7",
     "1-4-2-b7",
   ],
-  Dramatic: [
-    "1-5-6-4",
-    "1-4-5-1",
-    "6-4-1-5",
-    "1-b7-b6-5",
-    "1-5-4-b7",
-    "1-b7-4-5",
-    "6-5-4-5",
-    "1-b7-4-1",
-    "1-4-5-4",
-    "1-5-4-1",
-  ],
   Dreamy: [
     "1-5-4-5",
     "1-6-4-5",
@@ -121,7 +113,6 @@ export const MOOD_TO_PROGRESSIONS = {
 export const MOODS: readonly Mood[] = [
   "Uplifting",
   "Dark",
-  "Dramatic",
   "Dreamy",
   "Exotic",
   "Groovy",

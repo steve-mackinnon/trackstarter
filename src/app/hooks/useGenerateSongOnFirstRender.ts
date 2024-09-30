@@ -10,6 +10,6 @@ export function useGenerateSongOnFirstRender() {
       return;
     }
     setInitialLoad(false);
-    generateNewSong(null, true);
+    generateNewSong(null, false);
   }, [initialLoad, setInitialLoad, generateNewSong]);
 }
