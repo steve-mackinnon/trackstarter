@@ -1,5 +1,6 @@
 import { Button } from "common/components/ui/button";
 import { cn } from "common/utils";
+import { Github } from "lucide-react";
 import { Titillium_Web } from "next/font/google";
 import Link from "next/link";
 
@@ -8,8 +9,17 @@ const contentFont = Titillium_Web({ subsets: ["latin"], weight: "400" });
 export default function Home() {
   return (
     <main className="flex flex-col justify-center items-center p-6 gap-y-12 text-center">
+      <a
+        className="absolute right-0 top-2 py-2"
+        href="https://github.com/steve-mackinnon/trackstarter"
+        aria-label="Trackstarter on Github"
+      >
+        <Button variant={"ghost"}>
+          <Github className="w-8 h-8" />
+        </Button>
+      </a>
       <h1
-        className="text-[2.6rem] font-bold pt-8"
+        className="text-[2.6rem] font-bold pt-10"
         style={{
           textShadow: "var(--harmony-border-active) 0px 0 100px",
         }}
@@ -60,6 +70,7 @@ export default function Home() {
           <li>Dedicated synthesizers for harmony and melody</li>
           <li>Customizable amp envelopes, filters, and delay effects</li>
           <li>909 drum machine with AI-generated patterns</li>
+          <li>Factory preset bank for quickly changing instrument settings</li>
         </ul>
       </section>
 
