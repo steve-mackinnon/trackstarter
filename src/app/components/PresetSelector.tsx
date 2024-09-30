@@ -19,35 +19,39 @@ export function PresetSelector() {
   };
 
   return (
-    <div className="flex gap-x-2">
-      <Button
-        className="w-8 h-8"
-        variant="outline"
-        onClick={() => loadPreset(PRESETS[0])}
-      >
-        A
-      </Button>
-      <Button
-        className="w-8 h-8"
-        variant="outline"
-        onClick={() => loadPreset(PRESETS[1])}
-      >
-        B
-      </Button>
-      <Button
-        className="w-8 h-8"
-        variant="outline"
-        onClick={() => loadPreset(PRESETS[2])}
-      >
-        C
-      </Button>
-      <Button
-        className="w-8 h-8"
-        variant="outline"
-        onClick={() => loadPreset(PRESETS[3])}
-      >
-        D
-      </Button>
+    <div className="flex justify-between w-[320px] items-center">
+      <span className="text-sm text-slate-300">presets</span>
+      <div className="flex gap-x-2 items-center w-full justify-center">
+        <Button
+          className="w-8 h-8"
+          variant="outline"
+          onClick={() => loadPreset(PRESETS[0])}
+        >
+          A
+        </Button>
+        <Button
+          className="w-8 h-8"
+          variant="outline"
+          onClick={() => loadPreset(PRESETS[1])}
+        >
+          B
+        </Button>
+        <Button
+          className="w-8 h-8"
+          variant="outline"
+          onClick={() => loadPreset(PRESETS[2])}
+        >
+          C
+        </Button>
+        <Button
+          className="w-8 h-8"
+          variant="outline"
+          onClick={() => loadPreset(PRESETS[3])}
+        >
+          D
+        </Button>
+      </div>
+      <div className="w-[60px]"></div>
     </div>
   );
 }
