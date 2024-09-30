@@ -29,7 +29,7 @@ export default function SongStarterView() {
       <XYPadContainer />
       <InstrumentSelectionContainer />
       <DrumControls />
-      <TransportButton className="absolute bottom-2 self-end sm:self-center" />
+      <TransportButton className="sm:absolute bottom-2 self-center" />
     </div>
   );
 }
