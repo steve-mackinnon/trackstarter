@@ -312,7 +312,7 @@ function TabButton({
     <Button
       variant="secondary"
       className={cn(
-        "rounded-none bg-primary-foreground select-none z-20 rounded-t-md text-md font-bold",
+        "rounded-none bg-primary-foreground select-none z-20 rounded-t-md text-md",
         { "bg-secondary hover:bg-secondary ": selected },
       )}
       onClick={onClick}
