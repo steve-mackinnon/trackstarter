@@ -111,7 +111,7 @@ export async function generateDrumPattern(
         if (sequences.length === workers.length) {
           // Randomly choose the longest sequence 60% of the time,
           // and the second longest sequence 40% of the time
-          let index = Math.random() > 0.4 ? 0 : 1;
+          let index = Math.random() > 0.4 ? 0 : sequences.length > 1 ? 1 : 0;
           const sortedSequences = sequences.sort(
             (a, b) => b.notes!.length - a.notes!.length,
           );
