@@ -71,7 +71,7 @@ function synthVoice({
     },
     [
       mul({ multiplier: params.gain, key: `${prefix}-gain` }, [
-        reverb({ wetMix: 0.2 }, [
+        reverb({ wetMix: 0.12 }, [
           osc({
             ...params,
             modSources: {
