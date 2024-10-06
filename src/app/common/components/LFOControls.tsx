@@ -4,7 +4,7 @@ import {
   inverseScaleAndNormalizeValue,
   scaleNormalizedValue,
 } from "common/utils/parameterScaling";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface ParamInfo {
   value: number;
@@ -32,23 +32,27 @@ export function LFOControls({
   label,
   rangeColor,
 }: LFOControlsProps) {
-  const [rateValue, setRateValue] = useState(
-    inverseScaleAndNormalizeValue({
-      value: rate.value,
-      min: rate.min,
-      max: rate.max,
-      scaling: rate.scaling,
-    }),
-  );
-  const [amountValue, setAmountValue] = useState(
-    inverseScaleAndNormalizeValue({
-      value: amount.value,
-      min: amount.min,
-      max: amount.max,
-      scaling: amount.scaling,
-    }),
-  );
+  const [rateValue, setRateValue] = useState(0);
+  const [amountValue, setAmountValue] = useState(0);
 
+  useEffect(() => {
+    setRateValue(
+      inverseScaleAndNormalizeValue({
+        value: rate.value,
+        min: rate.min,
+        max: rate.max,
+        scaling: rate.scaling,
+      }),
+    );
+    setAmountValue(
+      inverseScaleAndNormalizeValue({
+        value: amount.value,
+        min: amount.min,
+        max: amount.max,
+        scaling: amount.scaling,
+      }),
+    );
+  }, [rate, amount]);
   return (
     <div className={cn("flex flex-col w-full", className)}>
       <div className="flex space-x-4 w-full items-center">
