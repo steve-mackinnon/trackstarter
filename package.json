@@ -11,6 +11,8 @@
     "find-deadcode": "ts-prune"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^0.0.51",
+    "@anthropic-ai/sdk": "^0.29.0",
     "@magenta/music": "^1.23.1",
     "@radix-ui/react-select": "^2.1.1",
     "@radix-ui/react-slider": "^1.2.0",
@@ -19,6 +21,7 @@
     "@tonaljs/note": "^4.11.0",
     "@tonaljs/scale": "^4.13.0",
     "@tonaljs/scale-type": "^4.9.0",
+    "ai": "^3.4.9",
     "class-variance-authority": "^0.7.0",
     "classnames": "^2.5.1",
     "clsx": "^2.1.1",
@@ -27,6 +30,7 @@
     "midi-writer-js": "^3.1.1",
     "next": "14.2.5",
     "next-themes": "^0.3.0",
+    "openai": "^4.67.3",
     "react": "^18",
     "react-dom": "^18",
     "react-spinners": "^0.14.1",
