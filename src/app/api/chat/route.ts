@@ -25,7 +25,12 @@ export async function POST(request: Request) {
     });
   }
 
-  const model = anthropic("claude-3-5-sonnet-20240620");
-  const { text } = await generateText({ model, prompt });
-  return Response.json({ message: text });
+  try {
+    const model = anthropic("claude-3-5-sonnet-20240620");
+    const { text } = await generateText({ model, prompt });
+    return Response.json({ message: text });
+  } catch (e) {
+    console.error(e);
+    return new Response((e as any).message, { status: 500 });
+  }
 }
