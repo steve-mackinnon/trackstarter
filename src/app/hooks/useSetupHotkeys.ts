@@ -10,6 +10,7 @@ export function useSetupHotkeys() {
     const handleKeyDown = (e: KeyboardEvent) => {
       switch (e.key) {
         case " ": {
+          return;
           e.preventDefault();
           const playing = !isPlaying;
           setIsPlaying(playing);

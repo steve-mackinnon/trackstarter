@@ -5,6 +5,7 @@ import { useGenerateSongOnFirstRender } from "hooks/useGenerateSongOnFirstRender
 import { useListenToPlaybackStateChanges } from "hooks/useListenToPlaybackStateChanges";
 import { useSetupHotkeys } from "hooks/useSetupHotkeys";
 import { useEffect } from "react";
+import { ChatPrompt } from "./ChatPrompt";
 import { DrumControls } from "./DrumControls";
 import { Header } from "./Header";
 import { InstrumentSelectionContainer } from "./InstrumentSelectionContainer";
@@ -28,6 +29,7 @@ export default function SongStarterView() {
       <Header className="absolute top-4" />
       <MelodicInfoReadout />
       <PresetSelector />
+      <ChatPrompt />
       <XYPadContainer />
       <InstrumentSelectionContainer />
       <DrumControls />

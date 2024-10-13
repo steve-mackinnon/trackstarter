@@ -37,7 +37,8 @@
     "standardized-audio-context": "^25.3.77",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
-    "tonal": "^6.2.0"
+    "tonal": "^6.2.0",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^14.2.11",
