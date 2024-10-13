@@ -100,6 +100,8 @@ function adsr(params: SynthParams, key: string) {
   });
 }
 
+const SEQUENCE_LENGTH = 128;
+
 export function useRenderAudioGraph() {
   const progressionState = useAtomValue(chordProgressionAtom);
   const harmonySynthParamsState = useAtomValue(harmonySynthParamsAtom);
@@ -140,13 +142,13 @@ export function useRenderAudioGraph() {
       sequencer({
         destinationNodes: ["harmony-osc"],
         notes: sequence,
-        length: 64,
+        length: SEQUENCE_LENGTH,
         key: "harmony-seq",
       }),
       sequencer({
         destinationNodes: ["open-hh-osc"],
         notes: drums.openHHPattern,
-        length: 64,
+        length: SEQUENCE_LENGTH,
         key: "open-hh-seq",
       }),
     ];
@@ -155,7 +157,7 @@ export function useRenderAudioGraph() {
         sequencer({
           destinationNodes: ["melody-osc"],
           notes: melodySequence,
-          length: 64,
+          length: SEQUENCE_LENGTH,
           key: "melody-seq",
         }),
       );

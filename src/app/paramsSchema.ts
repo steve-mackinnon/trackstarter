@@ -32,8 +32,8 @@ const synthParamsSchema = oscPropsSchema.extend({
 
 const melodySchema = z.array(
   z.object({
-    startStep: z.number().int().min(0).max(64),
-    endStep: z.number().int().min(0).max(64),
+    startStep: z.number().int().min(0).max(128),
+    endStep: z.number().int().min(0).max(128),
     note: z.string(),
   }),
 );
