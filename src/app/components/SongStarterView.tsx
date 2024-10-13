@@ -6,6 +6,7 @@ import { useListenToPlaybackStateChanges } from "hooks/useListenToPlaybackStateC
 import { useSetupHotkeys } from "hooks/useSetupHotkeys";
 import { useEffect } from "react";
 import { ChatPrompt } from "./ChatPrompt";
+import { ChatToggleButton } from "./ChatToggleButton";
 import { DrumControls } from "./DrumControls";
 import { Header } from "./Header";
 import { InstrumentSelectionContainer } from "./InstrumentSelectionContainer";
@@ -26,14 +27,15 @@ export default function SongStarterView() {
 
   return (
     <div className="absolute flex flex-col gap-y-4 w-full h-full py-16  items-center">
+      <ChatPrompt className="absolute right-12 bottom-12" />
       <Header className="absolute top-4" />
       <MelodicInfoReadout />
       <PresetSelector />
-      <ChatPrompt />
       <XYPadContainer />
       <InstrumentSelectionContainer />
       <DrumControls />
       <TransportButton className="sm:absolute bottom-2 self-center" />
+      <ChatToggleButton className="absolute bottom-4 right-4" />
     </div>
   );
 }

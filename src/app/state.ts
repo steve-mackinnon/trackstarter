@@ -115,3 +115,5 @@ export const melodySynthParamsAtom = atom<SynthParams>({
   delayParams: { ...defaultDelayParams },
   gain: 0.25,
 });
+
+export const chatVisibleAtom = atom(false);
