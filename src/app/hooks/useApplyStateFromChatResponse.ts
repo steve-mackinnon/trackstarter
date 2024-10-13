@@ -1,5 +1,4 @@
 import { chordsForProgression } from "audio/melodicUtils";
-import { generateMelodyForChordProgression } from "audio/melodyGenerator";
 import { ChordProgression } from "audio/sequenceGenerator";
 import { useRenderAudioGraph } from "common/hooks/useRenderAudioGraph";
 import { useSetAtom } from "jotai";
@@ -19,10 +18,10 @@ export function useApplyStateFromChatResponse() {
   const renderAudioGraph = useRenderAudioGraph();
 
   return async (state: ParamState) => {
+    console.log(`state from LLM: ${JSON.stringify(state)}`);
     const { chordNotes, chordNames } = chordsForProgression({
       progression: state.chordProgression,
       scaleName: state.scale,
-      octave: 3,
       rootNote: state.rootNote,
       notesPerChord: 4,
     });
@@ -35,17 +34,7 @@ export function useApplyStateFromChatResponse() {
       rootNote: state.rootNote,
       octave: 3,
     };
-    const melody = await generateMelodyForChordProgression(
-      chordNames,
-      state.scale,
-      state.rootNote,
-    );
-    if (!melody) {
-      throw new Error(
-        `Failed to generate melody to accompany chord progression ${chordNames}`,
-      );
-    }
-    setMelody(melody);
+    setMelody(state.melody);
     setChordProgression(chordProgression);
     setHarmonySynthParams(state.harmonySynthState);
     setMelodySynthParams(state.melodySynthState);
@@ -53,7 +42,7 @@ export function useApplyStateFromChatResponse() {
       progression: chordProgression,
       harmonySynthParams: state.harmonySynthState,
       melodySynthParams: state.melodySynthState,
-      melody,
+      melody: state.melody,
     });
   };
 }

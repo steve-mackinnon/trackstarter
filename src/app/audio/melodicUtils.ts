@@ -15,12 +15,12 @@ export function chordsForProgression({
 }: {
   progression: string;
   scaleName: string;
-  octave: number;
+  octave?: number;
   rootNote: string;
   notesPerChord: number;
 }): ChordProgressionInfo {
   const chordDegrees = parseChordProgression(progression);
-  const scale = Scale.get(`${rootNote}${octave} ${scaleName}`);
+  const scale = Scale.get(`${rootNote}${octave ?? ""} ${scaleName}`);
   const chordNotes = chordDegrees.map((degree) =>
     chordForScale(scale.notes, degree, notesPerChord),
   );
