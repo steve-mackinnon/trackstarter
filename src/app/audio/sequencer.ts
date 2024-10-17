@@ -49,7 +49,7 @@ export class Sequencer {
       for (const event of events) {
         const freq = Note.freq(event.note);
         if (freq === null) {
-          throw new Error("Failed to convert note to frequency");
+          throw new Error(`Failed to convert note to frequency: ${event.note}`);
         }
         const eventDuration = (event.endStep - event.startStep) * stepDuration;
         const destNode = this.triggerAudioNode(
