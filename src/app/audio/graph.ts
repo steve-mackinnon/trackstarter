@@ -25,6 +25,7 @@ export interface AudioGraphDelegate {
   stop: () => void;
   isPlaying: () => boolean;
   initialize: () => Promise<void>;
+  setBpm: (bpm: number) => void;
 }
 
 type NodeProps<T extends BaseNode["type"]> = Extract<
@@ -38,6 +39,10 @@ export class AudioGraph {
   private currentRoot: Node | null = null;
   private nodeStore: Map<string, Node> = new Map();
   private sampleStore: Map<string, AudioBuffer> = new Map();
+
+  public setBpm(bpm: number) {
+    this.delegate.setBpm(bpm);
+  }
 
   async render(newRoot: Node) {
     await this.delegate.initialize();

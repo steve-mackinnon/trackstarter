@@ -117,6 +117,7 @@ export function useRenderAudioGraph() {
     startStep,
     melody,
     drums,
+    bpm,
     restartPlayback = false,
     startPlaybackIfStopped = false,
   }: {
@@ -129,6 +130,7 @@ export function useRenderAudioGraph() {
     restartPlayback?: boolean;
     drums?: DrumsParams;
     startPlaybackIfStopped?: boolean;
+    bpm?: number;
   }) => {
     const prog = progression ?? progressionState;
     if (!prog) {
@@ -165,6 +167,7 @@ export function useRenderAudioGraph() {
         }),
       );
     }
+    audioGraph.setBpm(bpm ?? 120);
     audioGraph.render(
       output([
         ...sequencers,

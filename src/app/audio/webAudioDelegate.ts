@@ -51,6 +51,10 @@ export class WebAudioDelegate implements AudioGraphDelegate {
     await this.workletPromise;
   }
 
+  setBpm(bpm: number) {
+    this.scheduler.tempo = bpm;
+  }
+
   private workletPromise: Promise<void>;
   private sequencers = new Map<string, Sequencer>();
   private stepIndex = 0;

@@ -6,7 +6,7 @@ type AudioNode = IAudioNode<AudioContext>;
 
 function lengthOf16thNoteInSeconds(bpm: number): number {
   const secondsPerBeat = 60 / bpm;
-  const lengthOf16thNote = secondsPerBeat / 4;
+  const lengthOf16thNote = secondsPerBeat / 8;
   return lengthOf16thNote;
 }
 

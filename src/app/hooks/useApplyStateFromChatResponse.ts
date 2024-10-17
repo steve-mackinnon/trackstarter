@@ -3,6 +3,8 @@ import { useSetAtom } from "jotai";
 import { ParamState } from "paramsSchema";
 import {
   chordProgressionAtom,
+  drumsAtom,
+  DrumsParams,
   harmonySynthParamsAtom,
   melodyAtom,
   melodySynthParamsAtom,
@@ -13,6 +15,7 @@ export function useApplyStateFromChatResponse() {
   const setMelodySynthParams = useSetAtom(melodySynthParamsAtom);
   const setChordProgression = useSetAtom(chordProgressionAtom);
   const setMelody = useSetAtom(melodyAtom);
+  const setDrums = useSetAtom(drumsAtom);
   const renderAudioGraph = useRenderAudioGraph();
 
   return async (state: ParamState) => {
@@ -37,11 +40,27 @@ export function useApplyStateFromChatResponse() {
     // setChordProgression(chordProgression);
     setHarmonySynthParams(state.harmonySynthState);
     setMelodySynthParams(state.melodySynthState);
+    const drums: DrumsParams = {
+      muted: false,
+      patternLength: 64,
+      patternGenIntensity: "medium",
+      kickPattern: state.kickSequence,
+      snarePattern: state.snareSequence,
+      closedHHPattern: state.closedHhSequence,
+      openHHPattern: state.openHhSequence,
+      lowTomPattern: [],
+      midTomPattern: [],
+      highTomPattern: [],
+      rideCymbalPattern: [],
+    };
+    setDrums(drums);
     renderAudioGraph({
       progressionSequence: state.chordProgression,
       harmonySynthParams: state.harmonySynthState,
       melodySynthParams: state.melodySynthState,
       melody: state.melody,
+      drums,
+      bpm: state.bpm,
     });
   };
 }

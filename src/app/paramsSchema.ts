@@ -41,10 +41,15 @@ const sequenceSchema = z.array(
 export const paramStateSchema = z.object({
   harmonySynthState: synthParamsSchema,
   melodySynthState: synthParamsSchema,
-  scale: z.string(),
-  rootNote: z.string(),
+  // scale: z.string(),
+  // rootNote: z.string(),
   chordProgression: sequenceSchema,
   melody: sequenceSchema,
+  kickSequence: sequenceSchema,
+  snareSequence: sequenceSchema,
+  closedHhSequence: sequenceSchema,
+  openHhSequence: sequenceSchema,
+  bpm: z.number(),
 });
 
 export type ParamState = z.infer<typeof paramStateSchema>;
