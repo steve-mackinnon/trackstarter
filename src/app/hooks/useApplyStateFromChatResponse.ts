@@ -24,6 +24,7 @@ export function useApplyStateFromChatResponse() {
       scaleName: state.scale,
       rootNote: state.rootNote,
       notesPerChord: 4,
+      octave: 3,
     });
     const chordProgression: ChordProgression = {
       chordNotes,
