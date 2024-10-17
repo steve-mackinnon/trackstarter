@@ -30,7 +30,7 @@ const synthParamsSchema = oscPropsSchema.extend({
   gain: z.number().min(0).max(0.3),
 });
 
-const melodySchema = z.array(
+const sequenceSchema = z.array(
   z.object({
     startStep: z.number().int().min(0).max(128),
     endStep: z.number().int().min(0).max(128),
@@ -43,8 +43,8 @@ export const paramStateSchema = z.object({
   melodySynthState: synthParamsSchema,
   scale: z.string(),
   rootNote: z.string(),
-  chordProgression: z.string(),
-  melody: melodySchema,
+  chordProgression: sequenceSchema,
+  melody: sequenceSchema,
 });
 
 export type ParamState = z.infer<typeof paramStateSchema>;

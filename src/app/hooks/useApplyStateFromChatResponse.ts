@@ -1,5 +1,3 @@
-import { chordsForProgression } from "audio/melodicUtils";
-import { ChordProgression } from "audio/sequenceGenerator";
 import { useRenderAudioGraph } from "common/hooks/useRenderAudioGraph";
 import { useSetAtom } from "jotai";
 import { ParamState } from "paramsSchema";
@@ -19,28 +17,28 @@ export function useApplyStateFromChatResponse() {
 
   return async (state: ParamState) => {
     console.log(`state from LLM: ${JSON.stringify(state)}`);
-    const { chordNotes, chordNames } = chordsForProgression({
-      progression: state.chordProgression,
-      scaleName: state.scale,
-      rootNote: state.rootNote,
-      notesPerChord: 4,
-      octave: 3,
-    });
-    const chordProgression: ChordProgression = {
-      chordNotes,
-      chordNames,
-      progression: state.chordProgression,
-      scale: state.scale,
-      mood: "Uplifting",
-      rootNote: state.rootNote,
-      octave: 3,
-    };
+    // const { chordNotes, chordNames } = chordsForProgression({
+    //   progression: state.chordProgression,
+    //   scaleName: state.scale,
+    //   rootNote: state.rootNote,
+    //   notesPerChord: 4,
+    //   octave: 3,
+    // });
+    // const chordProgression: ChordProgression = {
+    //   chordNotes,
+    //   chordNames,
+    //   progression: state.chordProgression,
+    //   scale: state.scale,
+    //   mood: "Uplifting",
+    //   rootNote: state.rootNote,
+    //   octave: 3,
+    // };
     setMelody(state.melody);
-    setChordProgression(chordProgression);
+    // setChordProgression(chordProgression);
     setHarmonySynthParams(state.harmonySynthState);
     setMelodySynthParams(state.melodySynthState);
     renderAudioGraph({
-      progression: chordProgression,
+      progressionSequence: state.chordProgression,
       harmonySynthParams: state.harmonySynthState,
       melodySynthParams: state.melodySynthState,
       melody: state.melody,

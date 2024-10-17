@@ -100,7 +100,7 @@ function adsr(params: SynthParams, key: string) {
   });
 }
 
-const SEQUENCE_LENGTH = 128;
+const SEQUENCE_LENGTH = 64;
 
 export function useRenderAudioGraph() {
   const progressionState = useAtomValue(chordProgressionAtom);
@@ -111,6 +111,7 @@ export function useRenderAudioGraph() {
 
   return ({
     progression,
+    progressionSequence,
     harmonySynthParams,
     melodySynthParams,
     startStep,
@@ -120,6 +121,7 @@ export function useRenderAudioGraph() {
     startPlaybackIfStopped = false,
   }: {
     progression?: ChordProgression;
+    progressionSequence?: SequencerEvent[];
     harmonySynthParams?: SynthParams;
     melodySynthParams?: SynthParams;
     startStep?: number;
@@ -137,7 +139,8 @@ export function useRenderAudioGraph() {
     const melodyParams = melodySynthParams ?? melodySynthParamsState;
     drums = drums ?? drumsState;
 
-    const sequence = chordProgressionToSequencerEvents(prog.chordNotes);
+    const sequence =
+      progressionSequence ?? chordProgressionToSequencerEvents(prog.chordNotes);
     const sequencers = [
       sequencer({
         destinationNodes: ["harmony-osc"],
