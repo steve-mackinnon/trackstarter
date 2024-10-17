@@ -7,6 +7,7 @@ import { useAtom } from "jotai";
 import { X } from "lucide-react";
 import { paramStateSchema } from "paramsSchema";
 import { useState } from "react";
+import LoadingIndicator from "react-spinners/CircleLoader";
 import { chatVisibleAtom } from "state";
 
 type ResponseStatus = "idle" | "pending" | "error" | "success";
@@ -44,6 +45,7 @@ export function ChatPrompt({ className }: { className?: string }) {
       setResponseContent("");
     }
   };
+  const loading = responseStatus === "pending";
   return (
     <div
       className={cn(
@@ -52,7 +54,7 @@ export function ChatPrompt({ className }: { className?: string }) {
       )}
     >
       <form
-        className="w-full pt-10 flex flex-col justify-center items-center gap-y-4"
+        className="w-full pt-10 flex flex-col justify-center items-center gap-y-4 relative"
         onSubmit={handleSubmit}
       >
         <label htmlFor="prompt">What would you like to hear?</label>
@@ -63,7 +65,14 @@ export function ChatPrompt({ className }: { className?: string }) {
           onChange={(e) => setInput(e.target.value)}
           className="bg-slate-900 w-full rounded-xl"
         />
-        <Button type="submit">Submit</Button>
+        <Button type="submit" disabled={loading || input.length === 0}>
+          Submit
+        </Button>
+        {loading && (
+          <div className="absolute right-1 bottom-1">
+            <LoadingIndicator size={36} color="white" />
+          </div>
+        )}
       </form>
       <div>{responseContent}</div>
       <Button
