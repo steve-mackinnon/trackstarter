@@ -17,7 +17,9 @@ export function useGenerateNewMelody() {
   }) => {
     chordProgression =
       chordProgression ??
-      (chordProgressionState ? chordProgressionState : undefined);
+      (chordProgressionState && !Array.isArray(chordProgressionState)
+        ? chordProgressionState
+        : undefined);
     if (!chordProgression) {
       return;
     }

@@ -111,7 +111,6 @@ export function useRenderAudioGraph() {
 
   return ({
     progression,
-    progressionSequence,
     harmonySynthParams,
     melodySynthParams,
     startStep,
@@ -121,8 +120,7 @@ export function useRenderAudioGraph() {
     restartPlayback = false,
     startPlaybackIfStopped = false,
   }: {
-    progression?: ChordProgression;
-    progressionSequence?: SequencerEvent[];
+    progression?: ChordProgression | SequencerEvent[];
     harmonySynthParams?: SynthParams;
     melodySynthParams?: SynthParams;
     startStep?: number;
@@ -141,8 +139,9 @@ export function useRenderAudioGraph() {
     const melodyParams = melodySynthParams ?? melodySynthParamsState;
     drums = drums ?? drumsState;
 
-    const sequence =
-      progressionSequence ?? chordProgressionToSequencerEvents(prog.chordNotes);
+    const sequence = Array.isArray(prog)
+      ? prog
+      : chordProgressionToSequencerEvents(prog.chordNotes);
     const sequencers = [
       sequencer({
         destinationNodes: ["harmony-osc"],
@@ -167,7 +166,9 @@ export function useRenderAudioGraph() {
         }),
       );
     }
-    audioGraph.setBpm(bpm ?? 120);
+    if (bpm) {
+      audioGraph.setBpm(bpm ?? 120);
+    }
     audioGraph.render(
       output([
         ...sequencers,

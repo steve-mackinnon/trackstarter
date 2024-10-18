@@ -5,7 +5,9 @@ import { atom } from "jotai";
 
 export const isPlayingAtom = atom(false);
 
-export const chordProgressionAtom = atom<ChordProgression | null>(null);
+export const chordProgressionAtom = atom<
+  ChordProgression | SequencerEvent[] | null
+>(null);
 export const chordProgressionLoadingAtom = atom(false);
 
 export const melodyAtom = atom<SequencerEvent[] | null>(null);

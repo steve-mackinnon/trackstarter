@@ -37,6 +37,7 @@ export function useApplyStateFromChatResponse() {
     //   octave: 3,
     // };
     setMelody(state.melody);
+    setChordProgression(state.chordProgression);
     // setChordProgression(chordProgression);
     setHarmonySynthParams(state.harmonySynthState);
     setMelodySynthParams(state.melodySynthState);
@@ -55,7 +56,7 @@ export function useApplyStateFromChatResponse() {
     };
     setDrums(drums);
     renderAudioGraph({
-      progressionSequence: state.chordProgression,
+      progression: state.chordProgression,
       harmonySynthParams: state.harmonySynthState,
       melodySynthParams: state.melodySynthState,
       melody: state.melody,
