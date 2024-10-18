@@ -1,3 +1,4 @@
+import { CoreMessage } from "ai";
 import { Mood } from "audio/melodicConstants";
 import { ChordProgression } from "audio/sequenceGenerator";
 import { OscProps, SequencerEvent } from "audio/webAudioNodes";
@@ -119,3 +120,4 @@ export const melodySynthParamsAtom = atom<SynthParams>({
 });
 
 export const chatVisibleAtom = atom(false);
+export const chatStateAtom = atom<CoreMessage[]>([]);
